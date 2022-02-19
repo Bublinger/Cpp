@@ -1,0 +1,47 @@
+<html>
+<head>
+<title>The C++ Annotations</title>
+</head>
+
+<script language=javascript>
+    var
+        hiding = true,
+        contentsWindow;
+
+    function closeContentsWindow()
+    {
+        hiding = true;
+        if (contentsWindow && !contentsWindow.closed)
+            contentsWindow.close();
+    }
+
+    function openContentsWindow()
+    {
+        hiding = false;
+        if (!contentsWindow || contentsWindow.closed)
+            contentsWindow = window.open("contents.html", "Contents", 
+                                    "width=500,height=400,resizeable," +
+                                    "scrollbars");
+    }
+
+    function toggleContents()
+    {
+        if (hiding)
+            openContentsWindow();
+        else
+            closeContentsWindow();
+    }
+</script>
+    
+
+<frameset cols="190,*" name=fullscreen 
+        onunload="window.closeContentsWindow()">
+    <frame src=target.shtml name=index>
+    <frame src=cplusplus.html name=info>
+    <noframes>
+        Sorry we can't offer you the C++ Annotations, as your browser
+        doesn't support frames.
+    </noframes>
+</frameset>
+
+</html>

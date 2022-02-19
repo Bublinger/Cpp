@@ -1,0 +1,939 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus16.html">Next chapter</a>
+    <li> <a href="cplusplus14.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="Inheritance"></a><a name="l256"></a>
+<h1>Chapter 15: Inheritance</h1>
+<a name="inherit"></a>
+    
+
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="inherit/intro"></a>
+    When programming in <strong>C</strong>, it is common to view problem solutions from a
+<em>top-down</em> approach: functions and actions of the program are defined in
+terms of sub-functions, which again are defined in sub-sub-functions, etc..
+This yields a hierarchy of code: <code>main()</code> at the top, followed by a level
+of functions which are called from <code>main()</code>, etc..
+</p><p>In <strong>C++</strong> the dependencies between code and data can also be defined in
+terms of <em>classes</em> which are <em>related to other classes</em>. This looks like
+<em>composition</em> (see section <a href="cplusplus05.html#Composition">5.5</a>), where objects of a
+class contain objects of another class as their data. But the relation which
+is described here is of a different kind: a class can be <em>defined</em> by means
+of an older, pre-existing, class. This leads to a situation in which a new
+class has all the functionality of the older class, and additionally
+introduces its own specific functionality.  Instead of composition, where a
+given class <em>contains</em> another class, we mean here <em>derivation</em>, where a
+given class <em>is</em> another class.
+</p><p>Another term for derivation is <em>inheritance</em>: the new class inherits the
+functionality of an existing class, while the existing class does not appear as
+a data member in the definition of the new class. When speaking of inheritance
+the existing class is called the <em>base class</em>, while the new class is
+called the <em>derived class</em>.
+</p><p>Derivation of classes is often used when the methodology of <strong>C++</strong> program
+development is fully exploited. In this chapter we will first address the
+syntactical possibilities which <strong>C++</strong> offers to derive classes from other
+classes. Then we will address the peculiar extension to <strong>C</strong> which is thus
+offered by <strong>C++</strong>.
+</p><p>As we have seen the object-oriented approach to problem solving in the
+introductory chapter (see section <a href="cplusplus02.html#OOP">2.4</a>), classes are identified
+during the problem analysis, after which objects of the defined classes can be
+declared to represent entities of the problem at hand. The classes are placed
+in a hierarchy, where the top-level class contains the least functionality.
+Each derivation and hence descent in the hierarchy adds functionality in the
+class definition.
+</p><p>In this chapter we shall use a simple vehicle classification system to build a
+hierarchy of classes. The first class is <code>Vehicle</code>, which implements as its
+functionality the possibility to set or retrieve the weight of a vehicle. The
+next level in the object hierarchy are land-, water- and air vehicles.
+</p><p>The initial object hierarchy is illustrated in figure <a href="cplusplus15.html#hierarchy">12</a>.
+    <a name="hierarchy"></a></p><p><center><img src="inherit/hierarchy.gif" align="bottom" alt="figure 12 is shown here."><br> 
+figure 12: Initial object hierarchy of vehicles. 
+</center></p><p>
+    
+
+</p><p><a name="VehicleSystem"></a><a name="l257"></a>
+<h2>15.1: Related types</h2>
+    <a name="inherit/related"></a>
+    The relationship between the proposed classes representing different kinds of
+vehicles is further illustrated here. The figure shows the object hierarchy in
+vertical direction: an <code>Auto</code> is a special case of a <code>Land</code> vehicle,
+which in turn is a special case of a <code>Vehicle</code>. 
+</p><p>The class <code>Vehicle</code> is thus the `greatest common denominator' in the
+classification system. For the sake of the example we implement in this class
+the functionality to store and retrieve the weight of a vehicle:
+<pre>
+
+    class Vehicle
+    {
+        public:
+            // constructors
+            Vehicle();
+            Vehicle(int wt);
+
+            // interface
+            int getweight() const;
+            void setweight(int wt);
+            
+        private:
+            // data
+            int weight;
+    };
+
+</pre>
+
+Using this class, the weight of a vehicle can be defined as soon as the
+corresponding object is created. At a later stage the weight can be re-defined
+or retrieved.
+</p><p>To represent vehicles which travel over land, a new class <code>Land</code> can be
+defined with the functionality of a <code>Vehicle</code>, but in addition its own
+specific information. For the sake of the example we assume that we are
+interested in the speed of land vehicles <em>and</em> in their weight. The
+relationship between <code>Vehicle</code>s and <code>Land</code>s could of course be
+represented with composition, but that would be awkward: composition would
+suggest that a <code>Land</code> vehicle <em>contains</em> a vehicle, while the
+relationship should be that the <code>Land</code> vehicle <em>is</em> a special case of a
+vehicle.
+</p><p>A relationship in terms of composition would also introduce needless code.
+E.g., consider the following code fragment which shows a class <code>Land</code> using
+composition (only the <code>setweight()</code> functionality is shown):
+<pre>
+
+    class Land
+    {
+        public:
+            void setweight(int wt);
+        private:
+            Vehicle v;      // composed Vehicle
+    };
+
+    void Land::setweight(int wt)
+    {
+        v.setweight(wt);
+    }
+
+</pre>
+
+Using composition, the <code>setweight()</code> function of the class <code>Land</code> would
+only serve to pass its argument to <code>Vehicle::setweight()</code>. Thus, as far as
+weight handling is concerned,
+<code>Land::setweight()</code> would introduce no extra functionality, just extra
+code. Clearly this code duplication is redundant: a <code>Land</code> should <em>be</em> a
+<code>Vehicle</code>, and not: a <code>Land</code> should <em>contain</em> a <code>Vehicle</code>.
+</p><p>The relationship is better achieved with inheritance: <code>Land</code> is
+<em>derived</em> from <code>Vehicle</code>, in which <code>Vehicle</code> is the base class of the
+derivation.
+<pre>
+
+    class Land: public Vehicle
+    {
+        public:
+            // constructors
+            Land();
+            Land(int wt, int sp);
+
+            // interface
+            void setspeed(int sp);
+            int getspeed() const;
+            
+        private:
+            // data
+            int speed;
+    };
+
+</pre>
+
+By postfixing the class name <code>Land</code> in its definition by 
+<code>public Vehicle</code> the derivation is defined: 
+the class <code>Land</code> now contains all the
+functionality of its base class <code>Vehicle</code> plus its own specific
+information. The extra functionality consists here of a constructor with two
+arguments and interface functions to access the <code>speed</code> data
+member. (The derivation in this example mentions the keyword
+<code>public</code>. <strong>C++</strong> also implements <code>private</code> derivation, which is not
+often used and which we will therefore leave to the reader to
+uncover.).
+</p><p>To illustrate the use of the derived class <code>Land</code> consider the following
+example:
+<pre>
+
+    Land
+        veh(1200, 145);
+
+    int main()
+    {
+        cout &lt;&lt; "Vehicle weighs " &lt;&lt; veh.getweight() &lt;&lt; endl
+             &lt;&lt; "Speed is " &lt;&lt; veh.getspeed() &lt;&lt; endl;
+
+        return (0);
+    }
+
+</pre>
+
+This example shows two features of derivation. First, <code>getweight()</code> is no
+direct member of a <code>Land</code>. Nevertheless it is used in <code>veh.getweight()</code>.
+This member function is an implicit part of the class, inherited from its
+`parent' vehicle.
+</p><p>Second, although the derived class <code>Land</code> now contains the functionality of
+<code>Vehicle</code>, the <code>private</code> fields of <code>Vehicle</code> remain private in the sense
+that they can only be accessed by member functions of <code>Vehicle</code> itself. This
+means that the member functions of <code>Land</code> <em>must</em> use the interface
+functions (<code>getweight()</code>, <code>setweight()</code>) to address the <code>weight</code> field;
+just as any other code outside the <code>Vehicle</code> class. This restriction is
+necessary to enforce the principle of data hiding. The class <code>Vehicle</code>
+could, e.g., be recoded and recompiled, after which the program could be
+relinked. The class <code>Land</code> itself could remain unchanged.
+</p><p>Actually, the previous remark is not quite right: If the internal organization
+of the <code>Vehicle</code> changes, then the internal organization of the <code>Land</code>
+objects, containing the data of <code>Vehicle</code>, changes as well. This means that
+objects of the <code>Land</code> class, after changing <code>Vehicle</code>, might require more
+(or less) memory than before the modification. However, in such a situation we
+still don't have to worry about the use of member functions of the parent class
+<code>Vehicle</code> in the class <code>Land</code>. We might have to recompile the <code>Land</code>
+sources, though, as the relative locations of the data members within the
+<code>Land</code> objects will have changed due to the modification of the <code>Vehicle</code>
+class.
+</p><p>To play it safe, classes which are derived from other classes must be fully
+recompiled (but don't have to be modified) after changing the <em>data
+organization</em> of their base class(es).  As adding new <em>member functions</em> to
+the base class doesn't alter the data organization, no such recompilation is
+needed after adding new <em>member functions</em>. (A subtle point to note, however,
+is that adding a new member function that happens to be the <em>first</em>
+<a href="cplusplus16.html#virfunc"><em>virtual</em> member function</a> of a class results in a <a href="cplusplus16.html#howpolymorfism">hidden
+pointer</a> to a table of pointers to virtual functions. This
+topic is discussed further in chapter <a href="cplusplus16.html#Polymorphism">16</a>).
+</p><p>In the following example we assume that the class <code>Auto</code>, representing
+automobiles, should be able to contain the weight, speed and name of a car.
+This class is therefore derived from <code>Land</code>:
+<pre>
+
+    class Auto: public Land
+    {
+        public:
+            // constructors
+            Auto();
+            Auto(int wt, int sp, char const *nm);
+
+            // copy constructor
+            Auto(Auto const &amp;other);
+
+            // assignment
+            Auto const &amp;operator=(Auto const &amp;other);
+
+            // destructor
+            ~Auto();
+
+            // interface
+            char const *getname() const;
+            void setname(char const *nm);
+
+        private:
+            // data
+            char const *name;
+    };
+
+</pre>
+
+In the above class definition, <code>Auto</code> is derived from <code>Land</code>, which in
+turn is derived from <code>Vehicle</code>. This is called <em>nested</em>
+derivation: <code>Land</code> is called <code>Auto</code>'s <em>direct base class</em>, 
+while <code>Vehicle</code> is called the <em>indirect base class</em>.
+</p><p>Note the presence of a destructor, a copy constructor and overloaded
+assignment function in the class <code>Auto</code>. Since this class uses a pointer to
+reach allocated memory, these tools are needed.
+ 
+</p><p><a name="l258"></a>
+<h2>15.2: The constructor of a derived class</h2>
+    <a name="inherit/constructor"></a>
+    
+As mentioned earlier, a derived class inherits the functionality from its
+base class. In this section we shall describe the effects of the inheritance
+on the constructor of a derived class.
+</p><p>As can be seen from the definition of the class <code>Land</code>, a constructor
+exists to set both the <code>weight</code> and the <code>speed</code> of an object. The
+poor-man's implementation of this constructor could be:
+<pre>
+
+    Land::Land (int wt, int sp)
+    {
+        setweight(wt);
+        setspeed(sp);
+    }
+
+</pre>
+
+This implementation has the following disadvantage. The <strong>C++</strong> compiler will
+generate code to call the default constructor of a base class from each
+constructor in the derived class, unless explicitly instructed otherwise.
+This can be compared to the situation which arises in composed objects (see
+section <a href="cplusplus05.html#Composition">5.5</a>).
+</p><p>Consequently, in the above implementation (a) the default
+constructor of a <code>Vehicle</code> is called, which probably initializes the weight
+of the vehicle, and (b) subsequently the weight is redefined by calling
+<code>setweight()</code>.
+</p><p>A better solution is of course to call directly the constructor of
+<code>Vehicle</code> expecting an <code>int</code> argument.  The syntax to achieve this
+is to mention the constructor to be called (supplied with an argument) 
+immediately following the argument list of the constructor of the derived 
+class itself:
+<pre>
+
+    Land::Land(int wt, int sp)
+    : 
+        Vehicle(wt)
+    {
+        setspeed(sp);
+    }
+
+</pre>
+    
+
+</p><p><a name="l259"></a>
+<h2>15.3: The destructor of a derived class</h2>
+    <a name="inherit/destructor"></a>
+    Destructors of classes are called automatically when an object is
+destroyed. This rule also holds true for objects of classes that are derived
+from other classes. Assume we have the following situation:
+</p><p><pre>
+
+    class Base
+    {
+        public:
+            ...         // members
+            ~Base();    // destructor
+    };
+
+    class Derived
+    {
+        public:
+            ...         // members
+            ~Derived(); // destructor
+    }
+
+    ...                 // other code
+
+    int main()
+    {
+        Derived
+            derived;
+
+        ...
+        return (0);
+    }
+
+</pre>
+
+</p><p>At the end of the <code>main()</code> function, the <code>derived</code> object ceases to
+exists. Hence, its destructor <code>Derived::~Derived()</code> is called. However,
+since <code>derived</code> is also a <code>Base</code> object, the <code>Base::~Base()</code> destructor
+is called as well. 
+</p><p>It is <em>not</em> necessary to call the <code>Base::~Base()</code> destructor explicitly
+from the <code>Derived::~Derived()</code> destructor. 
+</p><p>Constructors and destructors are called in a stack-like fashion: when
+<code>derived</code> is constructed, the appropriate <code>Base</code> constructor is called
+first, then the appropriate <code>Derived</code> constructor is called. When
+<code>derived</code> is destroyed, the <code>Derived</code> destructor is called first, and then
+the <code>Base</code> destructor is called for that object. In general, a derived class
+destructor is called before a base class destructor is called. 
+</p><p>
+</p><p><a name="Truck"></a><a name="l260"></a>
+<h2>15.4: Redefining member functions</h2>
+    <a name="inherit/redefining"></a>
+    
+The actions of all functions which are defined in a base class (and which are
+therefore also available in derived classes) can be redefined. This feature is
+illustrated in this section.
+</p><p>Let's assume that the vehicle classification system should be able to
+represent trucks, which consist of a two parts: the front engine, which pulls
+a trailer. Both the front engine and the trailer have their own weights,
+but the <code>getweight()</code> function should return the combined weight.
+</p><p>The definition of a <code>Truck</code> therefore starts with the class definition,
+derived from <code>Auto</code> but expanded to hold one more <code>int</code> field to
+represent additional weight information. Here we choose to represent the
+weight of the front part of the truck in the <code>Auto</code> class and to store the
+weight of the trailer in an additional field:
+<pre>
+
+    class Truck: public Auto
+    {
+        public:
+            // constructors
+            Truck();
+            Truck(int engine_wt, int sp, char const *nm,
+                  int trailer_wt);
+
+            // interface: to set two weight fields
+            void setweight(int engine_wt, int trailer_wt);
+            // and to return combined weight
+            int getweight() const;
+
+        private:
+            // data
+            int trailer_weight;
+    };
+
+    // example of constructor
+    Truck::Truck(int engine_wt, int sp, char const *nm,
+                 int trailer_wt)
+    :
+        Auto(engine_wt, sp, nm)
+    {
+        trailer_weight = trailer_wt;
+    }
+
+</pre>
+    
+Note that the class <code>Truck</code> now contains two functions which are already
+present in the base class:
+</p><p><ul>
+    <li > The function <code>setweight()</code> is already defined in <code>Auto</code>.  The
+redefinition in <code>Truck</code> poses no problem: this functionality is simply
+redefined to perform actions which are specific to a <code>Truck</code> object.<br>
+    The definition of a new version of <code>setweight()</code> in the class <code>Truck</code>
+will <em>hide</em> the version of <code>Auto</code> (which is the version defined in
+<code>Vehicle</code>: for a <code>Truck</code> only a <code>setweight()</code> function with two <code>int</code>
+arguments can be used.<br>
+    However, note that the <code>Vehicle</code>'s <code>setweight()</code> function remains
+available. But, as the <code>Auto::setweight()</code> function is
+hidden it must be called explicitly when needed (e.g., inside
+<code>Truck::setweight()</code>. This is required even though <code>Auto::setweight()</code> has
+only one <code>int</code> argument, and one could argue that <code>Auto::setweight()</code> and
+<code>Truck::setweight()</code> are merely overloaded functions within the class
+<code>Truck</code>. So, the implementation of the function <code>Truck::setweight()</code> could
+be:
+ <pre>
+
+    void Truck::setweight(int engine_wt, int trailer_wt)
+    {
+        trailer_weight = trailer_wt;
+        Auto::setweight(engine_wt);     // note: Auto:: is required
+    }   
+ 
+</pre>
+
+    <li > Outside of the class the <code>Auto</code>-version of <code>setweight()</code> is
+accessed through the scope resolution operator. So, if a <code>Truck t</code> needs to
+set its <code>Auto</code> weight, it must use
+            <center><code>t.Auto::setweight(x)</code> </center>
+    <li > An alternative to using the scope resolution operator is to include
+the base-class functions in the class interface as inline functions. This
+might be an elegant solution for the occasional function. E.g., if the
+interface of the <code>class Truck</code> contains
+        <pre>
+
+    void setweight(int engine_wt)
+    {
+        Auto::setweight(engine_wt);
+    }
+        
+</pre>
+
+    then the single argument <code>setweight()</code> function can be used by <code>Truck</code>
+objects without using the scope resolution operator. As the function is
+defined inline, no overhead of an extra function call is involved.
+    <li > The function <code>getweight()</code> is also already defined in
+<code>Vehicle</code>, with the same argument list as in <code>Truck</code>. In this case,
+the class <code>Truck</code> <em>redefines</em> this member function.
+</p><p>The next code fragment presents the redefined function 
+<code>Truck::getweight()</code>:
+ <pre>
+
+    int Truck::getweight() const
+    {
+        return
+            (                           // sum of:
+                Auto::getweight() +     //   engine part plus
+                trailer_weight          //   the trailer
+            );
+    }
+ 
+</pre>
+
+</ul>
+</p><p>The following example shows the actual usage of the member functions of the
+class <code>Truck</code> to display several of its weights:
+ <pre>
+
+    int main()
+    {
+        Land
+            veh(1200, 145);
+   
+        Truck 
+            lorry(3000, 120, "Juggernaut", 2500);
+   
+        lorry.Vehicle::setweight(4000);
+   
+        cout &lt;&lt; endl &lt;&lt; "Truck weighs " &lt;&lt; lorry.Vehicle::getweight() &lt;&lt; endl
+            &lt;&lt; "Truck + trailer weighs " &lt;&lt; lorry.getweight() &lt;&lt; endl
+            &lt;&lt; "Speed is " &lt;&lt; lorry.getspeed() &lt;&lt; endl
+            &lt;&lt; "Name is " &lt;&lt; lorry.getname() &lt;&lt; endl;
+        return (0);
+    }
+ 
+</pre>
+
+    Note the explicit call to <code>Vehicle::setweight(4000)</code>: in order to reach
+the hidden member function <code>Vehicle::setweight()</code>, which <em>is</em> part of the
+set of member functions available to the class <code>Vehicle</code>, is must be called
+explicitly, using the <code>Vehicle::</code> scope resolution. As said, this is
+remarkable, because <code>Vehicle::setweight()</code> can very well be considered an
+overloaded version of <code>Truck::setweight()</code>. 
+    The situation with <code>Vehicle::getweight()</code> and <code>Truck::getweight()</code> is
+a different one: here the function <code>Truck::getweight()</code> is a
+<em>redefinition</em> of <code>Vehicle::getweight()</code>, so in order to reach
+<code>Vehicle::getweight()</code> a scope resolution operation (<code>Vehicle::</code>) is
+required.
+</p><p>
+</p><p><a name="l261"></a>
+<h2>15.5: Multiple inheritance</h2>
+    <a name="inherit/multiple"></a>
+    In the previously described derivations, a class was always derived from
+<em>one</em> base class. <strong>C++</strong> also implements <em>multiple derivation</em>, in
+which a class is derived from several base classes and hence inherits the
+functionality from more than one `parent' at the same time.
+</p><p>For example, let's assume that a class <code>Engine</code> exists with the
+functionality to store information about an engine: the serial number, the
+power, the type of fuel, etc.:
+<pre>
+
+    class Engine
+    {
+        public:
+            // constructors and such
+            Engine();
+            Engine(char const *serial_nr, int power,
+                   char const *fuel_type);
+
+            // tools needed as we have pointers in the class
+            Engine(Engine const &amp;other);
+            Engine const &amp;operator=(Engine const &amp;other);
+
+            ~Engine();
+
+            // interface to get/set stuff
+            void setserial(char const *serial_nr);
+            void setpower(int power);
+            void setfueltype(char const *type);
+
+            char const *getserial() const;
+            int getpower() const;
+            char const *getfueltype() const;
+
+        private:
+            // data
+            char const 
+                *serial_number, 
+                *fuel_type;
+            int 
+                power;
+    };
+
+</pre>
+
+To represent an <code>Auto</code> but with all information about the engine, a class
+<code>MotorCar</code> can be derived from <code>Auto</code> <code>and</code> from <code>Engine</code>,
+as illustrated in the below listing. By using multiple derivation, the
+functionality of an <code>Auto</code> <em>and</em> of an <code>Engine</code> are combined
+into a <code>MotorCar</code>:
+<pre>
+
+    class MotorCar
+    : 
+        public Auto, 
+        public Engine
+    {
+        public:
+            // constructors
+            MotorCar();
+            MotorCar(int wt, int sp, char const *nm,
+                     char const *ser, int pow, char const *fuel);
+    };                
+
+    MotorCar::MotorCar(int wt, int sp, char const *nm,
+                       char const *ser, int pow, char const *fuel)
+    : 
+        Engine (ser, pow, fuel), 
+        Auto (wt, sp, nm)
+    {
+    }
+
+</pre>
+
+</p><p>A few remarks concerning this derivation are:
+</p><p><ul>
+</p><p><li > The keyword <code>public</code> is present both before the classname
+    <code>Auto</code> and before the classname <code>Engine</code>. This is so because the
+    default derivation in <strong>C++</strong> is <code>private</code>: the keyword <code>public</code>
+    must be repeated before each base class specification.
+</p><p><li > The multiply derived class <code>MotorCar</code> introduces no `extra'
+    functionality of its own, but only combines two pre-existing types into
+    one aggregate type. Thus, <strong>C++</strong> offers the possibility to simply sweep
+    multiple simple types into one more complex type.
+</p><p>This feature of <strong>C++</strong> is very often used. Usually it pays to
+    develop `simple' classes each with its strict well-defined functionality.
+    More functionality can always be achieved by combining several small
+    classes.
+</p><p><li > The constructor which expects six arguments contains no code of its
+    own. Its only purpose is to activate the constructors of the base classes.
+    Similarly, the class definition contains no data or interface functions:
+    here it is sufficient that all interface is inherited from the base
+    classes.
+</p><p></ul>
+</p><p>Note also the syntax of the constructor: following the argument list, the two
+base class constructors are called, each supplied with the correct arguments.
+It is also noteworthy that the <em>order</em> in which the constructors are called
+is defined by the <em>interface</em>, and <em>not</em> by the implementation (i.e.,
+by the statement in the constructor of the class <code>MotorCar</code>. 
+This implies that:
+<ul>
+</p><p><li > First, the constructor of <code>Auto</code> is called, since <code>MotorCar</code>
+    is first of all derived from <code>Auto</code>.
+</p><p><li > Then, the constructor of <code>Engine</code> is called,
+</p><p><li > Last, any actions of the constructor of <code>MotorCar</code> itself are
+    executed (in this example, none).
+</p><p></ul>
+Lastly, it should be noted that the multiple derivation in this example may
+feel a bit awkward: the derivation implies that <code>MotorCar</code> <em>is</em>
+an <code>Auto</code> and at the same time it <em>is</em> an <code>Engine</code>. A
+relationship `a <code>MotorCar</code> <em>has</em> an <code>Engine</code>' would be
+expressed as composition, by including an <code>Engine</code> object in the data
+of a <code>MotorCar</code>. But using composition, unnecessary code
+duplication occurs in the interface functions for an <code>Engine</code> 
+(here we assume that a composed object <code>engine</code> of the class <code>Engine</code> 
+exists in a <code>MotorCar</code>):
+<pre>
+
+    void MotorCar::setpower(int pow)
+    {
+        engine.setpower(pow);
+    }
+
+    int MotorCar::getpower() const
+    {
+        return (engine.getpower());
+    }
+
+    // etcetera, repeated for set/getserial(),
+    // and set/getfueltype()
+
+</pre>
+
+</p><p>Clearly, such simple interface functions are avoided completely by using
+derivation. Alternatively, when insisting on the <code>has</code> relationship and
+hence on composition, the interface functions could have been avoided by using
+<code>inline</code> functions.
+
+</p><p><a name="l262"></a>
+<h2>15.6: Conversions between base classes and derived classes</h2>
+    <a name="inherit/conversions"></a>
+    When inheritance is used in the definition of classes, it can be said that an
+object of a derived class is at the same time an object of the base class.
+This has important consequences for the assignment of objects, and for the
+situation where pointers or references to such objects are used. Both
+situations will be discussed next.
+
+</p><p><a name="l263"></a>
+<h3>15.6.1: Conversions in object assignments</h3>
+        <a name="inherit/objectconv"></a>
+    We define two objects, one of a base class and one of a derived class:
+<pre>
+
+    Vehicle
+        v(900);                 // vehicle with weight 900 kg
+    Auto
+        a(1200, 130, "Ford");   // automobile with weight 1200 kg,
+                                // max speed 130 km/h, make Ford
+
+</pre>
+
+</p><p>The object <code>a</code> is now initialized with its specific values. However, an
+<code>Auto</code> is at the same time a <code>Vehicle</code>, which makes the 
+assignment <em>from</em> a derived object <em>to</em> a base object possible:
+<pre>
+
+    v = a;
+
+</pre>
+
+The effect of this assignment is that the object <code>v</code> now receives the value
+1200 as its <code>weight</code> field. A <code>Vehicle</code> has neither a <code>speed</code> nor a
+<code>name</code> field: these data are therefore not assigned.
+</p><p>The conversion from a base object to a derived object, however, is problematic:
+In a statement like 
+<pre>
+
+    a = v;
+
+</pre>
+
+it isn't clear what data to enter into the fields 
+<code>speed</code> and <code>name</code> of the <code>Auto</code> object <code>a</code>, 
+as they are missing in the
+<code>Vehicle</code> object <code>v</code>. Such an assignment is therefore not accepted by
+the compiler.
+</p><p>The following general rule applies: when assigning related objects, an
+assignment in which some data are dropped is legal. However, an assignment
+where data would have to be left blank is <em>not</em> legal. This rule is a
+syntactic one: it also applies when the classes in question have their
+overloaded assignment functions.
+</p><p>The conversion of an object of a base class to an object of a derived class
+could of course be explicitly defined using a dedicated constructor.
+E.g., to achieve compilability of a statement
+<pre>
+
+    a = v;
+
+</pre>
+
+the class <code>Auto</code> would need an assignment function accepting a <code>Vehicle</code>
+as its argument. It would be the programmer's responsibility to decide
+what to do with the missing data:
+<pre>
+
+    Auto const &amp;Auto::operator=(Vehicle const &amp;veh)
+    {
+        setweight (veh.getweight());
+        .
+        .  code to handle other fields should
+        .  be supplied here
+        .
+    }
+
+</pre>
+
+
+</p><p><a name="l264"></a>
+<h3>15.6.2: Conversions in pointer assignments</h3>
+        <a name="inherit/pointerconv"></a>
+    We define the following objects and one pointer variable:
+<pre>
+
+    Land
+        land(1200, 130);
+    Auto
+        auto(500, 75, "Daf");
+    Truck
+        truck(2600, 120, "Mercedes", 6000);
+    Vehicle
+        *vp;
+
+</pre>
+
+</p><p>Subsequently we can assign <code>vp</code> to the addresses of the three objects of
+the derived classes:
+<pre>
+
+    vp = &amp;land;
+    vp = &amp;auto;
+    vp = &amp;truck;
+
+</pre>
+
+</p><p>Each of these assignments is perfectly legal. However, an implicit conversion
+of the type of the derived class to a <code>Vehicle</code> is made, since <code>vp</code> is
+defined as a pointer to a <code>Vehicle</code>. Hence, when using <code>vp</code> only the
+member functions which manipulate the <code>weight</code> can be called, as this is the
+<em>only</em> functionality of a <code>Vehicle</code> and thus it is
+the only functionality which is available when a pointer to a <code>Vehicle</code> is
+used.
+</p><p>The same reasoning holds true for references to <code>Vehicles</code>. If, e.g., a
+function is defined with a <code>Vehicle</code> reference parameter, the function may
+be passed an object of a class that is derived from <code>Vehicle</code>. Inside the
+function, the specific <code>Vehicle</code> members of the object of the derived class
+remain accessible. This analogy between pointers and references holds true in
+all cases. Remember that a reference is nothing but a pointer in disguise: it
+mimics a plain variable, but is actually a pointer.
+</p><p>This restriction in functionality has furthermore an important effect for the
+class <code>Truck</code>. After the statement <code>vp = &amp;truck</code>, <code>vp</code> points to a
+<code>Truck</code> object. Nevertheless, <code>vp-&gt;getweight()</code> will return 2600; and not
+8600 (the combined weight of the cabin and of the trailer: 2600 + 6000),
+which would have been returned by <code>t.getweight()</code>.
+</p><p>When a function is called via a pointer to an object, then the 
+<em>type of the pointer</em> and not the object itself determines which member 
+functions are available and executed. 
+In other words, <strong>C++</strong> implicitly converts the type of an
+object reached via a pointer to the type of the pointer pointing to the 
+object. 
+</p><p>There is of course a way around the implicit conversion, which is an explicit
+type cast:
+<pre>
+
+    Truck
+        truck;
+    Vehicle
+        *vp;
+
+    vp = &amp;truck;        // vp now points to a truck object
+
+    Truck
+        *trp;
+
+    trp = (Truck *) vp;
+    printf ("Make: %s\n", trp-&gt;getname());
+
+</pre>
+
+</p><p>The second to last statement of the code fragment above specifically casts a
+<code>Vehicle *</code> variable to a <code>Truck *</code> in order to assign the value to the
+pointer <code>trp</code>. This code will <em>only</em> work if <code>vp</code> indeed points to a
+<code>Truck</code> and hence a function <code>getname()</code> is available. Otherwise
+the program may show some unexpected behavior.
+
+</p><p><a name="VStorage"></a><a name="l265"></a>
+<h2>15.7: Storing base class pointers</h2>
+    <a name="inherit/storing"></a>
+    The fact that pointers to a base class can be used to reach derived classes
+can be used to develop general-purpose classes which can process objects of
+the derived types. A typical example of such processing is the storage of
+objects, be it in an array, a list, a tree or whichever storage method may be
+appropriate. Classes which are designed to store objects of other classes are
+therefore often called <em>container classes</em>. The stored objects are     
+<em>contained</em> in the container class.
+</p><p>As an example we present the class <code>VStorage</code>, which is used to store
+pointers to <code>Vehicle</code>s. The actual pointers may be addresses of
+<code>Vehicle</code>s themselves, but also may refer to derived types such as
+<code>Auto</code>s.
+</p><p>The definition of the class is the following:
+<pre>
+
+    class VStorage
+    {
+        public:
+            VStorage();
+            VSTorage(VStorage const &amp;other);
+            ~VStorage();
+            VStorage const &amp;operator=(VStorage const &amp;other);
+
+                                // add Vehicle&amp; to storage
+            void add(Vehicle const &amp;vehicle);
+                                // retrieve first Vehicle *
+            Vehicle const *getfirst() const;
+                                // retrieve next Vehicle *
+            Vehicle const *getnext() const;
+
+        private:
+            // data
+            Vehicle 
+                **storage;
+            int 
+                nstored, 
+                current;
+    };
+
+</pre>
+
+</p><p>Concerning this class definition we note:
+<ul>
+</p><p><li > The class contains three interface functions: one to add a
+    <code>Vehicle &amp;</code> to the storage, one to retrieve the first <code>Vehicle *</code> from
+    the storage, and one to retrieve next pointers until no more are in the
+    storage.
+</p><p>An illustration of the use of this class is given in the next
+    example:
+    <pre>
+
+        Land
+            land(200, 20);          // weight 200, speed 20
+        Auto
+            auto(1200, 130, "Ford");// weight 1200 , speed 130,
+                                    // make Ford
+        VStorage
+            garage;                 // the storage
+
+        garage.add(land);           // add to storage
+        garage.add(auto);
+
+        Vehicle const
+            *anyp;
+        int
+            total_wt = 0;
+
+        for (anyp = garage.getfirst(); anyp; anyp = garage.getnext())
+            total_wt += anyp-&gt;getweight();
+
+        cout &lt;&lt; "Total weight: " &lt;&lt; total_wt &lt;&lt; endl;
+    
+</pre>
+
+</p><p>This example demonstrates how derived types (one <code>Auto</code> and one
+    <code>Land</code>) are implicitly converted to their base type (a <code>Vehicle &amp;</code>),
+    so that they can be stored in a <code>VStorage</code>. Base-type objects are then
+    retrieved from the storage. The function <code>getweight()</code>, 
+    defined in the  base class and the derived classes, 
+    is therupon used to compute the total weight.
+</p><p><li > Furthermore, the class <code>VStorage</code> contains all the tools to
+    ensure that two <code>VStorage</code> objects can be assigned to one another etc..
+    These tools are the overloaded assignment function and the copy
+    constructor.
+</p><p><li > The actual internal workings of the class only become apparent once
+    the <code>private</code> section is seen. The class <code>VStorage</code> maintains an
+    array of pointers to <code>Vehicle</code>s and needs two <code>int</code>s to store how
+    many objects are in the storage and which the `current' index is, to be
+    returned by <code>getnext()</code>.
+</p><p></ul>
+</p><p>The class <code>VStorage</code> shall not be further elaborated; similar examples
+shall appear in the next chapters. It is however <em>very</em> noteworthy that by
+providing class derivation and base/derived conversions, <strong>C++</strong> presents a
+powerful tool: these features of <strong>C++</strong> allow the processing of all derived
+types by one generic class.
+</p><p>The above class <code>VStorage</code> could even be used to store all types which may
+be
+derived from a <code>Vehicle</code> in the future. It seems a bit paradoxical that the
+class should be able to use code which isn't even there yet, but there is no
+real paradox: <code>VStorage</code> uses a certain <em>protocol</em>, defined by the
+<code>Vehicle</code> and obligatory for all derived classes.
+</p><p>The above class <code>VStorage</code> has just one disadvantage: when we add a
+<code>Truck</code> object to a storage, then a code fragment like:
+<pre>
+
+    Vehicle const
+        *any;
+    VStorage
+        garage;
+
+    any = garage.getnext();
+    cout &lt;&lt; any-&gt;getweight() &lt;&lt; endl;
+
+</pre>
+
+will <em>not</em> print the truck's combined weight of the cabin and the trailer.
+Only the weight stored in the <code>Vehicle</code> portion of the truck will be
+returned via the function <code>any-&gt;getweight()</code>.
+Fortunately, there is a remedy against this slight disadvantage. 
+This remedy will be discussed in the next chapter.
+
+</p><p>
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus16.html">Next chapter</a>
+    <li> <a href="cplusplus14.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

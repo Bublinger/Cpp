@@ -1,0 +1,451 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+<a name="titlepg"></a>
+    
+
+
+
+
+
+
+
+<html><head><title>C++ Annotations
+        Version 4.4.2</title>
+
+<link rev="made" href="mailto:Frank B. Brokken: f.b.brokken@rc.rug.nl">
+</head>
+<body fgcolor="black" bgcolor="white">
+
+<hr>
+
+<h1>C++ Annotations
+        Version 4.4.2</h1>
+<h2>Frank B. Brokken <br>
+        (and Karel Kubat until version 4.0.0)</h2>
+<h2>Computing Center, University of Groningen <br>Landleven 1,<br>P.O. Box 800,<br>9700 AV Groningen <br>The Netherlands <br>
+        Published at the University of Groningen <br>
+        ISBN 90 367 0470 7</h2><h2>1994 - 2000</h2>
+
+    
+<blockquote><em>This document is intended for knowledgeable users of <strong>C</strong> who would
+like to make the transition to <strong>C++</strong>. It is a guide for Frank's <strong>C++</strong>
+programming courses, which are given yearly at the University of Groningen. As
+such, this document is not a complete <strong>C++</strong> handbook.  Rather, it serves as
+an addition to other documentation sources.
+
+If you want a hard-copy version of the <strong>C++</strong> annotations: that's available
+in postscript, and other formats in <a href="ftp://ftp.icce.rug.nl/pub/documents">our
+ftp-site</a>, in several files starting with
+<code>cplusplus</code>.
+</em></blockquote>
+
+<p></p><p><hr><p></p><p><a href="cplusplus01.html#l1"><h1>Chapter 1: Overview of the chapters</h1> </a>
+<a href="cplusplus02.html#l2"><h1>Chapter 2: Introduction</h1> </a>
+<a href="cplusplus02.html#l3"><h3>2.0.1: History of the C++ Annotations</h3> </a>
+<a href="cplusplus02.html#l4"><h2>2.1: What's new in the C++ Annotations</h2> </a>
+<a href="cplusplus02.html#l5"><h2>2.2: The history of C++</h2> </a>
+<a href="cplusplus02.html#l6"><h3>2.2.1: Compiling a C program by a C++ compiler</h3> </a>
+<a href="cplusplus02.html#l7"><h3>2.2.2: Compiling a C++ program</h3> </a>
+<a href="cplusplus02.html#l8"><strong>2.2.2.1: C++ under MS-Windows</strong></p><p> </a>
+<a href="cplusplus02.html#l9"><strong>2.2.2.2: Compiling a C++ source text</strong></p><p> </a>
+<a href="cplusplus02.html#l10"><h2>2.3: Advantages and pretensions of C++</h2> </a>
+<a href="cplusplus02.html#l11"><h2>2.4: What is Object-Oriented Programming?</h2> </a>
+<a href="cplusplus02.html#l12"><h2>2.5: Differences between C and C++</h2> </a>
+<a href="cplusplus02.html#l13"><h3>2.5.1: End-of-line comment</h3> </a>
+<a href="cplusplus02.html#l14"><h3>2.5.2: NULL-pointers vs. 0-pointers</h3> </a>
+<a href="cplusplus02.html#l15"><h3>2.5.3: Strict type checking</h3> </a>
+<a href="cplusplus02.html#l16"><h3>2.5.4: A new syntax for casts</h3> </a>
+<a href="cplusplus02.html#l17"><h3>2.5.5: The 'static_cast'-operator</h3> </a>
+<a href="cplusplus02.html#l18"><h3>2.5.6: The 'const_cast'-operator</h3> </a>
+<a href="cplusplus02.html#l19"><h3>2.5.7: The 'reinterpret_cast'-operator</h3> </a>
+<a href="cplusplus02.html#l20"><h3>2.5.8: The void argument list</h3> </a>
+<a href="cplusplus02.html#l21"><h3>2.5.9: The #define __cplusplus</h3> </a>
+<a href="cplusplus02.html#l22"><h3>2.5.10: The usage of standard C functions</h3> </a>
+<a href="cplusplus02.html#l23"><h3>2.5.11: Header files for both C and C++</h3> </a>
+<a href="cplusplus02.html#l24"><h3>2.5.12: The definition of local variables</h3> </a>
+<a href="cplusplus02.html#l25"><h3>2.5.13: Function Overloading</h3> </a>
+<a href="cplusplus02.html#l26"><h3>2.5.14: Default function arguments</h3> </a>
+<a href="cplusplus02.html#l27"><h3>2.5.15: The keyword typedef</h3> </a>
+<a href="cplusplus02.html#l28"><h3>2.5.16: Functions as part of a struct</h3> </a>
+<a href="cplusplus03.html#l29"><h1>Chapter 3: A first impression of C++</h1> </a>
+<a href="cplusplus03.html#l30"><h2>3.1: More extensions of C in C++</h2> </a>
+<a href="cplusplus03.html#l31"><h3>3.1.1: The scope resolution operator ::</h3> </a>
+<a href="cplusplus03.html#l32"><h3>3.1.2: cout, cin and cerr</h3> </a>
+<a href="cplusplus03.html#l33"><h3>3.1.3: The keyword const</h3> </a>
+<a href="cplusplus03.html#l34"><h3>3.1.4: References</h3> </a>
+<a href="cplusplus03.html#l35"><h2>3.2: Functions as part of structs</h2> </a>
+<a href="cplusplus03.html#l36"><h2>3.3: Several new data types</h2> </a>
+<a href="cplusplus03.html#l37"><h3>3.3.1: The `bool' data type</h3> </a>
+<a href="cplusplus03.html#l38"><h3>3.3.2: The `wchar_t' data type</h3> </a>
+<a href="cplusplus03.html#l39"><h2>3.4: Data hiding: public, private and class</h2> </a>
+<a href="cplusplus03.html#l40"><h2>3.5: Structs in C vs. structs in C++</h2> </a>
+<a href="cplusplus03.html#l41"><h2>3.6: Namespaces</h2> </a>
+<a href="cplusplus03.html#l42"><h3>3.6.1: Defining namespaces</h3> </a>
+<a href="cplusplus03.html#l43"><strong>3.6.1.1: Declaring entities in namespaces</strong></p><p> </a>
+<a href="cplusplus03.html#l44"><strong>3.6.1.2: A closed namespace</strong></p><p> </a>
+<a href="cplusplus03.html#l45"><h3>3.6.2: Referring to entities</h3> </a>
+<a href="cplusplus03.html#l46"><strong>3.6.2.1: The using directive</strong></p><p> </a>
+<a href="cplusplus03.html#l47"><h3>3.6.3: The standard namespace</h3> </a>
+<a href="cplusplus03.html#l48"><h3>3.6.4: Nesting namespaces and namespace aliasing</h3> </a>
+<a href="cplusplus03.html#l49"><strong>3.6.4.1: Defining entities outside of their namespaces</strong></p><p> </a>
+<a href="cplusplus04.html#l50"><h1>Chapter 4: The `string' data type</h1> </a>
+<a href="cplusplus04.html#l51"><h2>4.1: Operations on strings</h2> </a>
+<a href="cplusplus04.html#l52"><h2>4.2: Overview of operations on strings</h2> </a>
+<a href="cplusplus04.html#l53"><h3>4.2.1: The string-initializers</h3> </a>
+<a href="cplusplus04.html#l54"><h3>4.2.2: The <code>string</code>-iterators</h3> </a>
+<a href="cplusplus04.html#l55"><h3>4.2.3: The <code>string</code>-operators</h3> </a>
+<a href="cplusplus04.html#l56"><h3>4.2.4: The string member functions</h3> </a>
+<a href="cplusplus05.html#l57"><h1>Chapter 5: Classes</h1> </a>
+<a href="cplusplus05.html#l58"><h2>5.1: Constructors and destructors</h2> </a>
+<a href="cplusplus05.html#l59"><h3>5.1.1: The constructor</h3> </a>
+<a href="cplusplus05.html#l60"><h3>5.1.2: The destructor</h3> </a>
+<a href="cplusplus05.html#l61"><h3>5.1.3: A first application</h3> </a>
+<a href="cplusplus05.html#l62"><h3>5.1.4: Constructors with arguments</h3> </a>
+<a href="cplusplus05.html#l63"><strong>5.1.4.1: The order of construction</strong></p><p> </a>
+<a href="cplusplus05.html#l64"><h2>5.2: Const member functions and const objects</h2> </a>
+<a href="cplusplus05.html#l65"><h2>5.3: The operators new and delete</h2> </a>
+<a href="cplusplus05.html#l66"><h3>5.3.1: Allocating and deallocating arrays</h3> </a>
+<a href="cplusplus05.html#l67"><h3>5.3.2: New and delete and object pointers</h3> </a>
+<a href="cplusplus05.html#l68"><h3>5.3.3: The function set_new_handler()</h3> </a>
+<a href="cplusplus05.html#l69"><h2>5.4: The keyword inline</h2> </a>
+<a href="cplusplus05.html#l70"><h3>5.4.1: Inline functions within class declarations</h3> </a>
+<a href="cplusplus05.html#l71"><h3>5.4.2: Inline functions outside of class declarations</h3> </a>
+<a href="cplusplus05.html#l72"><h3>5.4.3: When to use inline functions</h3> </a>
+<a href="cplusplus05.html#l73"><h2>5.5: Objects in objects: composition</h2> </a>
+<a href="cplusplus05.html#l74"><h3>5.5.1: Composition and const objects: const member initializers</h3> </a>
+<a href="cplusplus05.html#l75"><h3>5.5.2: Composition and reference objects: reference memberinitializers</h3> </a>
+<a href="cplusplus05.html#l76"><h2>5.6: Friend functions and friend classes</h2> </a>
+<a href="cplusplus05.html#l77"><h2>5.7: Header file organization with classes</h2> </a>
+<a href="cplusplus05.html#l78"><h2>5.8: Nesting Classes</h2> </a>
+<a href="cplusplus05.html#l79"><h3>5.8.1: Defining nested class members</h3> </a>
+<a href="cplusplus05.html#l80"><h3>5.8.2: Declaring nested classes</h3> </a>
+<a href="cplusplus05.html#l81"><h3>5.8.3: Access to private members in nested classes</h3> </a>
+<a href="cplusplus05.html#l82"><h3>5.8.4: Nesting enumerations</h3> </a>
+<a href="cplusplus06.html#l83"><h1>Chapter 6: Classes and memory allocation</h1> </a>
+<a href="cplusplus06.html#l84"><h2>6.1: Classes with pointer data members</h2> </a>
+<a href="cplusplus06.html#l85"><h2>6.2: The assignment operator</h2> </a>
+<a href="cplusplus06.html#l86"><h3>6.2.1: Overloading the assignment operator</h3> </a>
+<a href="cplusplus06.html#l87"><strong>6.2.1.1: The function 'operator=()'</strong></p><p> </a>
+<a href="cplusplus06.html#l88"><h2>6.3: The this pointer</h2> </a>
+<a href="cplusplus06.html#l89"><h3>6.3.1: Preventing self-destruction with this</h3> </a>
+<a href="cplusplus06.html#l90"><h3>6.3.2: Associativity of operators and this</h3> </a>
+<a href="cplusplus06.html#l91"><h2>6.4: The copy constructor: Initialization vs. Assignment</h2> </a>
+<a href="cplusplus06.html#l92"><h3>6.4.1: Similarities between the copy constructor and operator=()</h3> </a>
+<a href="cplusplus06.html#l93"><h2>6.5: Conclusion</h2> </a>
+<a href="cplusplus07.html#l94"><h1>Chapter 7: More About Operator Overloading</h1> </a>
+<a href="cplusplus07.html#l95"><h2>7.1: Overloading operator[]()</h2> </a>
+<a href="cplusplus07.html#l96"><h2>7.2: Overloading operator new(size_t)</h2> </a>
+<a href="cplusplus07.html#l97"><h2>7.3: Overloading operator delete(void *)</h2> </a>
+<a href="cplusplus07.html#l98"><h2>7.4: Cin, cout, cerr and their operators</h2> </a>
+<a href="cplusplus07.html#l99"><h2>7.5: Conversion operators</h2> </a>
+<a href="cplusplus07.html#l100"><h2>7.6: The `explicit' keyword</h2> </a>
+<a href="cplusplus07.html#l101"><h2>7.7: Overloading the increment and decrement operators</h2> </a>
+<a href="cplusplus07.html#l102"><h2>7.8: Function Objects</h2> </a>
+<a href="cplusplus07.html#l103"><h3>7.8.1: Categories of Function objects</h3> </a>
+<a href="cplusplus07.html#l104"><strong>7.8.1.1: Arithmetic Function Objects</strong></p><p> </a>
+<a href="cplusplus07.html#l105"><strong>7.8.1.2: Relational Function Objects</strong></p><p> </a>
+<a href="cplusplus07.html#l106"><strong>7.8.1.3: Logical Function Objects</strong></p><p> </a>
+<a href="cplusplus07.html#l107"><h3>7.8.2: Function Adaptors</h3> </a>
+<a href="cplusplus07.html#l108"><h2>7.9: Overloadable Operators</h2> </a>
+<a href="cplusplus08.html#l109"><h1>Chapter 8: Abstract Containers</h1> </a>
+<a href="cplusplus08.html#l110"><h2>8.1: The `pair' container</h2> </a>
+<a href="cplusplus08.html#l111"><h2>8.2: Sequential Containers</h2> </a>
+<a href="cplusplus08.html#l112"><h3>8.2.1: The `vector' container</h3> </a>
+<a href="cplusplus08.html#l113"><h3>8.2.2: The `list' container</h3> </a>
+<a href="cplusplus08.html#l114"><h3>8.2.3: The `queue' container</h3> </a>
+<a href="cplusplus08.html#l115"><h3>8.2.4: The `priority_queue' container</h3> </a>
+<a href="cplusplus08.html#l116"><h3>8.2.5: The `deque' container</h3> </a>
+<a href="cplusplus08.html#l117"><h3>8.2.6: The `map' container</h3> </a>
+<a href="cplusplus08.html#l118"><h3>8.2.7: The `multimap' container</h3> </a>
+<a href="cplusplus08.html#l119"><h3>8.2.8: The `set' container</h3> </a>
+<a href="cplusplus08.html#l120"><h3>8.2.9: The `multiset' container</h3> </a>
+<a href="cplusplus08.html#l121"><h3>8.2.10: The `stack' container</h3> </a>
+<a href="cplusplus08.html#l122"><h3>8.2.11: The `hash_map' and other hashing-based containers</h3> </a>
+<a href="cplusplus08.html#l123"><h2>8.3: The `complex' container</h2> </a>
+<a href="cplusplus09.html#l124"><h1>Chapter 9: Static data and functions</h1> </a>
+<a href="cplusplus09.html#l125"><h2>9.1: Static data</h2> </a>
+<a href="cplusplus09.html#l126"><h3>9.1.1: Private static data</h3> </a>
+<a href="cplusplus09.html#l127"><h3>9.1.2: Public static data</h3> </a>
+<a href="cplusplus09.html#l128"><h2>9.2: Static member functions</h2> </a>
+<a href="cplusplus10.html#l129"><h1>Chapter 10: Classes having pointers to members</h1> </a>
+<a href="cplusplus10.html#l130"><h2>10.1: Pointers to members: an example</h2> </a>
+<a href="cplusplus10.html#l131"><h2>10.2: Initializing pointers to members</h2> </a>
+<a href="cplusplus10.html#l132"><h2>10.3: Pointers to static members</h2> </a>
+<a href="cplusplus10.html#l133"><h2>10.4: Using pointers to members for real</h2> </a>
+<a href="cplusplus10.html#l134"><h3>10.4.1: Pointers to members: an implementation</h3> </a>
+<a href="cplusplus11.html#l135"><h1>Chapter 11: The Standard Template Library, generic algorithms</h1> </a>
+<a href="cplusplus11.html#l136"><h2>11.1: Iterators</h2> </a>
+<a href="cplusplus11.html#l137"><h3>11.1.1: Insert iterators</h3> </a>
+<a href="cplusplus11.html#l138"><h3>11.1.2: istream iterators</h3> </a>
+<a href="cplusplus11.html#l139"><h3>11.1.3: ostream iterators</h3> </a>
+<a href="cplusplus11.html#l140"><h2>11.2: The 'auto_ptr' class</h2> </a>
+<a href="cplusplus11.html#l141"><h3>11.2.1: Defining auto_ptr variables</h3> </a>
+<a href="cplusplus11.html#l142"><h3>11.2.2: Pointing to a newly allocated object</h3> </a>
+<a href="cplusplus11.html#l143"><h3>11.2.3: Pointing to another auto_ptr</h3> </a>
+<a href="cplusplus11.html#l144"><h3>11.2.4: Creating an plain auto_ptr</h3> </a>
+<a href="cplusplus11.html#l145"><h3>11.2.5: The get() member function</h3> </a>
+<a href="cplusplus11.html#l146"><h3>11.2.6: The reset() member function</h3> </a>
+<a href="cplusplus11.html#l147"><h3>11.2.7: The release() member function</h3> </a>
+<a href="cplusplus11.html#l148"><h2>11.3: The Generic Algorithms</h2> </a>
+<a href="cplusplus11.html#l149"><h3>11.3.1: accumulate()</h3> </a>
+<a href="cplusplus11.html#l150"><h3>11.3.2: adjacent_difference()</h3> </a>
+<a href="cplusplus11.html#l151"><h3>11.3.3: adjacent_find()</h3> </a>
+<a href="cplusplus11.html#l152"><h3>11.3.4: binary_search()</h3> </a>
+<a href="cplusplus11.html#l153"><h3>11.3.5: copy()</h3> </a>
+<a href="cplusplus11.html#l154"><h3>11.3.6: copy_backward()</h3> </a>
+<a href="cplusplus11.html#l155"><h3>11.3.7: count()</h3> </a>
+<a href="cplusplus11.html#l156"><h3>11.3.8: count_if()</h3> </a>
+<a href="cplusplus11.html#l157"><h3>11.3.9: equal()</h3> </a>
+<a href="cplusplus11.html#l158"><h3>11.3.10: equal_range()</h3> </a>
+<a href="cplusplus11.html#l159"><h3>11.3.11: fill()</h3> </a>
+<a href="cplusplus11.html#l160"><h3>11.3.12: fill_n()</h3> </a>
+<a href="cplusplus11.html#l161"><h3>11.3.13: find()</h3> </a>
+<a href="cplusplus11.html#l162"><h3>11.3.14: find_if()</h3> </a>
+<a href="cplusplus11.html#l163"><h3>11.3.15: find_end()</h3> </a>
+<a href="cplusplus11.html#l164"><h3>11.3.16: find_first_of()</h3> </a>
+<a href="cplusplus11.html#l165"><h3>11.3.17: for_each()</h3> </a>
+<a href="cplusplus11.html#l166"><h3>11.3.18: generate()</h3> </a>
+<a href="cplusplus11.html#l167"><h3>11.3.19: generate_n()</h3> </a>
+<a href="cplusplus11.html#l168"><h3>11.3.20: includes()</h3> </a>
+<a href="cplusplus11.html#l169"><h3>11.3.21: inner_product()</h3> </a>
+<a href="cplusplus11.html#l170"><h3>11.3.22: inplace_merge()</h3> </a>
+<a href="cplusplus11.html#l171"><h3>11.3.23: iter_swap()</h3> </a>
+<a href="cplusplus11.html#l172"><h3>11.3.24: lexicographical_compare()</h3> </a>
+<a href="cplusplus11.html#l173"><h3>11.3.25: lower_bound()</h3> </a>
+<a href="cplusplus11.html#l174"><h3>11.3.26: max()</h3> </a>
+<a href="cplusplus11.html#l175"><h3>11.3.27: max_element()</h3> </a>
+<a href="cplusplus11.html#l176"><h3>11.3.28: merge()</h3> </a>
+<a href="cplusplus11.html#l177"><h3>11.3.29: min()</h3> </a>
+<a href="cplusplus11.html#l178"><h3>11.3.30: min_element()</h3> </a>
+<a href="cplusplus11.html#l179"><h3>11.3.31: mismatch()</h3> </a>
+<a href="cplusplus11.html#l180"><h3>11.3.32: next_permutation()</h3> </a>
+<a href="cplusplus11.html#l181"><h3>11.3.33: nth_element()</h3> </a>
+<a href="cplusplus11.html#l182"><h3>11.3.34: partial_sort()</h3> </a>
+<a href="cplusplus11.html#l183"><h3>11.3.35: partial_sort_copy()</h3> </a>
+<a href="cplusplus11.html#l184"><h3>11.3.36: partial_sum()</h3> </a>
+<a href="cplusplus11.html#l185"><h3>11.3.37: partition()</h3> </a>
+<a href="cplusplus11.html#l186"><h3>11.3.38: prev_permutation()</h3> </a>
+<a href="cplusplus11.html#l187"><h3>11.3.39: random_shuffle()</h3> </a>
+<a href="cplusplus11.html#l188"><h3>11.3.40: remove()</h3> </a>
+<a href="cplusplus11.html#l189"><h3>11.3.41: remove_copy()</h3> </a>
+<a href="cplusplus11.html#l190"><h3>11.3.42: remove_if()</h3> </a>
+<a href="cplusplus11.html#l191"><h3>11.3.43: remove_copy_if()</h3> </a>
+<a href="cplusplus11.html#l192"><h3>11.3.44: replace()</h3> </a>
+<a href="cplusplus11.html#l193"><h3>11.3.45: replace_copy()</h3> </a>
+<a href="cplusplus11.html#l194"><h3>11.3.46: replace_if()</h3> </a>
+<a href="cplusplus11.html#l195"><h3>11.3.47: replace_copy_if()</h3> </a>
+<a href="cplusplus11.html#l196"><h3>11.3.48: reverse()</h3> </a>
+<a href="cplusplus11.html#l197"><h3>11.3.49: reverse_copy()</h3> </a>
+<a href="cplusplus11.html#l198"><h3>11.3.50: rotate()</h3> </a>
+<a href="cplusplus11.html#l199"><h3>11.3.51: rotate_copy()</h3> </a>
+<a href="cplusplus11.html#l200"><h3>11.3.52: search()</h3> </a>
+<a href="cplusplus11.html#l201"><h3>11.3.53: search_n()</h3> </a>
+<a href="cplusplus11.html#l202"><h3>11.3.54: set_difference()</h3> </a>
+<a href="cplusplus11.html#l203"><h3>11.3.55: set_intersection()</h3> </a>
+<a href="cplusplus11.html#l204"><h3>11.3.56: set_symmetric_difference()</h3> </a>
+<a href="cplusplus11.html#l205"><h3>11.3.57: set_union()</h3> </a>
+<a href="cplusplus11.html#l206"><h3>11.3.58: sort()</h3> </a>
+<a href="cplusplus11.html#l207"><h3>11.3.59: stable_partition()</h3> </a>
+<a href="cplusplus11.html#l208"><h3>11.3.60: stable_sort()</h3> </a>
+<a href="cplusplus11.html#l209"><h3>11.3.61: swap()</h3> </a>
+<a href="cplusplus11.html#l210"><h3>11.3.62: swap_ranges()</h3> </a>
+<a href="cplusplus11.html#l211"><h3>11.3.63: transform()</h3> </a>
+<a href="cplusplus11.html#l212"><h3>11.3.64: unique()</h3> </a>
+<a href="cplusplus11.html#l213"><h3>11.3.65: unique_copy()</h3> </a>
+<a href="cplusplus11.html#l214"><h3>11.3.66: upper_bound()</h3> </a>
+<a href="cplusplus11.html#l215"><h3>11.3.67: Heap algorithms</h3> </a>
+<a href="cplusplus11.html#l216"><strong>11.3.67.1: make_heap()</strong></p><p> </a>
+<a href="cplusplus11.html#l217"><strong>11.3.67.2: pop_heap()</strong></p><p> </a>
+<a href="cplusplus11.html#l218"><strong>11.3.67.3: push_heap()</strong></p><p> </a>
+<a href="cplusplus11.html#l219"><strong>11.3.67.4: sort_heap()</strong></p><p> </a>
+<a href="cplusplus11.html#l220"><strong>11.3.67.5: A small example using the heap algorithms</strong></p><p> </a>
+<a href="cplusplus12.html#l221"><h1>Chapter 12: The IO-stream Library</h1> </a>
+<a href="cplusplus12.html#l222"><h2>12.1: Streams: insertion (&lt;&lt;) and extraction (&gt;&gt;)</h2> </a>
+<a href="cplusplus12.html#l223"><h3>12.1.1: The insertion operator &lt;&lt;</h3> </a>
+<a href="cplusplus12.html#l224"><h3>12.1.2: The extraction operator &gt;&gt;</h3> </a>
+<a href="cplusplus12.html#l225"><h2>12.2: Four standard iostreams</h2> </a>
+<a href="cplusplus12.html#l226"><h2>12.3: Files and Strings in general</h2> </a>
+<a href="cplusplus12.html#l227"><h3>12.3.1: String stream objects: a summary</h3> </a>
+<a href="cplusplus12.html#l228"><h3>12.3.2: Writing streams</h3> </a>
+<a href="cplusplus12.html#l229"><h3>12.3.3: Reading streams</h3> </a>
+<a href="cplusplus12.html#l230"><h3>12.3.4: Reading and writing streams</h3> </a>
+<a href="cplusplus12.html#l231"><h3>12.3.5: Special functions</h3> </a>
+<a href="cplusplus12.html#l232"><h3>12.3.6: Good, bad, and ...: IOStream Condition States</h3> </a>
+<a href="cplusplus12.html#l233"><h3>12.3.7: Formating</h3> </a>
+<a href="cplusplus12.html#l234"><strong>12.3.7.1: The (v)form() and (v)scan() members</strong></p><p> </a>
+<a href="cplusplus12.html#l235"><strong>12.3.7.2: Manipulators: dec, hex, oct and other manipulators</strong></p><p> </a>
+<a href="cplusplus12.html#l236"><strong>12.3.7.3: Setting the precision: the member precision()</strong></p><p> </a>
+<a href="cplusplus12.html#l237"><strong>12.3.7.4: (Un)Setting display flags: the member (un)setf()</strong></p><p> </a>
+<a href="cplusplus12.html#l238"><h3>12.3.8: Constructing manipulators</h3> </a>
+<a href="cplusplus13.html#l239"><h1>Chapter 13: Exceptions</h1> </a>
+<a href="cplusplus13.html#l240"><h2>13.1: Using exceptions: an outline</h2> </a>
+<a href="cplusplus13.html#l241"><h2>13.2: An example using exceptions</h2> </a>
+<a href="cplusplus13.html#l242"><h3>13.2.1: No exceptions: the setjmp() and longjmp() approach</h3> </a>
+<a href="cplusplus13.html#l243"><h3>13.2.2: Exceptions: the preferred alternative</h3> </a>
+<a href="cplusplus13.html#l244"><h2>13.3: Throwing exceptions</h2> </a>
+<a href="cplusplus13.html#l245"><h3>13.3.1: The empty throw statement</h3> </a>
+<a href="cplusplus13.html#l246"><h2>13.4: The try block</h2> </a>
+<a href="cplusplus13.html#l247"><h2>13.5: Catching exceptions</h2> </a>
+<a href="cplusplus13.html#l248"><h3>13.5.1: The default catcher</h3> </a>
+<a href="cplusplus13.html#l249"><h2>13.6: Declaring exception throwers</h2> </a>
+<a href="cplusplus14.html#l250"><h1>Chapter 14: More about friends</h1> </a>
+<a href="cplusplus14.html#l251"><h2>14.1: Inserting String objects into streams</h2> </a>
+<a href="cplusplus14.html#l252"><h2>14.2: An initial solution</h2> </a>
+<a href="cplusplus14.html#l253"><h2>14.3: Friend-functions</h2> </a>
+<a href="cplusplus14.html#l254"><h3>14.3.1: Preventing the friend-keyword</h3> </a>
+<a href="cplusplus14.html#l255"><h2>14.4: Friend classes</h2> </a>
+<a href="cplusplus15.html#l256"><h1>Chapter 15: Inheritance</h1> </a>
+<a href="cplusplus15.html#l257"><h2>15.1: Related types</h2> </a>
+<a href="cplusplus15.html#l258"><h2>15.2: The constructor of a derived class</h2> </a>
+<a href="cplusplus15.html#l259"><h2>15.3: The destructor of a derived class</h2> </a>
+<a href="cplusplus15.html#l260"><h2>15.4: Redefining member functions</h2> </a>
+<a href="cplusplus15.html#l261"><h2>15.5: Multiple inheritance</h2> </a>
+<a href="cplusplus15.html#l262"><h2>15.6: Conversions between base classes and derived classes</h2> </a>
+<a href="cplusplus15.html#l263"><h3>15.6.1: Conversions in object assignments</h3> </a>
+<a href="cplusplus15.html#l264"><h3>15.6.2: Conversions in pointer assignments</h3> </a>
+<a href="cplusplus15.html#l265"><h2>15.7: Storing base class pointers</h2> </a>
+<a href="cplusplus16.html#l266"><h1>Chapter 16: Polymorphism, late binding and virtual functions</h1> </a>
+<a href="cplusplus16.html#l267"><h2>16.1: Virtual functions</h2> </a>
+<a href="cplusplus16.html#l268"><h3>16.1.1: Polymorphism in program development</h3> </a>
+<a href="cplusplus16.html#l269"><h3>16.1.2: How polymorphism is implemented</h3> </a>
+<a href="cplusplus16.html#l270"><h2>16.2: Pure virtual functions</h2> </a>
+<a href="cplusplus16.html#l271"><h2>16.3: Comparing only Persons</h2> </a>
+<a href="cplusplus16.html#l272"><h2>16.4: Virtual destructors</h2> </a>
+<a href="cplusplus16.html#l273"><h2>16.5: Virtual functions in multiple inheritance</h2> </a>
+<a href="cplusplus16.html#l274"><h3>16.5.1: Ambiguity in multiple inheritance</h3> </a>
+<a href="cplusplus16.html#l275"><h3>16.5.2: Virtual base classes</h3> </a>
+<a href="cplusplus16.html#l276"><h3>16.5.3: When virtual derivation is not appropriate</h3> </a>
+<a href="cplusplus16.html#l277"><h2>16.6: Run-Time Type identification</h2> </a>
+<a href="cplusplus16.html#l278"><h3>16.6.1: The dynamic_cast operator</h3> </a>
+<a href="cplusplus16.html#l279"><h3>16.6.2: The typeid operator</h3> </a>
+<a href="cplusplus17.html#l280"><h1>Chapter 17: Templates</h1> </a>
+<a href="cplusplus17.html#l281"><h2>17.1: Template functions</h2> </a>
+<a href="cplusplus17.html#l282"><h3>17.1.1: Template function definitions</h3> </a>
+<a href="cplusplus17.html#l283"><strong>17.1.1.1: The keyword 'typename'</strong></p><p> </a>
+<a href="cplusplus17.html#l284"><h3>17.1.2: Instantiations of template functions</h3> </a>
+<a href="cplusplus17.html#l285"><h3>17.1.3: Argument deduction</h3> </a>
+<a href="cplusplus17.html#l286"><strong>17.1.3.1: Lvalue transformations</strong></p><p> </a>
+<a href="cplusplus17.html#l287"><strong>17.1.3.2: Qualification conversions</strong></p><p> </a>
+<a href="cplusplus17.html#l288"><strong>17.1.3.3: Conversion to a base class</strong></p><p> </a>
+<a href="cplusplus17.html#l289"><strong>17.1.3.4: Summary: the template argument deduction algorithm</strong></p><p> </a>
+<a href="cplusplus17.html#l290"><h3>17.1.4: Explicit arguments</h3> </a>
+<a href="cplusplus17.html#l291"><strong>17.1.4.1: Template explicit instantiation declarations</strong></p><p> </a>
+<a href="cplusplus17.html#l292"><h3>17.1.5: Template explicit specialization</h3> </a>
+<a href="cplusplus17.html#l293"><h3>17.1.6: Overloading template functions</h3> </a>
+<a href="cplusplus17.html#l294"><h3>17.1.7: Selecting an overloaded (template) function</h3> </a>
+<a href="cplusplus17.html#l295"><h3>17.1.8: Name resolution within template functions</h3> </a>
+<a href="cplusplus17.html#l296"><h2>17.2: Template classes</h2> </a>
+<a href="cplusplus17.html#l297"><h3>17.2.1: Template class definitions</h3> </a>
+<a href="cplusplus17.html#l298"><h3>17.2.2: Template class instantiations</h3> </a>
+<a href="cplusplus17.html#l299"><h3>17.2.3: Nontype parameters</h3> </a>
+<a href="cplusplus17.html#l300"><h3>17.2.4: Template class member functions</h3> </a>
+<a href="cplusplus17.html#l301"><h3>17.2.5: Template classes and friend declarations</h3> </a>
+<a href="cplusplus17.html#l302"><strong>17.2.5.1: Nontemplate friends</strong></p><p> </a>
+<a href="cplusplus17.html#l303"><strong>17.2.5.2: Bound friends</strong></p><p> </a>
+<a href="cplusplus17.html#l304"><strong>17.2.5.3: Unbound friends</strong></p><p> </a>
+<a href="cplusplus17.html#l305"><h3>17.2.6: Template classes and static data</h3> </a>
+<a href="cplusplus17.html#l306"><h3>17.2.7: Derived Template Classes</h3> </a>
+<a href="cplusplus17.html#l307"><h3>17.2.8: Nesting and template classes</h3> </a>
+<a href="cplusplus17.html#l308"><h3>17.2.9: Template members</h3> </a>
+<a href="cplusplus17.html#l309"><h3>17.2.10: Template class specializations</h3> </a>
+<a href="cplusplus17.html#l310"><h3>17.2.11: Template class partial specializations</h3> </a>
+<a href="cplusplus17.html#l311"><h3>17.2.12: Name resolution within template classes</h3> </a>
+<a href="cplusplus17.html#l312"><h2>17.3: An example: the implementation of the bvector template</h2> </a>
+<a href="cplusplus17.html#l313"><h3>17.3.1: The reverse_iter template class</h3> </a>
+<a href="cplusplus17.html#l314"><h3>17.3.2: The final implementation</h3> </a>
+<a href="cplusplus18.html#l315"><h1>Chapter 18: Concrete examples of C++</h1> </a>
+<a href="cplusplus18.html#l316"><h2>18.1: Storing objects: Storable and Storage</h2> </a>
+<a href="cplusplus18.html#l317"><h3>18.1.1: The global setup</h3> </a>
+<a href="cplusplus18.html#l318"><strong>18.1.1.1: Interface functions of the class Storage</strong></p><p> </a>
+<a href="cplusplus18.html#l319"><strong>18.1.1.2: To copy or not to copy?</strong></p><p> </a>
+<a href="cplusplus18.html#l320"><strong>18.1.1.3: Who makes the copy?</strong></p><p> </a>
+<a href="cplusplus18.html#l321"><h3>18.1.2: The class Storable</h3> </a>
+<a href="cplusplus18.html#l322"><strong>18.1.2.1: Converting an existing class to a Storable</strong></p><p> </a>
+<a href="cplusplus18.html#l323"><h3>18.1.3: The class Storage</h3> </a>
+<a href="cplusplus18.html#l324"><h2>18.2: A binary tree</h2> </a>
+<a href="cplusplus18.html#l325"><h3>18.2.1: The Node class</h3> </a>
+<a href="cplusplus18.html#l326"><h3>18.2.2: The Tree class</h3> </a>
+<a href="cplusplus18.html#l327"><strong>18.2.2.1: Constructing a tree</strong></p><p> </a>
+<a href="cplusplus18.html#l328"><strong>18.2.2.2: The `standard' functions</strong></p><p> </a>
+<a href="cplusplus18.html#l329"><strong>18.2.2.3: Adding an object to the tree</strong></p><p> </a>
+<a href="cplusplus18.html#l330"><strong>18.2.2.4: Scanning the tree</strong></p><p> </a>
+<a href="cplusplus18.html#l331"><strong>18.2.2.5: The primitive operations copy() and destroy()</strong></p><p> </a>
+<a href="cplusplus18.html#l332"><h3>18.2.3: Using Tree and Node</h3> </a>
+<a href="cplusplus18.html#l333"><h2>18.3: Classes to process program options</h2> </a>
+<a href="cplusplus18.html#l334"><h3>18.3.1: Functionality of the class Configuration</h3> </a>
+<a href="cplusplus18.html#l335"><strong>18.3.1.1: The interface of the class Configuration</strong></p><p> </a>
+<a href="cplusplus18.html#l336"><strong>18.3.1.2: An example of a program using the class Configuration</strong></p><p> </a>
+<a href="cplusplus18.html#l337"><h3>18.3.2: Implementation of the class Configuration</h3> </a>
+<a href="cplusplus18.html#l338"><strong>18.3.2.1: The constructor</strong></p><p> </a>
+<a href="cplusplus18.html#l339"><strong>18.3.2.2: loadResourceFile()</strong></p><p> </a>
+<a href="cplusplus18.html#l340"><strong>18.3.2.3: loadCommandLineOptions()</strong></p><p> </a>
+<a href="cplusplus18.html#l341"><h3>18.3.3: The class Option</h3> </a>
+<a href="cplusplus18.html#l342"><strong>18.3.3.1: The interface of the class Option</strong></p><p> </a>
+<a href="cplusplus18.html#l343"><strong>18.3.3.2: The static member nextOptionDefinition</strong></p><p> </a>
+<a href="cplusplus18.html#l344"><h3>18.3.4: Derived from Option: The class TextOption</h3> </a>
+<a href="cplusplus18.html#l345"><strong>18.3.4.1: The interface of the class TextOption</strong></p><p> </a>
+<a href="cplusplus18.html#l346"><strong>18.3.4.2: The implementation of the assign() function</strong></p><p> </a>
+<a href="cplusplus18.html#l347"><h3>18.3.5: The class Object</h3> </a>
+<a href="cplusplus18.html#l348"><h3>18.3.6: The class Hashtable</h3> </a>
+<a href="cplusplus18.html#l349"><strong>18.3.6.1: The Hashtable constructor</strong></p><p> </a>
+<a href="cplusplus18.html#l350"><strong>18.3.6.2: The function mayInsert()</strong></p><p> </a>
+<a href="cplusplus18.html#l351"><strong>18.3.6.3: The function expanded()</strong></p><p> </a>
+<a href="cplusplus18.html#l352"><h3>18.3.7: Auxiliary classes</h3> </a>
+<a href="cplusplus18.html#l353"><strong>18.3.7.1: The class Mem</strong></p><p> </a>
+<a href="cplusplus18.html#l354"><strong>18.3.7.2: The class String</strong></p><p> </a>
+<a href="cplusplus18.html#l355"><strong>18.3.7.3: The class StringTokenizer</strong></p><p> </a>
+<a href="cplusplus18.html#l356"><strong>18.3.7.4: The class Ustream</strong></p><p> </a>
+<a href="cplusplus18.html#l357"><strong>18.3.7.5: The class Util</strong></p><p> </a>
+<a href="cplusplus18.html#l358"><h2>18.4: Using Bison and Flex</h2> </a>
+<a href="cplusplus18.html#l359"><h3>18.4.1: Using Flex++ to create a scanner</h3> </a>
+<a href="cplusplus18.html#l360"><strong>18.4.1.1: The flex++ specification file</strong></p><p> </a>
+<a href="cplusplus18.html#l361"><strong>18.4.1.2: The derived class: Scanner</strong></p><p> </a>
+<a href="cplusplus18.html#l362"><strong>18.4.1.3: The main() function</strong></p><p> </a>
+<a href="cplusplus18.html#l363"><strong>18.4.1.4: Building the scanner-program</strong></p><p> </a>
+<a href="cplusplus18.html#l364"><h3>18.4.2: Using both bison++ and flex++</h3> </a>
+<a href="cplusplus18.html#l365"><strong>18.4.2.1: The bison++ specification file</strong></p><p> </a>
+<a href="cplusplus18.html#l366"><strong>18.4.2.2: The bison++ token section</strong></p><p> </a>
+<a href="cplusplus18.html#l367"><strong>18.4.2.3: The bison++ grammar rules</strong></p><p> </a>
+<a href="cplusplus18.html#l368"><strong>18.4.2.4: The flex++ specification file</strong></p><p> </a>
+<a href="cplusplus18.html#l369"><strong>18.4.2.5: The generation of the code</strong></p><p> </a>
+ 
+<p></p><p><hr><p></p><p>
+</p><p>
+</p><p>
+
+
+</body>
+</html>

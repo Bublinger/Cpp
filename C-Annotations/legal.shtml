@@ -1,0 +1,29 @@
+<html>
+<title>Legal considerations for the C++ Annotations Guide</title>
+
+<body bgcolor=white>
+
+<p><hr><p>
+
+<h1>Legal considerations for the C++ Annotations Guide</h1>
+
+<p>You are of course encouraged to read the C++ Annotations guide and, if you
+like it, to share the address of the WWW document with others. You are also
+encouraged to include links to the C++ guide in other WWW documents.
+
+<p>You are however not allowed to download the guide in order to alter it or
+publish it, without my prior consent. Usually I agree in downloading the
+information for educational purposes. However, in all cases we, the author
+(Frank B. Brokken), reserves full copyright.
+
+<p>"No part of this document may be changed or published without prior consent
+of the author". Direct all correspondence concerning suggestions, additions,
+improvements or changes in this document to <a href=mailto:frank@icce.rug.nl>
+Frank B. Brokken.</a>
+
+<p>The document itself starts <a href="index.html">here</a>.
+
+<!--#include file="sigfrank" -->
+
+
+

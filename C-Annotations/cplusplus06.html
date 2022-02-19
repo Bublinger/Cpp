@@ -1,0 +1,1005 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus07.html">Next chapter</a>
+    <li> <a href="cplusplus05.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="MemoryManagement"></a><a name="l83"></a>
+<h1>Chapter 6: Classes and memory allocation</h1>
+<a name="alloc"></a>
+    
+
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="alloc/intro"></a>
+    In contrast to the set of functions which handle memory allocation in <strong>C</strong>
+(i.e., <code>malloc()</code> etc.), the operators <code>new</code> and <code>delete</code> are
+specifically meant to be used with the features that <strong>C++</strong> offers. 
+Important differences between <code>malloc()</code> and <code>new</code> are:
+</p><p><ul>
+    <li > The function <code>malloc()</code> doesn't `know' what the allocated memory
+will be used for. E.g., when memory for <code>int</code>s is allocated, the programmer
+must supply the correct expression using a multiplication by
+<code>sizeof(int)</code>. In contrast, <code>new</code> requires the use of a type; the
+<code>sizeof</code> expression is implicitly handled by the compiler.
+    <li > The only way to initialize memory which is allocated by <code>malloc()</code>
+is to use <code>calloc()</code>, which allocates memory and resets it to a given
+value. In contrast, <code>new</code> can call the constructor of an allocated object
+where initial actions are defined. This constructor may be supplied with
+arguments.
+    <li > All <strong>C</strong>-allocation functions must be inspected for
+<code>NULL</code>-returns. In contrast, the <code>new</code>-operator provides a facility called
+a <em>new_handler</em> (cf. section <a href="cplusplus05.html#NEWHANDLER">5.3.3</a>) which can be used instead of
+the explicit checks for <code>NULL</code>-returns.
+</ul>
+</p><p>The relationship between <code>free()</code> and <code>delete</code> is analogous: <code>delete</code>
+makes sure that when an object is deallocated, a corresponding destructor is
+called.
+</p><p>The automatic calling of constructors and destructors when objects are created
+and destroyed, has a number of consequences which we shall discuss in this
+chapter. Many problems encountered during <strong>C</strong> program development are caused
+by incorrect memory allocation or memory leaks: memory is not allocated, not
+freed, not initialized, boundaries are overwritten, etc..  <strong>C++</strong> does not
+`magically' solve these problems, but it <em>does</em> provide a number of handy
+tools.
+</p><p>Unfortunately, the very frequently used <code>str...()</code> functions, like
+<code>strdup()</code> are all <code>malloc()</code> based, and should therefore preferably 
+not be used anymore in <strong>C++</strong> programs. Instead, a new set of corresponding
+functions, based on the operator <code>new</code>, are preferred. 
+</p><p><a name="STRDUPNEW"></a>
+For the function <code>strdup()</code> a comparable function <code>char *strdupnew(char 
+const *str)</code> could be developed as follows:
+<pre>
+
+    char *strdupnew(char const *str)
+    {
+        return (strcpy(new char [strlen(str) + 1], str));
+    }
+
+</pre>
+
+Similar functions could be developed for comparable <code>malloc()</code>-based
+<code>str...()</code> and other functions.
+</p><p>In this chapter we discuss the following topics:
+</p><p><ul>
+</p><p><li > the assignment operator (and operator overloading in general),
+</p><p><li > the <code>this</code> pointer,
+</p><p><li > the copy constructor.
+</p><p></ul>
+ 
+</p><p><a name="Person"></a><a name="l84"></a>
+<h2>6.1: Classes with pointer data members</h2>
+    <a name="alloc/pointerdata"></a>
+    In this section we shall again use the class <code>Person</code> as example:
+</p><p><pre>
+
+    class Person
+    {
+        public:
+            // constructors and destructor
+            Person();
+            Person(char const *n, char const *a,
+                   char const *p);
+            ~Person();
+
+            // interface functions
+            void setname(char const *n);
+            void setaddress(char const *a);
+            void setphone(char const *p);
+
+            char const *getname(void) const;
+            char const *getaddress(void) const;
+            char const *getphone(void) const;
+
+        private:
+            // data fields
+            char *name;
+            char *address;
+            char *phone;
+    };
+
+</pre>
+
+</p><p>In this class the destructor is necessary to prevent that memory,
+once allocated for the fields <code>name</code>, <code>address</code> and <code>phone</code>, becomes
+unreachable when an object ceases to exist. In the following example a
+<code>Person</code> object is created, after which the data fields are printed. After
+this the <code>main()</code> function stops, which leads to the deallocation of
+memory. The destructor of the class is also shown for illustration purposes.
+</p><p>Note that in this example an object of the class <code>Person</code> is also created
+and destroyed using a pointer variable; using the operators <code>new</code> and
+<code>delete</code>.
+</p><p><pre>
+
+    Person::~Person()
+    {
+        delete name;
+        delete address;
+        delete phone;
+    }
+
+    int main()
+    {
+        Person
+            kk("Karel", "Rietveldlaan",
+                "050 542 6044"),
+            *bill = new Person("Bill Clinton",
+                   "White House",
+                   "09-1-202-142-3045");
+
+        printf("%s, %s, %s\n"
+               "%s, %s, %s\n",
+            kk.getname(), kk.getaddress(), kk.getphone(),
+            bill-&gt;getname(), bill-&gt;getaddress(), bill-&gt;getphone());
+
+        delete bill;
+
+        return (0);
+    }
+
+</pre>
+
+</p><p>The memory occupied by the object <code>kk</code> is released automatically
+when <code>main()</code> terminates: the <strong>C++</strong> compiler makes sure that the
+destructor is called. Note, however, that the object pointed to by <code>bill</code> is
+handled differently. The variable <code>bill</code> is a pointer; and a pointer
+variable is, even in <strong>C++</strong>, in itself no <code>Person</code>. Therefore, before
+<code>main()</code> terminates, the memory occupied by the object pointed to by
+<code>bill</code> must be <em>explicitly</em> released; hence the statement <code>delete</code>
+<code>bill</code>. The operator <code>delete</code> will make sure that the destructor is
+called, thereby releasing the three strings of the object.
+</p><p>
+</p><p><a name="l85"></a>
+<h2>6.2: The assignment operator</h2>
+    <a name="alloc/assignment"></a>
+    Variables which are <code>struct</code>s or <code>classes</code> can be directly assigned in
+<strong>C++</strong> in the same way that <code>struct</code>s can be assigned in <strong>C</strong>. The
+default action of such an assignment is a straight bytewise copy from one
+compound variable to another.
+</p><p>Let us now consider the consequences of this default action in a program
+statement such as the following:
+</p><p><pre>
+
+    void printperson(Person const &amp;p)
+    {
+        Person
+            tmp;
+
+        tmp = p;
+        printf("Name:     %s\n"
+                "Address:  %s\n"
+                "Phone:    %s\n",
+            tmp.getname(), tmp.getaddress(), tmp.getphone());
+    }
+
+</pre>
+
+</p><p>We shall follow the execution of this function step by step.
+</p><p><ul>
+</p><p><li > The function <code>printperson()</code> expects a reference to a
+    <code>Person</code> as its parameter <code>p</code>. So far, nothing extraordinary is
+    happening.
+</p><p><li > The function defines a local object <code>tmp</code>. This means that the
+    default constructor of <code>Person</code> is called, which -if defined properly-
+    resets the pointer fields <code>name</code>, <code>address</code> and <code>phone</code> of the
+    <code>tmp</code> object to zero.
+</p><p><li > Next, the object referenced by <code>p</code> is copied to <code>tmp</code>. By
+    default this means that <code>sizeof(Person)</code> bytes from <code>p</code> are copied
+    to <code>tmp</code>.
+</p><p>Now a potentially dangerous situation has arisen. Note that the actual
+    values in <code>p</code> are <em>pointers</em>, pointing to allocated memory.
+    Following the assignment this memory is addressed by two objects: <code>p</code>
+    <em>and</em> <code>tmp</code>.
+</p><p><li > The potentially dangerous situation develops into an acutely
+    dangerous situation when the function <code>printperson()</code> terminates:
+    the object <code>tmp</code> is destroyed. The destructor of the class <code>Person</code>
+    releases the memory pointed to by the fields <code>name</code>, <code>address</code> and
+    <code>phone</code>: unfortunately, this memory is also in use by <code>p</code>....
+</p><p>The incorrect assignment is illustrated in figure <a href="cplusplus06.html#badassign">3</a>.
+    <a name="badassign"></a></p><p><center><img src="alloc/badassign.gif" align="bottom" alt="figure 3 is shown here."><br> 
+figure 3: Private data and public interface functions of the class Person,
+    using bytewise assignment 
+</center></p><p>
+    
+</p><p></ul>
+</p><p>Having executed <code>printperson()</code>, the object which was
+referenced by <code>p</code> now contain pointers to deallocated memory. 
+</p><p>This action is undoubtedly not a desired
+effect of a function like the above. The deallocated memory will likely become
+occupied during subsequent allocations: the pointer members of <code>p</code> have
+effectively become <em>wild pointers</em>, as they don't point to allocated memory
+anymore.
+</p><p>In general it can be concluded that <em>every class containing pointer 
+data members is a potential candidate for trouble</em>. It is of course possible
+to prevent such troubles, as will be discussed in the next section.
+
+</p><p><a name="l86"></a>
+<h3>6.2.1: Overloading the assignment operator</h3>
+        <a name="alloc/overload"></a>
+    
+Obviously, the right way to assign one <code>Person</code> object to another, is
+<strong>not</strong> to copy the contents of the object bytewise. A better way is to
+make an equivalent object; one with its own allocated  memory, but which
+contains the same strings.
+</p><p>The `right' way to duplicate a <code>Person</code> object is illustrated in 
+    figure <a href="cplusplus06.html#rightass">4</a>.
+    <a name="rightass"></a></p><p><center><img src="alloc/rightass.gif" align="bottom" alt="figure 4 is shown here."><br> 
+figure 4: Private data and public interface functions of the class Person,
+     using the `correct' assignment. 
+</center></p><p>
+    
+</p><p>There is a number of solutions for the above wish. One solution consists of
+the definition of a special function to handle assignments of objects of the
+class <code>Person</code>. The purpose of this function would be to create a copy of
+an object, but one with its own <code>name</code>, <code>address</code> and <code>phone</code>
+strings. Such a member function might be:
+</p><p><pre>
+
+    void Person::assign(Person const &amp;other)
+    {
+        // delete our own previously used memory
+        delete name;
+        delete address;
+        delete phone;
+
+        // now copy the other Person's data
+        name = strdupnew(other.name);
+        address = strdupnew(other.address);
+        phone = strdupnew(other.phone);
+    }
+
+</pre>
+
+</p><p>Using this tool we could rewrite the offending function <code>printperson()</code>:
+</p><p><pre>
+
+    void printperson(Person const &amp;p)
+    {
+        Person
+            tmp;
+
+        // make tmp a copy of p, but with its own allocated
+        // strings
+        tmp.assign(p);
+        
+        printf("Name:     %s\n"
+                "Address:  %s\n"
+                "Phone:    %s\n",
+            tmp.getname(), tmp.getaddress(), tmp.getphone());
+
+        // now it doesn't matter that tmp gets destroyed..
+    }
+
+</pre>
+
+</p><p>In itself this solution is valid, although it is a purely symptomatic solution.
+This
+solution requires that the programmer uses a specific member function instead
+of the operator <code>=</code>. The problem, however, remains if this rule is not
+strictly adhered to. Experience learns that <em>errare humanum est</em>: a
+solution which doesn't enforce exceptions is therefore preferable.
+</p><p>The problem of the assignment operator is solved by means of <em>operator
+overloading</em>: the syntactic possibility <strong>C++</strong> offers 
+to redefine the actions of
+an operator in a given context. Operator overloading was mentioned earlier,
+when the operators <code>&lt;&lt;</code> and <code>&gt;&gt;</code> were redefined for the
+usage with streams as <code>cin</code>, <code>cout</code> and <code>cerr</code> (see section 
+<a href="cplusplus03.html#CoutCinCerr">3.1.2</a>).
+</p><p>Overloading the assignment operator is probably the most common form of
+operator overloading. However, a word of warning is appropriate: the fact that
+<strong>C++</strong> allows operator overloading does not mean that this feature should be
+used at all times. A few rules are:
+</p><p><ul>
+</p><p><li > Operator overloading should be used in situations where an operator
+    has a defined action, but when this action is not desired as it has
+    negative side effects. A typical example is the above assignment operator
+    in the context of the class <code>Person</code>.
+</p><p><li > Operator overloading can be used in situations where the usage of
+    the operator is common and when no ambiguity in the meaning of the
+    operator is introduced by redefining it. An example may be the
+    redefinition of the operator <code>+</code> for a class which represents a complex
+    number. The meaning of a <code>+</code> between two complex numbers is quite
+    clear and unambiguous.
+</p><p><li > In all other cases it is preferable to define a member function,
+    instead of redefining an operator.
+</p><p></ul>
+</p><p>Using these rules, operator overloading is minimized which helps keep source
+files readable. An operator simply does what it is designed to do. Therefore,
+in our vision, the operators insertion (<code>&lt;&lt;</code>) and extraction (<code>&gt;&gt;</code>)
+operators in the context of streams are unfortunate: the stream 
+operations do not have anything in common with the bitwise shift operations.
+
+</p><p>
+<a name="l87"></a>
+
+             
+<strong>6.2.1.1: The function 'operator=()'</strong></p><p>
+            <a name="alloc/operator"></a>
+    To achieve operator overloading in the context of a class, the class is simply
+expanded with a <code>public</code> function stating the particular operator. A
+corresponding function, the implementation of the overloaded operator,
+is thereupon defined.
+</p><p>For example, to overload the addition operator <code>+</code>, a function
+<code>operator+()</code> must be defined. The function name consists of two parts:
+the keyword <code>operator</code>, followed by the operator itself.
+</p><p>In our case we define a new function <code>operator=()</code> to redefine the actions
+of the assignment operator. A possible extension to the class <code>Person</code>
+could therefore be:
+</p><p><pre>
+
+    // new declaration of the class
+    class Person
+    {
+        public:
+            ...
+            void operator=(Person const &amp;other);
+            ...
+        private:
+            ...
+    };
+
+    // definition of the function operator=()
+    void Person::operator=(Person const &amp;other)
+    {
+        // deallocate old data
+        delete name;
+        delete address;
+        delete phone;
+
+        // make duplicates of other's data
+        name = strdupnew(other.name);
+        address = strdupnew(other.address);
+        phone = strdupnew(other.phone);
+    }
+
+</pre>
+
+</p><p>The function <code>operator=()</code> presented here is the first version of
+the overloaded assignment operator. 
+We shall present better and less bug-prone versions shortly.
+</p><p>The actions of this member function are similar to those of the previously
+proposed function <code>assign()</code>, but now its <em>name</em> makes sure that this 
+function is
+also activated when the assignment operator <code>=</code> is used. There are actually
+two ways to call this function, as illustrated below:
+</p><p><pre>
+
+    Person
+        pers("Frank", "Oostumerweg 17", "403 2223"),
+        copy;
+        
+    // first possibility
+    copy = pers;
+
+    // second possibility
+    copy.operator=(pers);
+
+</pre>
+
+</p><p>It is obvious that the second possibility, in which <code>operator=()</code> is
+explicitly stated, is not used often. However, the code fragment <em>does</em>
+illustrate the two ways of calling the same function.
+
+</p><p><a name="l88"></a>
+<h2>6.3: The this pointer</h2>
+    <a name="alloc/this"></a>
+    As we have seen, a member function of a given class is always called in the
+context of some object of the class. There is always an implicit `substrate'
+for the function to act on. <strong>C++</strong> defines a keyword, <code>this</code>, to address
+this substrate (Note that `<code>this</code>' is not available in the not yet 
+discussed <code>static</code> member functions.) 
+</p><p>The <code>this</code> keyword is a pointer
+variable, which always contains the address of the object in question. The
+<code>this</code> pointer is implicitly declared in each member function (whether
+<code>public</code> or <code>private</code>). Therefore, it is as if in each member function of
+the class <code>Person</code> would contain the following declaration:
+</p><p><pre>
+
+    extern Person *this;
+
+</pre>
+
+</p><p>A member function like <code>setname()</code>, which sets a <code>name</code> field of a
+<code>Person</code> to a given string, could therefore be implemented in two ways:
+with or without the <code>this</code> pointer:
+</p><p><pre>
+
+    // alternative 1: implicit usage of this
+    void Person::setname(char const *n)
+    {
+        delete name;
+        name = strdupnew(n);
+    }
+
+    // alternative 2: explicit usage of this
+    void Person::setname(char const *n)
+    {
+        delete this-&gt;name;
+        this-&gt;name = strdupnew(n);
+    }
+
+</pre>
+
+</p><p>Explicit usage of the <code>this</code> pointer is not used very frequently. 
+However, there exist a number of situations where the <code>this</code> pointer is 
+really needed.
+
+</p><p><a name="l89"></a>
+<h3>6.3.1: Preventing self-destruction with this</h3>
+        <a name="alloc/prevent"></a>
+    
+As we have seen, the operator <code>=</code> can be redefined for the class
+<code>Person</code> in such a way that two objects of the class can be assigned,
+leading to two copies of the same object.
+</p><p>As long as the two variables are different ones, the previously presented
+version of the function <code>operator=()</code> will behave properly: the memory of
+the assigned object is released, after which it is allocated again to hold new
+strings. However, when an object is assigned to itself (which is called
+auto-assignment), a problem occurs: the allocated strings of the receiving
+object are
+first released, but this also leads to the release  of the strings of the
+right-hand side variable, which we call <em>self-destruction</em>.
+An example of this situation is illustrated below:
+</p><p><pre>
+
+    void fubar(Person const &amp;p)
+    {
+        p = p;          // auto-assignment!
+    }
+
+</pre>
+
+</p><p>In this example it is perfectly clear that something unnecessary, possibly
+even wrong, is happening. But auto-assignment can also occur in more hidden
+forms:
+</p><p><pre>
+
+    Person
+        one,
+        two,
+        *pp;
+
+    pp = &amp;one;
+    ...
+    *pp = two;
+    ...
+    one = *pp;
+
+</pre>
+
+</p><p>The problem of the auto-assignment can be solved using the <code>this</code>
+pointer. In the overloaded assignment operator function we simply test whether
+the address of the right-hand side object is the same as the address of the
+current object: if so, no action needs to be taken. The definition of the
+function <code>operator=()</code> then becomes:
+</p><p><pre>
+
+    void Person::operator=(Person const &amp;other)
+    {
+        // only take action if address of current object
+        // (this) is NOT equal to address of other
+        // object(&amp;other):
+
+        if (this != &amp;other)
+        {
+            delete name;
+            delete address;
+            delete phone;
+
+            name = strdupnew(other.name);
+            address = strdupnew(other.address);
+            phone = strdupnew(other.phone);
+        }
+    }
+
+</pre>
+
+</p><p>This is the second version of the overloaded assignment function. One, yet
+better version remains to be discussed.
+</p><p>As a subtlety, note the usage of the <em>address operator</em> '<code>&amp;</code>' 
+in the statement
+</p><p><pre>
+
+    if (this != &amp;other)
+
+</pre>
+
+</p><p>The variable <code>this</code> is a pointer to the `current' object, while <code>other</code>
+is a reference; which is an `alias' to an actual <code>Person</code> object. The
+address of the other object is therefore <code>&amp;other</code>, while the address of
+the current object is <code>this</code>.
+
+</p><p><a name="l90"></a>
+<h3>6.3.2: Associativity of operators and this</h3>
+        <a name="alloc/associat"></a>
+    According to <strong>C++</strong>'s syntax, the associativity of the assignment
+operator is to the right-hand side. I.e., in statements like:
+</p><p><pre>
+
+    a = b = c;
+
+</pre>
+
+</p><p>the expression <code>b = c</code> is evaluated first, and the result is assigned to
+<code>a</code>.
+</p><p>The implementation of the overloaded assignment operator so far does not
+permit such constructions, as an assignment using the member function returns
+nothing (<code>void</code>). We can therefore conclude that the previous
+implementation does circumvent an allocation problem, but is
+syntactically  not quite right.
+</p><p>The syntactical problem can be illustrated as follows. When we rewrite the
+expression <code>a = b = c</code> to the form which explicitly
+mentions the overloaded assignment member functions, we get:
+</p><p><pre>
+
+    a.operator=(b.operator=(c));
+
+</pre>
+
+</p><p>This variant is syntactically wrong, since the sub-expression 
+<code>b.operator=(c)</code>
+yields <code>void</code>; and the class <code>Person</code> contains no member functions with
+the prototype <code>operator=(void)</code>.
+</p><p>This problem can also be remedied using the <code>this</code> pointer. The
+overloaded assignment function expects as its argument a reference to a
+<code>Person</code> object. It can also <em>return</em> a reference to such an
+object. This reference can then be used as an argument for a nested
+assignment.
+</p><p>It is customary to let the overloaded assignment return a reference to the
+current object (i.e., <code>*this</code>), as a <code>const</code> reference: the receiver 
+is not supposed to alter the <code>*this</code> object.
+</p><p>The (final)
+version of the overloaded assignment operator for the class <code>Person</code> thus
+becomes:
+</p><p><pre>
+
+    // declaration in the class
+    class Person
+    {
+        public:
+            ...
+            Person const &amp;operator=(Person const &amp;other)
+            ...
+    };
+
+    // definition of the function
+    Person const &amp;Person::operator=(Person const &amp;other)
+    {
+        // only take action when no auto-assignment occurs
+        if (this != &amp;other)
+        {
+            // deallocate own data
+            delete address;
+            delete name;
+            delete phone;
+
+            // duplicate other's data
+            address = strdupnew(other.address);
+            name = strdupnew(other.name);
+            phone = strdupnew(other.phone);
+        }
+
+        // return current object, compiler will make sure
+        // that a const reference is returned
+        return (*this);
+    }
+
+</pre>
+
+
+</p><p><a name="l91"></a>
+<h2>6.4: The copy constructor: Initialization vs. Assignment</h2>
+    <a name="alloc/initialisation"></a>
+    In the following sections we shall take a  closer look at another usage of the
+operator <code>=</code>. For this, we shall use a class <code>String</code>. This class is
+meant to handle allocated strings, and its interface is as follows:
+</p><p><pre>
+
+    class String
+    {
+        public:
+            // constructors, destructor
+            String();
+            String(char const *s);
+            ~String();
+
+            // overloaded assignment
+            String const &amp;operator=(String const &amp;other);
+
+            // interface functions
+            void set(char const *data);
+            char const *get(void);
+
+        private:
+            // one data field: ptr to allocated string
+            char *str;
+    };
+
+</pre>
+
+</p><p>Concerning this interface we remark the following:
+</p><p><ul>
+</p><p><li > The class contains a pointer <code>char *str</code>, possibly pointing to 
+    allocated memory. Consequently, the class needs a constructor and a
+    destructor.
+</p><p>A typical action of the constructor would be to set the <code>str</code>
+    pointer to 0. A typical action of the destructor would be to release the
+    allocated memory.
+</p><p><li > For the same reason the class has an overloaded assignment
+    operator. The code of this function would look like:
+</p><p><pre>
+
+        String const &amp;String::operator=(String const &amp;other)
+        {
+            if (this != &amp;other)
+            {
+                delete str;
+                str = strdupnew(other.str);
+            }
+            return (*this);
+        }
+    
+</pre>
+
+</p><p><li > The class has, besides a default constructor, a constructor which
+    expects one string argument. Typically this argument would be used to set
+    the string to a given value, as in:
+</p><p><pre>
+
+        String
+            a("Hello World!\n");
+    
+</pre>
+
+</p><p><li > The only interface functions are to set the string part of the
+    object and to retrieve it.
+</p><p></ul>
+</p><p>Now let's consider the following code fragment. The statement references are
+discussed following the example:
+</p><p><pre>
+
+    String
+        a("Hello World\n"),             // see (1)
+        b,                              // see (2)
+        c = a;                          // see (3)
+
+    int main()
+    {
+        b = c;                          // see (4)
+        return (0);
+    }
+
+</pre>
+
+</p><p><ul>
+</p><p><li > Statement 1: this statement shows an initialization. 
+    The object <code>a</code> is
+    initialized with a string ``Hello World''. This construction of the object
+    <code>a</code> therefore uses the constructor which expects one string argument.
+</p><p>It should be noted here that this form is identical to
+    <pre>
+    
+        String    
+            a = "Hello World\n";    
+    
+</pre>
+    
+    Even though this piece of code uses the operator <code>=</code>, this is no
+    assignment: rather, it is an <em>initialization</em>, and hence, it's
+    done at <em>construction time</em> by a constructor of the class <code>String</code>.
+</p><p><li > Statement 2: here a second <code>String</code> object is created. Again a
+    constructor is called. As no special arguments are present, 
+    the <em>default constructor</em> is used.
+</p><p><li > Statement 3: again a new object <code>c</code> is created. A constructor
+    is therefore called once more. 
+    The new object is also initialized. This time with a copy of the data of
+    object <code>a</code>.
+</p><p>This form of initializations has not yet been discussed. As we can
+    rewrite this statement in the form
+    <pre>
+    
+        String    
+            c(a);    
+    
+</pre>
+    
+    it suggests that a constructor is called, with as
+    argument a (reference to a) <code>String</code> object. Such constructors are
+    quite common in <strong>C++</strong> and are called <em>copy constructors</em>. More
+    properties of these constructors are discussed below.
+</p><p><li > Statement 4: here one object is assigned to another. No object is
+    <em>created</em> in this statement. Hence, this is just an assignment, using
+    the overloaded assignment operator.
+</p><p></ul>
+</p><p>The simple rule emanating from these examples is that 
+<em>whenever an object is created, a constructor is needed</em>. 
+All constructors have the following characteristics:
+</p><p><ul>
+    <li > Constructors have no return values.
+</p><p><li > Constructors are defined in functions having the same names as the
+    class to which they belong.
+</p><p><li > The argument list of constructors can be deduced from the code.
+    The argument is either present between parentheses or following a <code>=</code>.
+</p><p></ul>
+</p><p>Therefore, we conclude that, given the above statement (3), the class
+<code>String</code> must be rewritten to define a <strong>copy constructor</strong>:
+</p><p><pre>
+
+    // class definition
+    class String
+    {
+        public:
+            ...
+            String(String const &amp;other);
+            ...
+    };
+
+    // constructor definition
+    String::String(String const &amp;other)
+    {
+        str = strdupnew(other.str);
+    }
+
+</pre>
+
+</p><p>The actions of copy constructors are comparable to those of the overloaded
+assignment operators: an object is <em>duplicated</em>, so that it
+contains its own allocated data. The copy constructor function, however, is
+simpler in the following respect:
+</p><p><ul>
+</p><p><li > A copy constructor doesn't need to deallocate previously allocated
+    memory: since the object in question has just been created, it cannot
+    already have its own allocated data.
+</p><p><li > A copy constructor never needs to check whether auto-duplication
+    occurs. No variable can be initialized with itself.
+</p><p></ul>
+</p><p>Besides the above mentioned quite obvious usage of the copy constructor, the
+copy
+constructor has other important tasks. All of these tasks are related to the
+fact that the copy constructor is always called when an object is created and
+initialized with another object of its class.
+The copy constructor is called even when this new object is a hidden 
+or temporary variable.
+</p><p><ul>
+</p><p><li > When a function takes an object as argument, instead of, e.g., a
+    pointer or a reference, <strong>C++</strong> calls the copy constructor to pass a copy
+    of an object as the argument. This argument, which usually is passed via
+    the stack, is therefore a new object. It is 
+    created and initialized with the data of the passed argument.
+</p><p>This is illustrated in the following code fragment:
+    <pre>
+
+        void func(String s)         // no pointer, no reference
+        {                           // but the String itself
+            puts(s.get());
+        }
+
+        int main()
+        {
+            String
+                hi("hello world");
+
+            func(hi);
+            return (0);
+        }
+    
+</pre>
+
+    In this code fragment <code>hi</code> itself is not passed as an argument, but 
+    instead a 
+    temporary(stack) variable is created using the copy constructor. This
+    temporary variable is known within <code>func()</code> as <code>s</code>. Note that if
+    <code>func()</code> would have been defined using a reference argument, 
+    extra stack usage and a
+    call to the copy constructor would have been avoided.
+</p><p><li > The copy constructor is also implicitly called when a function
+    returns an object.
+</p><p>This situation occurs when, e.g., a function returns keyboard input in a
+    <code>String</code> format:
+    <pre>
+
+        String getline()
+        {
+            char
+                buf [100];          // buffer for kbd input
+
+            gets(buf);              // read buffer
+
+            String
+                ret = buf;          // convert to String
+
+            return(ret);            // and return it
+        }
+    
+</pre>
+
+    A hidden <code>String</code> object is here initialized with the return value
+    <code>ret</code> (using the copy constructor) and is returned by the function. The
+    local variable <code>ret</code> itself ceases to exist when <code>getline()</code>
+    terminates.
+</p><p></ul>
+</p><p>To demonstrate that copy constructors are not called in all situations,
+consider the following.  We could rewrite the above function <code>getline()</code> to
+the following form:
+    <pre>
+
+    String getline()
+    {
+        char
+            buf [100];          // buffer for kbd input
+
+        gets(buf);              // read buffer
+        return (buf);           // and return it
+    } 
+    
+</pre>
+ 
+    This code fragment is quite valid, even though the return value
+<code>char *</code> doesn't match the prototype <code>String</code>. In this situation, <strong>C++</strong>
+will try to convert the <code>char *</code> to a <code>String</code>. It can do so given a
+constructor expecting a <code>char *</code> argument.  This means that the copy
+constructor is <em>not</em> used in this version of <code>getline()</code>. Instead, the
+constructor expecting a <code>char *</code> argument is used.
+</p><p>Contrary to the situation we encountered with the default constructor, the
+default copy constructor remains available once a constructor (<em>any
+constructor</em>) is defined explicitly. The copy constructor can be redefined,
+but it will not disappear once another constructor is defined.
+
+</p><p>
+    <a name="CopyDestroy"></a><a name="l92"></a>
+<h3>6.4.1: Similarities between the copy constructor and operator=()</h3>
+        <a name="alloc/copyopis"></a>
+    The similarities between on one hand the copy constructor and on the other
+hand the overloaded assignment operator are reinvestigated in this section.
+We present here two primitive functions which often occur in our code, and
+which we think are quite useful. Note the following features of copy 
+constructors, overloaded assignment operators, and destructors:
+</p><p><ul>
+</p><p><li > The <em>duplication of (private) data</em> occurs (1) in
+       the copy constructor and (2) in the overloaded assignment function.
+</p><p><li > The <em>deallocation of used memory</em> occurs (1) in the 
+    overloaded assignment function and (2) in the destructor.
+</p><p></ul>
+</p><p>The two above actions (duplication and deallocation) can be coded in two
+private functions, say <code>copy()</code> and <code>destroy()</code>, which are used in the
+overloaded assignment operator, the copy constructor, and the destructor. When
+we apply this method to the class <code>Person</code>, we can rewrite the code as
+follows.
+</p><p>First, the class definition is expanded with two <code>private</code> functions
+<code>copy()</code> and <code>destroy()</code>. The purpose of these functions is to
+copy the data of another object or to deallocate the
+memory of the current object <em>unconditionally</em>. 
+Hence these functions implement `primitive' functionality:
+<pre>
+
+    // class definition, only relevant functions are shown here
+    class Person
+    {
+        public:
+            // constructors, destructor
+            Person(Person const &amp;other);
+            ~Person();
+
+            // overloaded assignment
+            Person const &amp;operator=(Person const &amp;other);
+        private:
+            // data fields
+            char 
+                *name, 
+                *address, 
+                *phone;
+
+            // the two primitives
+            void copy(Person const &amp;other);
+            void destroy(void);
+    };
+
+</pre>
+
+</p><p>Next, we present the implementations of the functions <code>copy()</code> and
+<code>destroy()</code>:
+</p><p><pre>
+
+    // copy(): unconditionally copy other object's data
+    void Person::copy(Person const &amp;other)
+    {
+        name = strdupnew(other.name);
+        address = strdupnew(other.address);
+        phone = strdupnew(other.phone);
+    }
+
+    // destroy(): unconditionally deallocate data
+    void Person::destroy ()
+    {
+        delete name;
+        delete address;
+        delete phone;
+    }
+
+</pre>
+
+</p><p>Finally the three <code>public</code> functions in which other object's memory is
+copied or in which memory is deallocated are rewritten:
+</p><p><pre>
+
+    // copy constructor
+    Person::Person (Person const &amp;other)
+    {
+        // unconditionally copy other's data
+        copy(other);
+    }
+
+    // destructor
+    Person::~Person()
+    {
+        // unconditionally deallocate
+        destroy();
+    }
+
+    // overloaded assignment
+    Person const &amp;Person::operator=(Person const &amp;other)
+    {
+        // only take action if no auto-assignment
+        if (this != &amp;other)
+        {
+            destroy();
+            copy(other);
+        }
+        // return (reference to) current object for
+        // chain-assignments
+        return (*this);
+    }
+
+</pre>
+
+</p><p>What we like about this approach is that the destructor, copy constructor and
+overloaded assignment functions are completely standard: they are independent
+of a particular class, and <em>their implementations 
+can therefore be used in every class</em>. 
+Any class dependencies are reduced to the implementations of the private 
+member functions <code>copy()</code> and <code>destroy()</code>.
+</p><p>
+</p><p><a name="l93"></a>
+<h2>6.5: Conclusion</h2>
+    <a name="alloc/conclusion"></a>
+    Two important extensions to classes have been discussed in this chapter: the
+overloaded assignment operator and the copy constructor. As we have seen,
+classes with pointer data which address allocated memory are potential sources
+of semantic errors. The two introduced extensions represent 
+the standard ways to prevent unintentional loss of allocated data.
+</p><p>The conclusion is therefore: as soon as a class is defined in which pointer
+data-members are used, a destructor, an overloaded assignment function and a
+copy constructor should be implemented.
+</p><p>
+</p><p>
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus07.html">Next chapter</a>
+    <li> <a href="cplusplus05.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

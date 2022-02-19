@@ -1,0 +1,59 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: Ex09a - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP7340.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR"Debug/" /Fp"Debug/Ex09a.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\vcpp32\ex09a\Dialog1.cpp"
+"C:\vcpp32\ex09a\Ex09a.cpp"
+"C:\vcpp32\ex09a\Ex09aDoc.cpp"
+"C:\vcpp32\ex09a\Ex09aView.cpp"
+"C:\vcpp32\ex09a\MainFrm.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP7340.TMP" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP7341.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR"Debug/" /Fp"Debug/Ex09a.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\vcpp32\ex09a\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP7341.TMP" 
+<h3>Ausgabefenster</h3>
+Kompilierung läuft...
+StdAfx.cpp
+Kompilierung läuft...
+Dialog1.cpp
+Ex09a.cpp
+Ex09aDoc.cpp
+Ex09aView.cpp
+MainFrm.cpp
+Generieren von Code...
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP80C1.TMP" mit Inhalten
+[
+/nologo /subsystem:windows /incremental:yes /pdb:"Debug/Ex09a.pdb" /debug /machine:I386 /out:"Debug/Ex09a.exe" /pdbtype:sept 
+.\Debug\Dialog1.obj
+.\Debug\Ex09a.obj
+.\Debug\Ex09aDoc.obj
+.\Debug\Ex09aView.obj
+.\Debug\MainFrm.obj
+.\Debug\StdAfx.obj
+.\Debug\Ex09a.res
+]
+Erstellen der Befehlzeile "link.exe @C:\WINDOWS\TEMP\RSP80C1.TMP"
+<h3>Ausgabefenster</h3>
+Linker-Vorgang läuft...
+Erstellen der Befehlzeile "bscmake.exe /nologo /o"Debug/Ex09a.bsc"  .\Debug\StdAfx.sbr .\Debug\Dialog1.sbr .\Debug\Ex09a.sbr .\Debug\Ex09aDoc.sbr .\Debug\Ex09aView.sbr .\Debug\MainFrm.sbr"
+Browse-Informationsdatei wird erstellt...
+<h3>Ausgabefenster</h3>
+
+
+
+<h3>Ergebnisse</h3>
+Ex09a.exe - 0 Fehler, 0 Warnung(en)
+</pre>
+</body>
+</html>

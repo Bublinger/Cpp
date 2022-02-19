@@ -1,0 +1,44 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: ex05c - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Creating command line "rc.exe /l 0x407 /fo"Debug/ex05c.res" /d "_DEBUG" /d "_AFXDLL" "C:\vcpp32\ex05c\ex05c.rc"" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP90C0.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Fp"Debug/ex05c.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"C:\vcpp32\ex05c\ex05c.cpp"
+"C:\vcpp32\ex05c\ex05cDoc.cpp"
+"C:\vcpp32\ex05c\ex05cView.cpp"
+"C:\vcpp32\ex05c\MainFrm.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP90C0.TMP" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP90C1.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Fp"Debug/ex05c.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"C:\vcpp32\ex05c\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP90C1.TMP" 
+Erstellen der Befehlzeile "link.exe /nologo /subsystem:windows /incremental:yes /pdb:"Debug/ex05c.pdb" /debug /machine:I386 /out:"Debug/ex05c.exe" /pdbtype:sept  .\Debug\ex05c.obj .\Debug\ex05cDoc.obj .\Debug\ex05cView.obj .\Debug\MainFrm.obj .\Debug\StdAfx.obj .\Debug\ex05c.res "
+<h3>Ausgabefenster</h3>
+Ressourcen werden kompiliert...
+Kompilierung läuft...
+StdAfx.cpp
+Kompilierung läuft...
+ex05c.cpp
+ex05cDoc.cpp
+ex05cView.cpp
+MainFrm.cpp
+Generieren von Code...
+Linker-Vorgang läuft...
+
+
+
+<h3>Ergebnisse</h3>
+ex05c.exe - 0 Fehler, 0 Warnung(en)
+</pre>
+</body>
+</html>

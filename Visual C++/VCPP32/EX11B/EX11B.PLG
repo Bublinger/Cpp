@@ -1,0 +1,27 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: ex11b - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP3105.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Debug/ex11b.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ   /c 
+"C:\vcpp32\ex11b\ex11bView.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP3105.TMP" 
+Erstellen der Befehlzeile "link.exe /nologo /subsystem:windows /incremental:yes /pdb:"Debug/ex11b.pdb" /debug /machine:I386 /out:"Debug/ex11b.exe" /pdbtype:sept  .\Debug\ex11b.obj .\Debug\StdAfx.obj .\Debug\MainFrm.obj .\Debug\ex11bDoc.obj .\Debug\ex11bView.obj .\Debug\ex11b.res "
+<h3>Ausgabefenster</h3>
+Kompilierung läuft...
+ex11bView.cpp
+Linker-Vorgang läuft...
+
+
+
+<h3>Ergebnisse</h3>
+ex11b.exe - 0 Fehler, 0 Warnung(en)
+</pre>
+</body>
+</html>

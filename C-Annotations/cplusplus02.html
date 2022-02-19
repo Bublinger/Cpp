@@ -1,0 +1,1104 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus03.html">Next chapter</a>
+    <li> <a href="cplusplus01.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="IntroC"></a><a name="l2"></a>
+<h1>Chapter 2: Introduction</h1>
+<a name="intro"></a>
+    
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="intro/intro"></a>
+    This document presents an introduction to programming in <strong>C++</strong>. It is a
+guide for <strong>C/C++</strong> programming courses, that Frank gives yearly at the 
+University of Groningen. As such, this document is not a complete
+<strong>C/C++</strong> handbook, but rather serves as an addition to other
+documentation sources (e.g., the Dutch book <em>De programmeertaal C</em>, 
+Brokken and Kubat, University of Groningen 1996) 
+</p><p>The reader should realize that extensive knowledge of the <strong>C</strong> programming
+language is assumed and required. This document continues where topics of the
+<strong>C</strong> programming language end, such as pointers, memory allocation and
+compound types.
+</p><p>The version number of this document (currently 4.4.2) is updated when the
+contents of the document change. The first number is the major number,
+and will probably not be changed for some time: it indicates a major
+rewriting. The middle number is increased when new information is added to the
+document. The last number only indicates small changes; it is increased when,
+e.g., series of typos are corrected.
+</p><p>This document is published by the Computing Center, University of Groningen,
+the Netherlands. This document was typeset using the <a href="http://www.icce.rug.nl/docs/programs/yodl/yodl.html">yodl</a> formating system.
+</p><p><strong>
+    All rights reserved. No part of this document may be published or
+    changed without prior consent of the author.  Direct all correspondence
+    concerning suggestions, additions, improvements or changes in this
+    document to the author: 
+</p><p><center>Frank B. Brokken <br>
+    Computing Center, University of Groningen <br>Landleven 1,<br>P.O. Box 800,<br>9700 AV Groningen <br>The Netherlands <br>
+    (email: f.b.brokken@rc.rug.nl)
+     </center>
+</strong>
+</p><p>In this chapter a first impression of <strong>C++</strong> is presented. A few extensions
+to <strong>C</strong> are reviewed and a tip of the mysterious veil surrounding object
+oriented programming (OOP) is lifted.
+</p><p><a name="l3"></a>
+<h3>2.0.1: History of the C++ Annotations</h3>
+</p><p>The original version of the guide was originally written by Frank and Karel in
+Dutch and in LaTeX format. After some time, Karel Kubat rewrote the text and
+converted the guide to a more suitable format and (of course) to English in
+september 1994.
+</p><p>The first version of the guide appeared on the net in october 1994. By then it
+was converted to <code>SGML</code>.
+</p><p>In time several chapters were added, and the contents were modified
+thanks to countless readers who sent us their comment, due to which we were
+able to correct some typos and improve unclear parts.
+</p><p>The transition from major version three to major version four was realized by
+Frank: again new chapters were added, and the source-document was converted
+from <code>SGML</code> to
+<a href="http://www.icce.rug.nl/docs/programs/yodl/yodl.html">Yodl</a>.
+</p><p><blockquote>
+The <strong>C++</strong> Annotations are <em>not</em> freely distributable. Be sure to read the
+<a href="legal.shtml">legal notes</a>. 
+</p><p><strong>Reading the annotations beyond this point
+implies that you are aware of the restrictions that we pose and that you agree
+with them.</strong>
+</blockquote>
+</p><p>If you like this document, tell your friends about it. Even better, let us
+know by sending email to <a href="mailto:f.b.brokken@rc.rug.nl">Frank</a>.
+
+</p><p><a name="l4"></a>
+<h2>2.1: What's new in the C++ Annotations</h2>
+    <a name="history"></a>
+    This section is modified when the first and second part of the version numbers
+change. Modifications in versions 1.*.*, 2.*.*, and 3.*.* were not logged.
+</p><p>Major version 4 represents a major rewrite of the previous
+version 3.4.14: The document was rewritten from SGML to 
+<a href="http://www.icce.rug.nl/docs/programs/yodl/yodl.html">Yodl</a>, and many
+new sections were added. All sections got a tune-up. The distribution basis,
+however, hasn't changed: see <a href="cplusplus02.html#IntroC">the introduction</a>.
+</p><p>The upgrade from version 4.1.* to 4.2.* was the result of the inclusion of
+section <a href="cplusplus03.html#BOOL">3.3.1</a> about the <strong>bool</strong> data type in chapter
+<a href="cplusplus03.html#FirstImpression">3</a>. The distinction between differences between <strong>C</strong> and
+<strong>C++</strong> and extensions of the <strong>C</strong> programming languages is (albeit a bit
+fuzzy) reflected in the introdution chapter and the chapter on first
+impressions of <strong>C++</strong>: The <a href="cplusplus02.html#IntroC">introduction chapter</a> 
+covers some differences between <strong>C</strong> and <strong>C++</strong>, whereas the chapter about 
+<a href="cplusplus03.html#FirstImpression">first impressions</a> of <strong>C++</strong> covers some extensions of
+the <strong>C</strong> programming language as found in <strong>C++</strong>.
+</p><p>The decision to upgrade from version 4.2.* to 4.3.* was made after realizing
+that the lexical scanner function <code>yylex()</code> can be defined in the 
+scanner class that is derived from <code>yyFlexLexer</code>. Under this approach
+the <code>yylex()</code> function can access the members of the class derived from
+<code>yyFlexLexer</code> as well as the public and protected members of
+<code>yyFlexLexer</code>. The result of all this is a clean implementation of the rules
+defined in the <code>flex++</code> specification file. See section <a href="cplusplus18.html#Flexpp">18.4.1</a> for
+details. 
+</p><p>The version <code>4.3.1a</code> is a precursor of <code>4.3.2</code>. In <code>4.3.1a</code> most of the
+typos I've received since the last update have been processed. In version
+<code>4.3.2.</code> the following modifications will be incorporated as well:
+<ul>
+    <li > Function-addresses must be obtained using the <code>&amp;</code>-operator
+    <li > Functions called via pointers to member functions must use the
+        <code>(this-&gt;*pointer)(...)</code> construction inside member functions of the
+        class in which the pointer to member functions is defined.
+</ul>
+</p><p>Version <code>4.4.1</code> again contains new material, and reflects the 
+<a href="ftp://research.att.com/dist/c++std/WP/">ANSI/ISO</a> standard (well, I try to
+have it reflect the ANSI/ISO standard). In version 4.4.1. the following
+sections and chapters were added:
+<ul>
+    <li > Releases over 4.4.1 handle typos and suggestions for improvements
+            I've received by <a href="mailto:f.b.brokken@rc.rug.nl">email</a>. 
+    <li > A section (<a href="cplusplus16.html#RTTI">16.6</a> about <em>Run-Time Type Identification</em>,
+            included as of release 4.4.1.
+    <li > A section (<a href="cplusplus16.html#DYNAMICCAST">16.6.1</a> about the <code>dynamic_cast</code> cast operator.
+            included as of release 4.4.1.
+    <li > Minor spellingcorrections were made up to release 4.4.0n.
+    <li > A reference to <code>icmake</code> and the <code>C++</code>-build script was added in 
+release 4.4.0m (see section <a href="cplusplus02.html#COMPILATION">2.2.2</a>).
+    <li > A section (<a href="cplusplus03.html#Namespaces">3.6</a>) about <em>namespaces</em>,
+            included as of release 4.4.0i.
+    <li > A section (<a href="cplusplus07.html#EXPLICIT">7.6</a>) about the <code>explicit</code> keyword,
+            included as of release 4.4.0h.
+    <li > A section about constructing <em>manipulators</em> (<a href="cplusplus12.html#CONSMANIP">12.3.8</a>),
+            included as of release 4.4.0h.
+    <li > A section about overloading the operators <code>++</code> and <code>--</code>
+            (<a href="cplusplus07.html#OVERLOADINCR">7.7</a>),
+            included as of release 4.4.0h.
+    <li > A rewrite of the chapter about Templates (chapter <a href="cplusplus17.html#Templates">17</a>),
+            included as of release 4.4.0h.
+    <li > A section (<a href="cplusplus11.html#AUTOPTR">11.2</a> about <code>auto_ptr</code> objects,
+            included as of release 4.4.0g.
+    <li > A section (<a href="cplusplus05.html#NESTING">5.8</a>) about nested classes.
+            included as of release 4.4.0f.
+    <li > The chapter (<a href="cplusplus12.html#IOStreams">12</a>) about <code>iostreams</code> was modified, and
+now contains more information about using manipulators and flags, as well as
+information about using <code>strstream</code> objects.
+            Included as of release 4.4.0e.
+    <li > A chapter (<a href="cplusplus11.html#STL">11</a> about the <em>Standard Template Library</em> and
+        generic algorithms,
+            included as of release 4.4.0e.
+    <li > The full contents of the <strong>C++</strong> Annotations can be inspected in
+parallel with the annotations themselves when the <code>html</code>-format is used.
+            Included as of release 4.4.0d.
+    <li > The section (<a href="cplusplus05.html#INLINE">5.4</a>) about <code>inline</code> functions was slightly
+modified,
+            included as of release 4.4.0d.
+    <li > A section (<a href="cplusplus07.html#FUNOBJ">7.8</a> about <em>function objects</em>,
+            included as of release 4.4.0d.
+    <li > A chapter (<a href="cplusplus08.html#Containers">8</a> about the abstract container types,
+            included as of release 4.4.0c.
+    <li > A section (<a href="cplusplus02.html#CPPCASTS">2.5.4</a> about the new syntax used with <em>casts</em>,
+            included as of release 4.4.0b.
+    <li > A section about the <code>string</code> type,
+            included as of release 4.4.0b.
+    <li > A section (<a href="cplusplus02.html#COMPILATION">2.2.2</a> about compiling <strong>C++</strong> programs,
+            included as of release 4.4.0a.
+</ul>
+Version <code>4.4.0</code> (and subletters) is a construction version, in which the
+extras mentioned above are only partially available.
+</p><p>In release <code>4.4.1b</code> the pagesize in the LaTeX file was defined
+to be <code>din A4</code>. In countries where other pagesizes are standard the
+conversion the default pagesize might be a better choice. In that case, remove
+the <code>dina4</code> option from <code>cplusplus.tex</code> (or <code>cplusplus.yo</code> if you have
+<code>yodl</code> installed), and reconstruct the annotations from the <em>TeX</em>-file or
+<code>Yodl</code>-files. 
+</p><p>The Annotations mailing lists was stopped at release <code>4.4.1d</code>. From this
+point on only minor modifications were expected, which are not anymore
+generally announced.
+</p><p>At some point, I considered version <code>4.4.1.</code> to be the final version of the
+<strong>C++</strong> annotations. However, a section on special I/O functions (section
+<a href="cplusplus12.html#SPECIALFUN">12.3.5</a>) was added to cover unformated I/O, and the section about the
+<code>string</code> datatype had its layout improved and was, due to its volume, given
+a chapter of its own (chapter <a href="cplusplus04.html#String">4</a>). All this eventually resulted in
+version <code>4.4.2.</code>.
+</p><p>Considering the volume of the annotations, I'm sure there will be
+typos found every now and then. Please do not hesitate to send me an email
+containing any mistakes you find or corrections you would like to suggest.
+Subreleases like <code>4.4.2a</code> etc. contain bugfixes and typographical
+corrections. 
+</p><p>
+</p><p><a name="l5"></a>
+<h2>2.2: The history of C++</h2>
+    <a name="intro/history"></a>
+    The first implementation of <strong>C++</strong> was developed in the eighties at the
+AT&amp;T Bell Labs, where the Unix operating system was created.
+</p><p><strong>C++</strong> was originally a `pre-compiler', similar to the preprocessor of
+<strong>C</strong>, which converted special constructions in its source code to plain
+<strong>C</strong>. This code was then compiled by a normal <strong>C</strong> compiler. The
+`pre-code', which was read by the <strong>C++</strong> pre-compiler, was usually located
+in a file with the extension <code>.cc</code>, <code>.C</code> or <code>.cpp</code>. This file
+would then be converted to a C source file with the extension <code>.c</code>, which
+was compiled and linked.
+</p><p>The nomenclature of <strong>C++</strong> source files remains: the extensions <code>.cc</code> and
+<code>.cpp</code> are usually still used. However, the preliminary work of a <strong>C++</strong>
+pre-compiler is in modern compilers usually included in the actual compilation
+process. Often compilers will determine the type of a source file by the
+extension. This holds true for Borland's and Microsoft's <strong>C++</strong> compilers,
+which assume a <strong>C++</strong> source for an extension <code>.cpp</code>. The GNU compiler
+<code>gcc</code>, which is available on many Unix platforms, assumes for <strong>C++</strong> the
+extension <code>.cc</code>.
+</p><p>The fact that <strong>C++</strong> used to be compiled into <strong>C</strong> code is also visible
+from the fact that <strong>C++</strong> is a superset of <strong>C</strong>: <strong>C++</strong> offers all
+possibilities of <strong>C</strong>, and more. This makes the transition from <strong>C</strong> to
+<strong>C++</strong> quite easy. Programmers who are familiar with <strong>C</strong> may start
+`programming in <strong>C++</strong>' by using source files with an extension <code>.cc</code> or
+<code>.cpp</code> instead of <code>.c</code>, and can then just comfortably slide into all the
+possibilities that <strong>C++</strong> offers. No abrupt change of habits is required.
+
+</p><p>
+    <a name="CppComp"></a><a name="l6"></a>
+<h3>2.2.1: Compiling a C program by a C++ compiler</h3>
+        <a name="intro/cascpp"></a>
+    For the sake of completeness, it must be mentioned here that <strong>C++</strong> is
+`almost' a superset of <strong>C</strong>. There are some small differences which you
+might encounter when you just rename a file to an extension <code>.cc</code> and
+run it through a <strong>C++</strong> compiler:
+</p><p><ul>
+</p><p><li > In <strong>C</strong>, <code>sizeof('c')</code> equals <code>sizeof(int)</code>,
+    <code>'c'</code> being any ASCII character.  The underlying philosophy is
+    probably that <code>char</code>'s, when passed as arguments to functions, are
+    passed as integers anyway. Furthermore, the <strong>C</strong> compiler handles a
+    character constant like <code>'c'</code> as an integer constant. Hence, in
+    <strong>C</strong>, the function calls
+</p><p><pre>
+
+ putchar(10);
+
+</pre>
+
+</p><p>and
+</p><p><pre>
+
+ putchar('\n');
+
+</pre>
+
+</p><p>are synonyms.
+</p><p>In contrast, in <strong>C++</strong>, <code>sizeof('c')</code> is always 1 (but see also section
+<a href="cplusplus03.html#WCHAR">3.3.2</a>), while
+    an <code>int</code> is still an <code>int</code>. As we shall see later (see
+    section <a href="cplusplus02.html#FunctionOverloading">2.5.13</a>), two function calls
+</p><p><pre>
+
+ somefunc(10);
+
+</pre>
+
+</p><p>and
+</p><p><pre>
+
+ somefunc('\n');
+
+</pre>
+ 
+</p><p>are quite separate functions: <strong>C++</strong> discriminates functions by
+    their arguments, which are different in these two calls: one function
+    requires an <code>int</code> while the other one requires a <code>char</code>.
+</p><p><li > <strong>C++</strong> requires very strict prototyping of external
+    functions. E.g., a prototype like
+</p><p><pre>
+
+ extern void func();
+
+</pre>
+
+</p><p>means in <strong>C</strong> that a function <code>func()</code> exists, which returns
+    no value. However, in <strong>C</strong>, the declaration doesn't specify which
+    arguments (if any) the function takes.
+</p><p>In contrast, such a declaration in <strong>C++</strong> means that the
+    function <code>func()</code> takes no arguments at all. 
+</p><p></ul>
+
+</p><p>
+    <a name="COMPILATION"></a><a name="l7"></a>
+<h3>2.2.2: Compiling a C++ program</h3>
+        <a name="intro/compiling"></a>
+    In order to compile a <strong>C++</strong> program, a <strong>C++</strong> compiler is
+needed. Considering the free nature of this document, it won't come as a
+surprise that a <em>free compiler</em> is suggested here. The <a href="http://www.gnu.org">Free Software
+Foundation</a> provides free <strong>C++</strong> compilers which is,
+among other places, available in the <a href="http://www.debian.org">Debian</a>
+distribution of <a href="http:/www.linux.org">Linux</a>. The version that's currenly
+available on my computer is 2.95.2.
+</p><p>
+</p><p>
+<a name="l8"></a>
+
+             
+<strong>2.2.2.1: C++ under MS-Windows</strong></p><p>
+            <a name="intro/mswindows"></a>
+    For MS-Windows <a href="http://www.redhat.com">Cygnus</a> provides the foundation for
+installing the <em>Windows port</em> of the <code>GNU g++</code> compiler. 
+</p><p>Cygnus is now distributed by <a href="http://www.redhat.com">RedHat</a>. Currently
+(october 2000), the cygnus distribution is found at
+<a href="http://sources.redhat.com">http://sources.redhat.com</a>. When linking to
+that URL, click on the <code>cygwin</code> menu entry and then on <code>install now</code>. This
+will download the file <code>setup.exe</code>, which can be run to install
+<code>cygwin</code>. The software to be installed can be downloaded by <code>setup.exe</code>
+from the internet. There are alternatives (e.g., using a CD-ROM), which are
+described on the <code>cygwin</code> page. Installation proceeds interactively. The
+offered defaults are normally what you would want.
+</p><p>
+</p><p>
+<a name="l9"></a>
+
+             
+<strong>2.2.2.2: Compiling a C++ source text</strong></p><p>
+            <a name="intro/compilesources"></a>
+    In general, compiling a <strong>C++</strong> source <code>source.cc</code> is done as follows:
+</p><p><center><code>g++ source.cc</code> </center>
+</p><p>This produces a binary program (<code>a.out</code> or <code>a.exe</code>). If the default name
+is not wanted, the name of the executable can be specified using the <code>-o</code>
+flag:
+</p><p><center><code>g++ -o source source.cc</code> </center>
+</p><p>If only a compilation is required, the compiled module can be generated using
+the <code>-c</code> flag:
+</p><p><center><code>g++ -c source.cc</code> </center>
+</p><p>This produces the file <code>source.o</code>, which can be linked to other modules
+later on.
+</p><p>Using the <code>icmake</code> program (to be downloaded from
+<a href="ftp://ftp.icce.rug.nl/pub/unix">ftp://ftp.icce.rug.nl/icmake-X.YY.tar.gz</a>)
+a maintenance script can be used to assist in the construction and
+maintenance of a <strong>C++</strong> program. This script has been tested on <strong>Linux</strong>
+platforms for several years now. It is described at 
+<a href="http://www.icce.rug.nl/docs/programs/Cscript.html">http://www.icce.rug.nl/docs/programs/Cscript.html</a>
+
+</p><p><a name="Pretensions"></a><a name="l10"></a>
+<h2>2.3: Advantages and pretensions of C++</h2>
+    <a name="intro/advantage"></a>
+    Often it is said that programming in <strong>C++</strong> leads to `better' programs. Some
+of the claimed advantages of <strong>C++</strong> are:
+</p><p><ul>
+</p><p><li > New programs would be developed in less time because old code can
+    be reused.
+</p><p><li > Creating and using new data types would be easier than in <strong>C</strong>.
+</p><p><li > The memory management under <strong>C++</strong> would be easier and more
+    transparent.
+</p><p><li > Programs would be less bug-prone, as <strong>C++</strong> uses a stricter
+    syntax and type checking.
+</p><p><li > `Data hiding', the usage of data by one program part while other
+    program parts cannot access the data, would be easier to implement with
+    <strong>C++</strong>.
+</p><p></ul>
+</p><p>Which of these allegations are true? In our opinion, <strong>C++</strong> is a little
+overrated; in general this holds true for the entire object-oriented
+programming (OOP). The enthusiasm around <strong>C++</strong> resembles somewhat the
+former allegations about Artificial-Intelligence (AI) languages like Lisp and
+Prolog: these languages were supposed to solve the most difficult AI-problems
+`almost without effort'. Obviously, too promising stories about any
+programming language must be overdone; in the end, each problem can be coded
+in any programming language (even BASIC or assembly language). 
+The advantages or
+disadvantages of a given programming language aren't in `what you can do with
+them', but rather in `which tools the language offers to make the job easier'.
+</p><p>Concerning the above allegations of <strong>C++</strong>, we think that the following can
+be concluded.  The development of new programs while existing code is reused
+can also be realized in <strong>C</strong> by, e.g., using function libraries: thus, handy
+functions can be collected in a library and need not be re-invented with each
+new program. Still, <strong>C++</strong> offers its specific syntax possibilities for
+code reuse, apart from function libraries (see chapter <a href="cplusplus15.html#Inheritance">15</a>).
+</p><p>Creating and using new data types is also very well possible in <strong>C</strong>; e.g.,
+by using <code>struct</code>s, <code>typedef</code>s etc.. From these types other types can be
+derived, thus leading to <code>struct</code>s containing <code>struct</code>s and so on.
+</p><p>Memory management is in principle in <strong>C++</strong> as easy or as difficult as in
+<strong>C</strong>. Especially when dedicated <strong>C</strong> functions such as <code>xmalloc()</code> and
+<code>xrealloc()</code> are used (these functions are often present in our
+<strong>C</strong>-programs, they allocate or abort the program when the memory pool is
+exhausted). In short, memory management in <strong>C</strong> or in
+<strong>C++</strong> can be coded `elegantly', `ugly' or anything in between --
+this depends on the developer rather than on the language.
+</p><p>Concerning `bug proneness' we can say that <strong>C++</strong> indeed uses stricter type
+checking than <strong>C</strong>. However, most modern <strong>C</strong> compilers implement
+`warning levels'; it is then the programmer's choice to disregard or heed a
+generated warning. In <strong>C++</strong> many of such warnings become fatal errors (the
+compilation stops).
+</p><p>As far as `data hiding' is concerned, <strong>C</strong> does offer some tools.  E.g.,
+where possible, local or <code>static</code> variables can be used and special data
+types such as <code>struct</code>s can be manipulated by dedicated functions.  Using
+such techniques, data hiding can be realized even in <strong>C</strong>; though it needs
+to be said that <strong>C++</strong> offers special syntactical constructions.  In
+contrast, programmers who prefer to use a global variable <code>int</code> <code>i</code> for
+each counter variable will quite likely not benefit from the concept of data
+hiding, be it in <strong>C</strong> or <strong>C++</strong>.
+</p><p>Concluding, <strong>C++</strong> in particular and OOP in general are not solutions to all
+programming problems. <strong>C++</strong>, however, <em>does</em> offer some elegant syntactical
+possibilities which are worthwhile investigating. At the same time, the level
+of grammatical complexity of <strong>C++</strong> has increased significantly compared to
+<strong>C</strong>. In time we got used to this increased level of complexity, but the
+transition didn't take place fast or painless. With the annotations we hope to
+help the reader to make the transition from <strong>C</strong> to <strong>C++</strong> by providing,
+indeed, our <em>annotations</em> to what is found in some textbooks on <strong>C++</strong>. We
+hope you like this document and may benefit from it: Good luck!
+</p><p>
+</p><p><a name="OOP"></a><a name="l11"></a>
+<h2>2.4: What is Object-Oriented Programming?</h2>
+    <a name="intro/object"></a>
+    Object-oriented programming propagates a slightly different approach to
+programming problems than the strategy which is usually used in <strong>C</strong>. The
+<strong>C</strong>-way is known as a `procedural approach': a problem is decomposed into
+subproblems and this process is repeated until the subtasks can be coded. Thus
+a conglomerate of functions is created, communicating through arguments and
+variables, global or local (or <code>static</code>).
+</p><p>In contrast, or maybe better: in addition to this, 
+an object-oriented approach identifies the  <strong>keywords</strong>
+in the problem. These keywords are then depicted in a diagram and arrows are
+drawn between these keywords to define an internal hierarchy. The keywords
+will be the objects in the implementation and the hierarchy defines the
+relationship between these objects. The term object is used here to describe a
+limited, well-defined structure, containing all information about some
+entity: data types and functions to manipulate the data.
+</p><p>As an example of an object-oriented approach, an illustration follows:
+</p><p><blockquote><code>
+    The employees and owner of a car dealer and auto garage company are paid
+    as follows. First, mechanics who work in the garage are paid a certain sum
+    each month. Second, the owner of the company receives a fixed amount each
+    month. Third, there are car salesmen who work in the showroom and receive
+    their salary each month plus a bonus per sold car. Finally, the company
+    employs second-hand car purchasers who travel around; these employees
+    receive their monthly salary, a bonus per bought car, and a restitution of
+    their travel expenses.
+</code></blockquote>
+</p><p>When representing the above salary administration, the keywords could be
+mechanics, owner, salesmen and purchasers. The properties of such units are: a
+monthly salary, sometimes a bonus per purchase or sale, and sometimes
+restitution of travel expenses. When analyzing the problem in this manner we
+arrive at the following representation:
+</p><p><ul>
+</p><p><li > The owner and the mechanics can be represented as the same type,
+    receiving a given salary per month. The relevant information for such a
+    type would be the monthly amount. In addition this object could contain
+    data as the name, address and social security number.
+</p><p><li > Car salesmen who work in the showroom can be represented as the
+    same type as above but with extra functionality: the number of
+    transactions (sales) and the bonus per transaction.
+</p><p>In the hierarchy of objects we would define the dependency between the
+    first two objects by letting the car salesmen be `derived' from
+    the owner and mechanics.
+</p><p><li > Finally, there are the second-hand car purchasers. These share the
+    functionality of the salesmen except for the travel expenses. The
+    additional functionality would therefore consist of the expenses made and
+    this type would be derived from the salesmen.
+</p><p></ul>
+</p><p>The hierarchy of the thus identified objects further illustrated 
+       in figure <a href="cplusplus02.html#objects">1</a>.
+<a name="objects"></a></p><p><center><img src="intro/objects.gif" align="bottom" alt="figure 1 is shown here."><br> 
+figure 1: Hierarchy of objects in the salary administration. 
+</center></p><p>
+    
+</p><p>The overall process in the definition of a hierarchy such as the above starts
+with the description of the most simple type. Subsequently more complex types
+are derived, while each derivation adds a little functionality. From these
+derived types, more complex types can be derived <em>ad infinitum</em>, until a
+representation of the entire problem can be made.
+</p><p>In <strong>C++</strong> each of the objects can be represented  in a
+<a href="cplusplus05.html#Classes"><em>class</em></a>, containing the necessary functionality to do useful
+things with the variables (called <em>objects</em>) of these classes. Not all of
+the functionality and not all of the properties of a class is usually
+available to objects of other classes. As we will see, classes tend to
+<em>encapsulate</em> their properties in such a way that they are not immediately
+accessible from the outside world. Instead, dedicated functions are normally
+used to reach or modify the properties of objects. 
+
+</p><p><a name="l12"></a>
+<h2>2.5: Differences between C and C++</h2>
+    <a name="intro/differences"></a>
+    In this section some examples of <strong>C++</strong> code are shown. Some differences
+between <strong>C</strong> and <strong>C++</strong> are highlighted.
+
+</p><p><a name="l13"></a>
+<h3>2.5.1: End-of-line comment</h3>
+        <a name="intro/eoln"></a>
+    According to the ANSI definition, `end of line comment' is implemented in the
+syntax of <strong>C++</strong>. This comment starts with <code>//</code> and ends with the
+end-of-line marker. The standard <strong>C</strong> comment, delimited by <code>/*</code> and
+<code>*/</code> can still be used in <strong>C++</strong>:
+</p><p><pre>
+
+    int main()
+    {
+        // this is end-of-line comment
+        // one comment per line
+
+        /*
+            this is standard-C comment, over more
+            than one line
+        */
+
+        return (0);
+    }
+
+</pre>
+
+</p><p>The end-of-line comment was already implemented as an extension to <strong>C</strong>
+in some <strong>C</strong> compilers, such as the Microsoft <strong>C</strong> Compiler V5.
+
+</p><p><a name="l14"></a>
+<h3>2.5.2: NULL-pointers vs. 0-pointers</h3>
+        <a name="intro/null"></a>
+    In <strong>C++</strong> all zero values are coded as <code>0</code>. In <strong>C</strong>, where pointers are
+concerned, <code>NULL</code> is often used. This difference is purely stylistic, though
+one that is widely adopted. In <strong>C++</strong> there's no need anymore to use
+<code>NULL</code>. Indeed, according to the descriptions of the pointer-returning
+operator <code>new</code> 0 rather than <code>NULL</code> is returned when memory allocation
+fails.
+</p><p>
+</p><p><a name="l15"></a>
+<h3>2.5.3: Strict type checking</h3>                    
+        <a name="intro/type"></a>
+    <strong>C++</strong> uses very strict type checking. A prototype must be known for each
+function which is called, and the call must match the prototype.
+</p><p>The program
+<pre>
+
+    int main()
+    {
+        printf("Hello World\n");
+        return (0);
+    }
+
+</pre>
+
+</p><p>does often compile under <strong>C</strong>, though with a warning that <code>printf()</code> is
+not a known function. Many <strong>C++</strong> compilers will fail to produce code in
+such a situation (When GNU's g++ compiler encounters an unknown
+function, it assumes that an `ordinary' C function is meant. It does complain
+however.). The error is of course the missing <code>#include&lt;stdio.h&gt;</code> directive.
+
+</p><p>
+    <a name="CPPCASTS"></a><a name="l16"></a>
+<h3>2.5.4: A new syntax for casts</h3>
+        <a name="intro/cast"></a>
+    Traditionally, <strong>C</strong> offers the following <em>cast</em> construction:
+                         <center><code>(typename)expression</code> </center>
+in which <code>typename</code> is the name of a valid <em>type</em>, and <code>expression</code> an
+expression. Following that, <strong>C++</strong> initially also supported the <em>function
+call style</em> cast notation:
+                    <center><code>typename(expression)</code> </center>
+But, these casts are now all called <em>old-style casts</em>, and they are
+deprecated. Instead, four <em>new-style casts</em> were introduced:
+<ul>
+    <li > The standard cast to convert one type to another is
+                     <center><code>static_cast&lt;type&gt;(expression)</code> </center>
+    <li > There is a special cast to do away with the <code>const</code>
+type-modification: 
+                     <center><code>const_cast&lt;type&gt;(expression)</code> </center>
+    <li > A third cast is used to change the <em>interpretation</em> of information:
+                   <center><code>reinterpret_cast&lt;type&gt;(expression)</code> </center>
+    <li > And, finally, there is a cast form which is used in combination with
+polymorphism (see chapter <a href="cplusplus16.html#Polymorphism">16</a>): The 
+                    <center><code>dynamic_cast&lt;type&gt;(expression)</code> </center>
+is performed run-time to convert, e.g., a pointer to an object of a certain
+class to a pointer to an object in its so-called <em>class hierarchy</em>. At this
+point in the <em>Annotations</em> it is a bit premature to discuss the
+<code>dynamic_cast</code>, but we will return to this topic in section
+<a href="cplusplus16.html#DYNAMICCAST">16.6.1</a>. 
+</p><p></ul>
+</p><p><a name="l17"></a>
+<h3>2.5.5: The 'static_cast'-operator</h3>
+</p><p>The <code>static_cast&lt;type&gt;(expression)</code> operator is used to convert one type to
+an acceptable other type. E.g., <code>double</code> to <code>int</code>. An example of such a
+cast is, assuming <code>intVar</code> is of type <code>int</code>:
+        <center><code>intVar = static_cast&lt;int&gt;(12.45);</code> </center>
+Another nice example of code in which it is a good idea to use the
+<code>static_cast&lt;&gt;()</code>-operator is in situations where the arithmetic assignment
+operators are used in mixed-type situations. E.g., consider the following
+expression (assume <code>doubleVar</code> is a variable of type <code>double</code>: 
+        <center><code>intVar += doubleVar;</code> </center>
+Here, the evaluated expression actually is:
+     <center><code>intVar = static_cast&lt;int&gt;(static_cast&lt;double&gt;(intVar) + doubleVar);</code> </center>
+    <code>IntVar</code> is first promoted to a <code>double</code>, and is then added as
+<code>double</code> to <code>doubleVar</code>. Next, the sum is cast back to an <code>int</code>.  These
+two conversions are a bit overdone. The same result is obtained by explicitly
+casting the <code>doubleVar</code> to an <code>int</code>, thus obtaining an <code>int</code>-value for
+the right-hand side of the expression:
+        <center><code>intVar += static_cast&lt;int&gt;(doubleVar);</code> </center>
+    <a name="l18"></a>
+<h3>2.5.6: The 'const_cast'-operator</h3>
+    The <code>const_cast&lt;type&gt;(expression)</code> operator is used to do away with the
+<code>const</code>-ness of a (pointer) type. Assume that a function <code>string_op(char
+*s)</code> is available, which performs some operation on its <code>char *s</code>
+parameter. Furthermore, assume that it's known that the function does not
+actually alter the string it receives as its argument. How can we use the
+function with a string like <code>char const hello[] = "Hello world"</code>?
+</p><p>Passing <code>hello</code> to <code>fun()</code> produces the warning 
+    <center><code>passing `const char *' as argument 1 of `fun(char *)' discards const</code> </center>
+        which can be prevented using the call
+                    <center><code>fun(const_cast&lt;char *&gt;(hello));</code> </center>
+    <a name="l19"></a>
+<h3>2.5.7: The 'reinterpret_cast'-operator</h3>
+</p><p>The <code>reinterpret_cast&lt;type&gt;(expression)</code> operator is used to reinterpret
+byte patterns. For example, the individual bytes making up a <code>double</code> value
+can easily be reached using a <code>reinterpret_cast&lt;&gt;()</code>. Assume <code>doubleVar</code>
+is a variable of type <code>double</code>, then the individual bytes can be reached
+using 
+        <center><code>reinterpret_cast&lt;char *&gt;(&amp;doubleVar)</code> </center>
+    This particular example also suggests the danger of the cast: it looks as
+though a standard <code>C</code>-string is produced, but there is not normally a
+trailing 0-byte. It's just a way to reach the individual bytes of the memory
+holding a double value.
+</p><p>More in general: using the cast-operators is a dangerous habit, as it
+suppresses the normal type-checking mechanism of the compiler. It is suggested
+to prevent casts if at all possible. If circumstances arise in which casts
+have to be used, document the reasons for their use well in your code, to make
+double sure that the cast is not the underlying cause for a program to
+misbehave.
+</p><p>
+</p><p><a name="l20"></a>
+<h3>2.5.8: The void argument list</h3>
+        <a name="intro/void"></a>
+    
+A function prototype with an empty argument list, such as
+</p><p><pre>
+
+    extern void func();
+
+</pre>
+
+</p><p>means in <strong>C</strong> that the argument list of the declared function is not
+prototyped: the compiler will not be able to warn  against improper argument
+usage. When declaring a function in <strong>C</strong> which has no arguments, the keyword
+<code>void</code> is used, as in:
+</p><p><pre>
+
+    extern void func(void);
+
+</pre>
+
+</p><p>Because <strong>C++</strong> maintains strict type checking, an empty argument list is
+interpreted as the absence of any parameter. The keyword <code>void</code> can then be
+left out. In <strong>C++</strong> the above two declarations are equivalent.
+</p><p>
+</p><p><a name="l21"></a>
+<h3>2.5.9: The #define __cplusplus</h3>
+        <a name="intro/cplus"></a>
+    Each <strong>C++</strong> compiler which conforms to the ANSI standard defines the symbol
+<code>__cplusplus</code>: it is as if each source file were prefixed with the
+preprocessor directive <code>#define __cplusplus</code>.
+</p><p>We shall see examples of the usage of this symbol in the following sections.
+</p><p>
+</p><p><a name="l22"></a>
+<h3>2.5.10: The usage of standard C functions</h3>
+        <a name="intro/cfunc"></a>
+    Normal <strong>C</strong> functions, e.g., which are compiled and collected in a run-time
+library, can also be used in <strong>C++</strong> programs. Such functions however must be
+declared as <strong>C</strong> functions.
+</p><p>As an example, the following code fragment declares a function <code>xmalloc()</code>
+which is a <strong>C</strong> function:
+</p><p><pre>
+
+    extern "C" void *xmalloc(unsigned size);
+
+</pre>
+
+</p><p>This declaration is analogous to a declaration in <strong>C</strong>, except that the
+prototype is prefixed with <code>extern "C"</code>.
+</p><p>A slightly different way to declare <strong>C</strong> functions is the following:
+</p><p><pre>
+
+    extern "C"
+    {
+        .
+        . (declarations)
+        .
+    }
+
+</pre>
+
+</p><p>It is also possible to place preprocessor directives at the location of the
+declarations. E.g., a <strong>C</strong> header file <code>myheader.h</code> which declares
+<strong>C</strong> functions can be included in a <strong>C++</strong> source file as follows:
+</p><p><pre>
+
+    extern "C"
+    {
+    #   include &lt;myheader.h&gt;
+    }
+
+</pre>
+
+</p><p>The above presented methods can be used without problem, but are not very
+current. A more frequently used method to declare external <strong>C</strong> functions is
+presented below.
+
+</p><p>
+    <a name="CHeaders"></a><a name="l23"></a>
+<h3>2.5.11: Header files for both C and C++</h3>
+        <a name="intro/header"></a>
+    The combination of the predefined symbol <code>__cplusplus</code> and of the
+possibility to define <code>extern "C"</code> functions offers the ability to
+create header files for both <strong>C</strong> and <strong>C++</strong>. Such a header file might,
+e.g., declare a group of functions which are to be used in both <strong>C</strong> and
+<strong>C++</strong> programs.
+</p><p>The setup of such a header file is as follows:
+</p><p><pre>
+
+    #ifdef __cplusplus
+    extern "C"
+    {
+    #endif
+    .
+    . (the declaration of C-functions occurs
+    .  here, e.g.:)
+    extern void *xmalloc(unsigned size);
+    .
+    #ifdef __cplusplus
+    }
+    #endif
+
+</pre>
+
+</p><p>Using this setup, a normal <strong>C</strong> header file is enclosed by <code>extern
+"C" {</code> which occurs at the start of the file and by <code>}</code>, which
+occurs at the end of the file. The <code>#ifdef</code> directives test for the type of
+the compilation: <strong>C</strong> or <strong>C++</strong>. The `standard' header files, such as
+<code>stdio.h</code>, are built in this manner and therefore usable for both <strong>C</strong>
+and <strong>C++</strong>.
+</p><p>An extra addition which is often seen is the following. Usually it is
+desirable to avoid multiple inclusions of the same header file. This can
+easily be achieved by including an <code>#ifndef</code> directive in the header file.
+An example of a file <code>myheader.h</code> would then be:
+</p><p><pre>
+
+    #ifndef _MYHEADER_H_
+    #define _MYHEADER_H_
+    .
+    . (the declarations of the header file follow here,
+    .  with #ifdef _cplusplus etc. directives)
+    .
+    #endif
+
+</pre>
+
+</p><p>When this file is scanned for the first time by the preprocessor, the
+symbol <code>_MYHEADER_H_</code> is not yet defined. The <code>#ifndef</code> condition
+succeeds and all declarations are scanned. In addition, the symbol
+<code>_MYHEADER_H_</code> is defined.
+</p><p>When this file is scanned for a second time during the same compilation,
+the symbol <code>_MYHEADER_H_</code> <strong>is</strong> defined. All information between the
+<code>#ifndef</code> and <code>#endif</code> directives is skipped.
+</p><p>The symbol name <code>_MYHEADER_H_</code> serves in this context only for recognition
+purposes. E.g., the name of the header file can be used for this purpose, in
+capitals, with an underscore character instead of a dot.
+</p><p>Apart from all this, the custom has evolved to give  <strong>C</strong> header files the
+extension <code>.h</code>, and to give <code>C++</code> header files <em>no</em> extension. For
+example, the standard <em>iostreams</em> <code>cin, cout</code> and <code>cerr</code> are available
+after inclusing the preprocessor directive <code>#include &lt;iostream&gt;</code>, rather
+than <code>#include &lt;iostream.h&gt;</code> in a source. In the Annotations this convention
+is used with the standard <strong>C++</strong> header files, but not everywhere else (yet).
+</p><p>There is more to be said about header files. In section <a href="cplusplus05.html#CLASSHEADER">5.7</a> the
+preferred organization of header files when <strong>C++</strong> classes are used is 
+discussed.
+</p><p>
+</p><p><a name="l24"></a>
+<h3>2.5.12: The definition of local variables</h3>
+        <a name="intro/local"></a>
+    
+In <strong>C</strong> local variables can only be defined at the top of a function or at
+the beginning of a nested block. In <strong>C++</strong> local variables can be created at
+any position in the code, even between statements.
+</p><p>Furthermore local variables can be defined in some statements, just prior to
+their usage. A typical example is the <code>for</code> statement:
+</p><p><pre>
+
+    #include &lt;stdio.h&gt;
+    
+    int main()
+    {
+        for (register int i = 0; i &lt; 20; i++)
+            printf("%d\n", i);
+        return (0);
+    }
+
+</pre>
+
+</p><p>In this code fragment the variable <code>i</code> is created inside the <code>for</code>
+statement. According to the ANSI-standard, the variable does not exist 
+prior to the <code>for</code>-statement and not beyond the <code>for</code>-statement.
+With some compilers, the variable continues to exist after the execution of 
+the <code>for</code>-statement, but a warning like 
+<blockquote>
+    warning: name lookup of `i' changed for new ANSI `for' scoping
+    using obsolete binding at `i'
+</blockquote>
+will be issued when the variable is used outside of the <code>for</code>-loop. The 
+implication seems clear: define a variable just before the <code>for</code>-statement 
+if it's to be used beyond that statement, otherwise the variable can be
+defined at the <code>for</code>-statement itself.
+</p><p>Defining local variables when they're needed requires a little getting used 
+to. However, eventually it tends to produce more readable code than defining
+variables at the beginning of compound statements. We suggest the following
+rules of thumb for defining local variables:
+</p><p><ul>
+</p><p><li > Local variables should be defined at the beginning of a function,
+    following the first <code>{</code>,
+</p><p><li > or they should be created at `intuitively right' places, such as in
+    the example above. This does not only entail the <code>for</code>-statement, but 
+    also all situations where a variable is only needed, say, half-way through 
+    the function.
+</p><p></ul>
+
+</p><p>
+    <a name="FunctionOverloading"></a><a name="l25"></a>
+<h3>2.5.13: Function Overloading</h3>
+        <a name="intro/overload"></a>
+    
+In <strong>C++</strong> it is possible to define several functions with the same name,
+performing different actions. The functions must only differ in their
+argument lists. An example is given below:
+</p><p><pre>
+
+    #include &lt;stdio.h&gt;
+
+    void show(int val)
+    {
+        printf("Integer: %d\n", val);
+    }
+
+    void show(double val)
+    {
+        printf("Double: %lf\n", val);
+    }
+
+    void show(char *val)
+    {
+        printf("String: %s\n", val);
+    }
+
+    int main()
+    {
+        show(12);
+        show(3.1415);
+        show("Hello World\n!");
+
+        return (0);
+    }
+
+</pre>
+
+</p><p>In the above fragment three functions <code>show()</code> are defined, which only
+differ in their argument lists: <code>int</code>, <code>double</code> and <code>char *</code>. The
+functions have the same name. The definition of several functions with the
+same name is called `function overloading'.
+</p><p>It is interesting that the way in which the <strong>C++</strong> compiler implements
+function overloading is quite simple. Although the functions share the same
+name in the source text (in this example <code>show()</code>), the compiler --and
+hence the linker-- use quite different names. The conversion of a name in the
+source file to an internally used name is called `name mangling'. E.g., the
+<strong>C++</strong> compiler might convert the name <code>void</code> <code>show</code> <code>(int)</code> to the
+internal name <code>VshowI</code>, while an analogous function with a <code>char*</code>
+argument might be called <code>VshowCP</code>. The actual names which are internally
+used depend on the compiler and are not relevant for the programmer, except
+where these names show up in e.g., a listing of the contents of a library.
+</p><p>A few remarks concerning function overloading are:
+</p><p><ul>
+</p><p><li > The usage of more than one function with the same name but quite
+    different actions should be avoided. In the example above, the functions
+    <code>show()</code> are still somewhat related (they print information to the
+    screen).
+</p><p>However, it is also quite possible to define two functions
+    <code>lookup()</code>, one of which would find a name in a list while the other
+    would determine the video mode. In this case the two functions have
+    nothing in common except for their name. It would therefore be more
+    practical to use names which suggest the action; say, <code>findname()</code> and
+    <code>getvidmode()</code>.
+</p><p><li > <strong>C++</strong> does not allow that several functions only differ in their
+    return value. This has the reason that it is always the programmer's
+    choice to inspect or ignore the return value of a function. E.g., the
+    fragment
+    <pre>
+
+        printf("Hello World!\n");
+    
+</pre>
+
+    holds no information concerning the return value of the function
+    <code>printf()</code> (The return value is, by the way, an integer which
+    states the number of printed characters. This return value is practically
+    never inspected.). Two functions <code>printf()</code> which would only
+    differ in their return type could therefore not be distinguished by the
+    compiler.
+</p><p><li > Function overloading can lead to surprises. E.g., imagine a
+    statement like
+</p><p><pre>
+
+        show(0);
+    
+</pre>
+
+</p><p>given the three functions <code>show()</code> above. The zero could be
+    interpreted here as a <code>NULL</code> pointer to a <code>char</code>, i.e., a
+    <code>(char *)0</code>, or as an integer with the value zero. <strong>C++</strong> will
+    choose to call the function expecting an integer argument, which might not
+    be what one expects.
+</p><p></ul>
+</p><p>
+</p><p><a name="l26"></a>
+<h3>2.5.14: Default function arguments</h3>
+        <a name="intro/default"></a>
+    
+In <strong>C++</strong> it is possible to provide `default arguments' when defining a
+function. These arguments are supplied by the compiler when not specified by
+the programmer.
+</p><p>An example is shown below:
+</p><p><pre>
+
+    #include &lt;stdio.h&gt;
+
+    void showstring(char *str = "Hello World!\n")
+    {
+        printf(str);
+    }
+
+    int main()
+    {
+        showstring("Here's an explicit argument.\n");
+
+        showstring();           // in fact this says:
+                                // showstring("Hello World!\n");
+        return (0);                             
+    }
+
+</pre>
+
+</p><p>The possibility to omit arguments in situations where default arguments are
+defined is just a nice touch: the compiler will supply the missing argument
+when not specified. The code of the program becomes by no means shorter or
+more efficient.
+</p><p>Functions may be defined with more than one default argument:
+</p><p><pre>
+
+    void two_ints(int a = 1, int b = 4)
+    {
+        .
+        .
+        .
+    }
+
+    int main()
+    {
+        two_ints();            // arguments:  1, 4
+        two_ints(20);          // arguments: 20, 4
+        two_ints(20, 5);       // arguments: 20, 5
+
+        return (0);
+    }
+
+</pre>
+
+</p><p>When the function <code>two_ints()</code> is called, the compiler supplies one or two
+arguments when necessary. A statement as <code>two_ints(,6)</code> is however
+not allowed: when arguments are omitted they must be on the right-hand side.
+</p><p>Default arguments must be known to the compiler when the code is generated
+where the arguments may have to be supplied. Often this means that the default
+arguments are present in a header file:
+</p><p><pre>
+
+    // sample header file
+    extern void two_ints(int a = 1, int b = 4);
+
+    // code of function in, say, two.cc
+    void two_ints(int a, int b)
+    {
+        .
+        .
+    }
+
+</pre>
+
+</p><p>Note that supplying the default arguments in the function definition instead
+of in the header file would not be the correct approach.
+
+</p><p><a name="l27"></a>
+<h3>2.5.15: The keyword typedef</h3>
+        <a name="intro/typedef"></a>
+    
+The keyword <code>typedef</code> is in <strong>C++</strong> allowed, but no longer necessary when
+it is used as a prefix in <code>union</code>, <code>struct</code> or <code>enum</code> definitions.
+This is illustrated in the following example:
+</p><p><pre>
+
+    struct somestruct
+    {
+        int
+            a;
+        double
+            d;
+        char
+            string[80];
+    };
+
+</pre>
+
+</p><p>When a <code>struct</code>, <code>union</code> or other compound type is defined, the tag of
+this type can be used as type name (this is <code>somestruct</code> in the above
+example):
+</p><p><pre>
+
+    somestruct
+        what;
+
+    what.d = 3.1415;
+
+</pre>
+
+</p><p>
+</p><p>
+    <a name="FunctionInStruct"></a><a name="l28"></a>
+<h3>2.5.16: Functions as part of a struct</h3>
+        <a name="intro/struct"></a>
+    In <strong>C++</strong> it is allowed to define functions as part of a <code>struct</code>. This
+is the first concrete example of the definition of an object: as was described
+previously (see section <a href="cplusplus02.html#OOP">2.4</a>), an object is a structure containing
+all involved code and data.
+</p><p>A definition of a <code>struct point</code> is given in the code fragment below.
+In this structure, two <code>int</code> data fields and one function <code>draw()</code> are
+declared.
+</p><p><pre>
+
+    struct point            // definition of a screen
+    {                       // dot:
+        int
+            x,              // coordinates
+            y;              // x/y
+        void
+            draw(void);    // drawing function
+    };
+
+</pre>
+
+</p><p>A similar structure could be part of a painting program and could, e.g.,
+represent a pixel in the drawing. Concerning this <code>struct</code> it should be
+noted that:
+</p><p><ul>
+</p><p><li > The function <code>draw()</code> which occurs in the <code>struct</code> definition
+    is only a <em>declaration</em>. The actual code of the function, or in other
+    words the actions which the function should perform, are located
+    elsewhere: in the code section of the program, where all code is
+    collected. We will describe the actual definitions of functions inside
+    <code>struct</code>s later (see section <a href="cplusplus03.html#FunctionsInStructs">3.2</a>).
+</p><p><li > The size of the <code>struct</code> <code>point</code> is just two <code>int</code>s. Even
+    though a function is declared in the structure, its size is not affected
+    by this. The compiler implements this behavior by allowing the function
+    <code>draw()</code> to be known only in the context of a <code>point</code>.
+</p><p></ul>
+</p><p>The <code>point</code> structure could be used as follows:
+</p><p><pre>
+
+    point                   // two points on
+        a,                  // screen
+        b;
+
+    a.x = 0;                // define first dot
+    a.y = 10;               // and draw it
+    a.draw();
+
+    b = a;                  // copy a to b
+    b.y = 20;               // redefine y-coord
+    b.draw();              // and draw it
+
+</pre>
+
+</p><p>The function which is part of the structure is selected in a similar manner in
+which data fields are selected; i.e., using the field selector operator
+(<code>.</code>). When pointers to <code>struct</code>s are used, <code>-&gt;</code> can be used.
+</p><p>The idea of this syntactical construction is that several types may contain
+functions with the same name. E.g., a structure representing a circle might
+contain three <code>int</code> values: two values for the coordinates of the center of
+the circle and one value for the radius. Analogously to the <code>point</code>
+structure, a function <code>draw()</code> could be declared which would draw the
+circle.
+
+</p><p>
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus03.html">Next chapter</a>
+    <li> <a href="cplusplus01.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

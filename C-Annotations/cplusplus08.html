@@ -1,0 +1,2154 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus09.html">Next chapter</a>
+    <li> <a href="cplusplus07.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="Containers"></a><a name="l109"></a>
+<h1>Chapter 8: Abstract Containers</h1>
+<a name="containers"></a>
+    
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="containers/container"></a>
+    <strong>C++</strong> offers several predefined datatypes, all part of the <a href="cplusplus11.html#STL">Standard
+Template Library</a>, which can be used to implement solutions to frequently
+occurring problems. The datatypes discussed in this chapter are all
+<em>containers</em>: you can put stuff inside them, and you can retrieve the stored
+information from them. 
+</p><p>The interesting part is that the kind of data that can be stored inside these
+containers has been left unspecified by the time the containers were
+constructed. That's why they are spoken of as <em>abstract containers</em>. 
+</p><p>The abstract containers rely heavily on <em>templates</em>, which are covered near
+the end of the <strong>C++</strong> Annotations, in chapter <a href="cplusplus17.html#Templates">17</a>. However, in
+order to use the abstract containers, only a minimal grasp of the template
+concept is needed. In <strong>C++</strong> a <em>template</em> is in fact a recipe for
+constructing a function or a complete class. The recipe tries to abstract the
+functionality of the class or function as much as possible from the data on
+which the class or function operate. As the types of the data on which the
+templates operate were not known by the time the template was constructed, the
+datatypes are either inferred from the context in which a template function is
+used, or they are mentioned explicitly by the time a template class is used
+(the term that's used here is <em>instantiated</em>). In situations where the types
+are explicitly mentioned, the <em>angular bracket notation</em> is used to indicate
+which data types are required. For example, below (in section <a href="cplusplus08.html#PAIR">8.1</a>) we'll
+encounter the <code>pair</code> container, which requires the explicit mentioning of
+two data types. E.g., to define a <code>pair</code> variable containing both an <code>int</code>
+and a <code>string</code>, the notation
+        <pre>
+
+    pair&lt;int, string&gt;
+        myPair;
+        
+</pre>
+
+    is used. Here, <code>myPair</code> is defined as a <code>pair</code> variable, containing
+both an <code>int</code> and a <code>string</code>.
+</p><p>The angular bracket notation is used intensively in the following
+discussion of the abstract container. Actually, understanding this part of
+templates is the only real requirement for being able to use the abstract
+containers. Now that we've introduced this notation, we can postpone the more
+thorough discussion of templates to chapter <a href="cplusplus17.html#Templates">17</a>, and get on with
+their use in the form of the abstract container classes.
+</p><p>Most of the abstract containers are <em>sequential</em> containers: they represent
+a series of data which can be stored and retrieved in some sequential
+way. Examples are the <code>vector</code>, implementing an extendable array, the
+<code>list</code>, implementing a datastructure in which insertions and deletions can
+be easily realized, a <code>queue</code>, in which the first element that is entered
+will be the first element that will be retrieved, and the <em>stack</em>, which is
+a <em>first in, last out</em> datastructure.
+</p><p>Apart from the sequential containers, several special containers are
+available. The <code>pair</code> is a basic container in which a pair of values (of
+types that are left open for further specification) can be stored, like two
+strings, two ints, a string and a double, etc.. Pairs are often used to return
+data elements that naturally come in pairs. For example, the <code>map</code> is an
+abstract container in which keys and corresponding values are stored. Elements
+of these maps are returned as <code>pairs</code>. 
+</p><p>A variant of the <code>pair</code> is the <code>complex</code> container, which implements
+operations that are defined on <em>complex numbers</em>.
+</p><p>All abstract containers described in this chapter and the <code>string</code> datatype
+discussed in chapter <a href="cplusplus04.html#String">4</a> are part of the standard template
+library. There exists also an abstract container for the implementation of a
+<em>hashtable</em>, but that container is not (yet) accepted by the <code>ISO/ANSI</code>
+standard. The <a href="cplusplus08.html#HASHMAP">final section</a> of this chapter will cover the
+hashtable to some extent. 
+</p><p>All containers support the <code>=</code> operator to assign two containers of the same
+type to each other. All containers also support the <code>==, !=, &lt;, &lt;=, &gt;</code> and
+<code>&gt;=</code> operators.
+</p><p>Note that if a user-defined type (usually a <code>class</code>-type) is to be stored in
+a container, the user-defined type must support 
+    <ul>
+    <li > A default-value (e.g., a default constructor)
+    <li > The equality operator (<code>==</code>)
+    <li > The less-than operator (<code>&lt;</code>)
+     </ul>
+</p><p>Closely linked to the standard template library are the <em>generic
+algorithms</em>. These algorithms may be used to perform even more tasks than is
+possible with the containers themselves, like counting, filling, merging,
+filtering etc.. An overview of the generic algorithms and their applications
+is given in chapter <a href="cplusplus11.html#STL">11</a>. Generic algorithms usually rely on the
+availability of <a href="cplusplus11.html#ITERATORS"><em>iterators</em></a>, which represent begin and
+endpoints for processing data stored inside the containers. The abstract
+containers normally have constructors and members using iterators themselves,
+and they have members returning iterators (comparable to the
+<code>string::begin()</code> and <code>string::end()</code> members). In the remainder of this
+chapter the use of iterators is not really covered. Refer to chapter <a href="cplusplus11.html#STL">11</a>
+for the discussion of iterators.
+</p><p>The url <a href="http://www.sgi.com/Technology/STL">http://www.sgi.com/Technology/STL</a> is worth visiting by those readers who
+want more information about the abstract containers and the standard template
+library than can be provided in the <strong>C++</strong> annotations.
+</p><p>Containers often collect data during their lifetime. When a container goes
+out of scope, its destructor tries to destroy its data elements. This only
+succeeds if the data elements themselves are stored inside the container. If
+the data elements of containers are pointers, the data to which these pointers
+point will not be destroyed, and a memory leak will result. A consequence of
+this scheme is that the data stored in a container should be considered the
+`property' of the container: the container should be able to destroy its data
+elements when the destructor of the container is called. Consequently, the
+container should not only contain no pointer data, but it should also not
+contain <code>const</code> data elements, as these data elements cannot be destroyed by
+the container's destructor.
+</p><p>
+</p><p><a name="PAIR"></a><a name="l110"></a>
+<h2>8.1: The `pair' container</h2>
+<a name="containers/pair"></a>
+    The <code>pair</code> container is a rather basic container. It can be used to store
+two elements, called <code>first</code> and <code>second</code>, and that's about it. To define
+a variable as a <code>pair</code> container, the header file
+    <pre>
+
+            #include &lt;utility&gt;
+    
+</pre>
+
+    must be included. 
+</p><p>The  data types of a <code>pair</code> are defined when the <code>pair</code> variable is
+defined, using the standard template (see chapter <code>Templates</code>) notation:
+    <pre>
+
+            pair&lt;string, string&gt;
+                piper("PA28", "PH-ANI"),
+                cessna("C172", "PH-ANG");
+    
+</pre>
+
+here, the variables <code>piper</code> and <code>cessna</code> are defined as <code>pair</code> variables
+containing two <code>strings</code>. Both strings can be retrieved using the <code>first</code>
+and <code>second</code> fields of the <code>pair</code> type:
+    <pre>
+
+            cout &lt;&lt; piper.first &lt;&lt; endl &lt;&lt;  // shows 'PA28'
+                    cessna.second &lt;&lt; endl;  // shows 'PH-ANG'
+    
+</pre>
+
+</p><p>The <code>first</code> and <code>second</code> members can also be used to reassign values:
+    <pre>
+
+            cessna.first = "C152";
+            cessna.second = "PH-ANW";
+    
+</pre>
+
+</p><p>If a <code>pair</code> variable must be completely reassigned, it is also possible to
+use an <em>anonymous</em> pair variable as the right-hand side operand of the
+assignment. An anonymous variable defines a temporary variable (which receives
+no name) solely for the purpose of (re)assigning another variable of the same
+type. Its general form is
+    <pre>
+
+            type(initializer list)
+    
+</pre>
+
+    Note, however, that with a <code>pair</code> variable the type specification is not
+completed when the containername <code>pair</code> has been mentioned. It also requires
+the specification of the data types which are stored inside the pair. For this
+the (template) angular bracket notation is used again. E.g., the reassignment
+of the <code>cessna</code> pair variable could also have been accomplished as follows:
+    <pre>
+
+            cessna = pair&lt;string, string&gt;("C152", "PH-ANW");
+    
+</pre>
+
+    In cases like this, the <code>type</code> specification can become quite
+elaborate, which has caused a revival of interest in the possibilities offered
+by the <code>typedef</code> keyword. If a lot of <code>pair&lt;type1, type2&gt;</code> clauses are
+used in a source, the amount of typing may be reduced and legibility might be
+improved by first defining a name for the clause, and then using the defined
+name later on. E.g.,
+    <pre>
+
+            typedef pair&lt;string, string&gt; pairStrStr
+            ...
+            cessna = pairStrStr("C152", "PH-ANW")
+    
+</pre>
+
+    Apart from this (and the basic set of operations (assignment and
+comparisons) the <code>pair</code> has no further special features. It is, however, a
+basic ingredient of the upcoming abstract containers <code>map, multimap</code> and
+<code>hash_map</code>.
+    
+</p><p><a name="l111"></a>
+<h2>8.2: Sequential Containers</h2>
+</p><p><a name="l112"></a>
+<h3>8.2.1: The `vector' container</h3>
+    <a name="containers/vector"></a>
+    The <code>vector</code> class implements an (expandable) array. To use the <code>vector</code>,
+the header file <code>vector</code> must be included:
+    <pre>
+
+            #include &lt;vector&gt;
+    
+</pre>
+
+    <code>Vector</code>s can be used like arrays, and can be defined with a fixed
+number of elements. E.g., to define a vector of 30 <code>int</code>s we do
+    <pre>
+
+            vector&lt;int&gt;
+                iVector(30);
+    
+</pre>
+
+    Note the specification of the data type that is to be used: the datatype
+is given between angular brackets after the <code>vector</code> container name. So, a
+vector of 30 <code>string</code>s is defined as
+    <pre>
+
+            vector&lt;string&gt;
+                strVector(30);
+    
+</pre>
+
+    One of the nice characteristics of defining such a vector is that it's
+initialized to the data type's default value. If there is a default
+constructor, it is called to construct the elements of the vector.  For the
+basic data types the initial value is zero. So, for the <code>int</code> vector we know
+its values are 0.
+</p><p>Another way to initialize the vector is to use explicit initialization
+values:
+    <pre>
+
+            vector&lt;int&gt;
+                iVector(1, 2, 3);
+    
+</pre>
+
+    This does not work, however, if a vector of one element must be
+initialized to a non-default value.  
+</p><p>As with <code>string</code> variables, 
+    <ul>
+    <li > <code>vector</code> objects may be initialized with other <code>vectors</code>, or 
+parts of existing <code>vector</code>s may be used to initialize a <code>vector</code>:
+    <pre>
+
+            vector&lt;int&gt;
+                a(10);
+            ...
+            vector&lt;int&gt;
+                b(&amp;a[3], &amp;a[6]);
+    
+</pre>
+           
+     </ul>
+    Note here that the last element mentioned is <em>not</em> used for the
+initialization. This is a simple example of the use of <em>iterators</em>, in which
+the range of values that is used starts at the first value, and includes all
+elements up to, but not including the last value mentioned. The standard
+notation for this is <code>[begin, end)</code>.
+    <ul>
+    <li ><code>vectors</code> may be assigned to each other, 
+    <li > the subscript operator may be used to retrieve individual elements, 
+    <li > the <code>==</code> and <code>!=</code> operators may be used to test the equality of
+two <code>vectors</code>. 
+    <li > the <code>&lt;</code> operator may be used to test whether each element in the
+left-hand operand vector is less than each corresponding element in the
+right-hand operand vector. The <code>&lt;=, &gt;</code> and <code>&gt;=</code> operators are also
+available. 
+    <li > the <code>size()</code> and <code>empty()</code> member functions are available,
+    <li > the <code>swap()</code> member function is available, swapping two
+vectors. E.g.,
+    <pre>
+
+        int main()
+        {
+            vector&lt;int&gt;
+                v1(10),
+                v2(10);
+        
+            v1.swap(v2);
+        }
+    
+</pre>
+
+    <li > elements may be inserted at a certain position <code>pos</code>. Below
+<code>source</code> represents a value of the type that is stored in the vector, while
+<code>pos</code> is an <em>iterator</em> pointing to a position in the vector where
+<code>source</code> must be inserted:
+        <ul>
+        <li ><code>insert(pos, source)</code> inserts <code>source</code> at <code>pos</code>,
+        <li ><code>insert(pos, begin, end)</code> inserts the elements in the iterator range
+<code>[begin, end)</code>. 
+        <li ><code>insert(pos, n, source)</code> inserts <code>n</code> elements having value
+<code>source</code> at position <code>pos</code>.
+         </ul>
+    <li > elements may be erased: 
+        <ul>
+        <li ><code>erase()</code> and <code>clear()</code> both erase all elements, <code>clear()</code> is
+not available with <code>strings</code>.
+        <li ><code>erase(pos)</code> erases all elements starting at position <code>pos</code>,
+        <li ><code>erase(begin, end)</code> erases elements indicated by the iterator range
+<code>[begin, end)</code>.
+         </ul>
+    <li ><code>resize(n)</code> and <code>resize(n, source)</code> may be used to resize the vector
+to a size of <code>n</code>. If the vector is expanded, the extra elements are
+initialized by the default value of the used datatype, or by the explicitly
+provided value <code>source</code>. 
+     </ul>    
+</p><p>Also available are:
+    <ul>
+    <li ><code>void pop_back()</code> may be used to remove the last element from the
+vector. The element is <em>not</em> returned by this member function.
+    <li ><code>front()</code>, returning the initial element of the <code>vector</code>,
+    <li ><code>back()</code>, returning the final element of the <code>vector</code>,
+    <li ><code>push_back(source)</code> stores <code>source</code> at the end of the <code>vector</code>: a
+new element is added at the end.
+     </ul>
+    Note that a vector may be defined without size: <code>vector&lt;int&gt; ivect;</code>.
+This defines an empty vector, without any element at all. Therefore, a
+statement like <code>ivect[0] = 18;</code> would (in this case) be an error, as there
+isn't any element as yet. In this case the preferred idiom is
+<code>ivect.push_back(18);</code>
+
+</p><p><a name="l113"></a>
+<h3>8.2.2: The `list' container</h3>
+    <a name="containers/list"></a>
+    The <code>list</code> class implements a list datastructure.  To use the <code>list</code>, the
+header file <code>list</code> must be included:
+    <pre>
+
+            #include &lt;list&gt;
+    
+</pre>
+
+A list is depicted in figure <a href="cplusplus08.html#listFig">5</a>.
+    <a name="listFig"></a></p><p><center><img src="containers/list.gif" align="bottom" alt="figure 5 is shown here."><br> 
+figure 5: A list data-structure 
+</center></p><p>
+     
+    In figure <a href="cplusplus08.html#listFig">5</a> it is shown that a list consists of
+separate data-items, connected to each other by pointers. The list can be
+traversed in two ways: starting at the <em>Front</em> the list may be traversed
+from left to right, until the 0-pointer is reached at the end of the rightmost
+data-item. The list can also be traversed from right to left: starting at the
+<em>Back</em>, the list is traversed from right to left, until eventually the
+0-pointer emanating from the leftmost data-item is reached.
+</p><p>Both lists and vectors are often possible datastructures in situations where
+an unknown number of data elements must be stored. However, there are some
+rules of thumb to follow when a choice between the two datastructures must be
+made. 
+    <ul>
+    <li > When the majority of accesses is random, then the <code>vector</code> is
+the preferred datastructure. E.g., in a program that counts the frequencies of
+characters in a textfile, a <code>vector&lt;int&gt; frequencies(256)</code> is the
+datastructure doing the trick, as the values of the received characters can be
+used as indices into the <code>frequencies</code> vector.
+    <li > The previous example illustrates a second rule of thumb, also
+favoring the <code>vector</code>: if the number of elements is known in advance (and
+does not notably change during the lifetime of the program), the vector
+is also preferred over the <code>list</code>.
+    <li > In cases where insertions and deletions prevail, the list is
+generally preferred. Actually, in my experience, lists aren't that useful at
+all, and often an implementation will be faster when a <code>vector</code>, maybe
+containing holes, is used. Nonetheless, the <code>list</code> container exists, and
+it may become popular now that the list-management is part of the
+implementation of the abstract container.  
+     </ul> 
+    Other considerations related to the choice between lists and vectors
+should also be given some thought. Although it is true that the vector is able
+to grow dynamically, the dynamical growth does involve a lot of copying of
+data elements. Clearly, copying a million large datastructures takes a
+considerable amount of time, even on fast computers. On the other hand,
+inserting a large number of elements in a list doesn't require us to copy the
+remainder of the list structure: inserting a new element in a list merely
+requires us to juggle some pointers. In figure <a href="cplusplus08.html#listAdd">6</a> this is shown: a
+new element is inserted between the second and third element, creating a new
+list of four elements.
+    <a name="listAdd"></a></p><p><center><img src="containers/insertlist.gif" align="bottom" alt="figure 6 is shown here."><br> 
+figure 6: Adding a new element to a list 
+</center></p><p>
+    
+    Removing an element from a list also is a simple matter. Starting again
+from the situation shown in figure <a href="cplusplus08.html#listFig">5</a>, figure <a href="cplusplus08.html#listDel">7</a> shows
+what happens if element two is removed from our list. Again: only pointers
+need to be juggled. In this case it's even simpler than adding an element:
+only two pointers need to be rerouted.
+    <a name="listDel"></a></p><p><center><img src="containers/dellist.gif" align="bottom" alt="figure 7 is shown here."><br> 
+figure 7: Removing an element from a list 
+</center></p><p>
+    
+    Summarizing the comparison between lists and vectors, it's probably best
+to conclude that there is no clear-cut answer to the question what
+datastructure to prefer. There are rules of thumb, which may be adhered
+to. But if worse comes to worst, a profiler may be required to find out what's
+working best.
+    But, no matter what thoughts remain, the <code>list</code> container is available,
+so let's see what we can do with it.  As with the <code>vector</code>-class, the
+following constructors and member functions are available:<br>
+    Constructors:
+    <ul>
+    <li > an empty list is created using, e.g.,
+        <pre>
+
+    list&lt;string&gt;
+        strList;
+        
+</pre>
+
+    <li > A list may be initialized with a certain number of elements. By
+default, if the initialization value is not explicitly mentioned, the
+defaultvalue or default constructor for the actual datatype is used. For
+example: 
+        <pre>
+
+    list&lt;string&gt;
+        hello(5, string("Hello")),  // initialize to 5 Hello's
+        zilch(10);                  // initialize to 10 empty strings
+        
+</pre>
+
+    <li > A list may be initialized using a two iterators, e.g., to
+initialize a list with elements 5 until 10 (including the last one) of a
+<code>vector&lt;string&gt;</code> the following construction may be used:
+        <pre>
+
+    extern vector&lt;string&gt;
+        svector;
+    list&lt;string&gt;
+        slist(&amp;svector[5], &amp;svector[11]);
+        
+</pre>
+
+     </ul>
+    Note that a list may be defined without size: 
+                           <center><code>list&lt;int&gt; ivect;</code> </center>
+    This defines an empty list, without any element at all. So, a statement
+like
+                            <center><code>*ivect.begin() = 18;</code> </center>
+would in this case be an error, as there isn't any element as yet. In this
+case, the preferred idiom is:
+                         <center><code>ivect.push_back(18);</code> </center>
+    Other member functions, some of which were also available in <code>vector</code>,
+are:
+    <ul>
+    <li ><code>back()</code>, returning the last element of the list.
+    <li ><code>clear()</code>,
+    <li ><code>front()</code>, returning the first element of the list.
+    <li ><code>empty()</code>,
+    <li > elements may be erased: 
+        <ul>
+        <li ><code>erase()</code> and <code>clear()</code> both erase all elements,         
+        <li ><code>erase(pos)</code> erases all elements starting at the position pointed to
+by iterator  <code>pos</code>,
+        <li ><code>erase(begin, end)</code> erases elements indicated by the iterator range
+<code>[begin, end)</code>.
+         </ul>
+    <li > elements may be inserted at a certain position pointed to by the
+iterator <code>pos</code>:
+        <ul>
+        <li ><code>insert(pos, source)</code> inserts <code>source</code> at the position pointed to
+by <code>pos</code>,
+        <li ><code>insert(pos, begin, end)</code> inserts the elements in the iterator
+range <code>[begin, end)</code> at the position pointed to by <code>pos</code>.
+        <li ><code>insert(pos, n, argument)</code> inserts <code>n</code> elements having value
+<code>argument</code> at the position pointed to by <code>pos</code>. The data type
+of <code>argument</code> must be equal to the data type of the the elements of the
+list.
+         </ul>
+    <li ><code>resize(n)</code> and <code>resize(n, argument)</code> may be used to resize the list
+to a size of <code>n</code>. If the list is expanded, the extra elements are
+initialized by the default value of the used datatype, or by the explicitly
+provided value <code>argument</code>. 
+    <li ><code>size()</code>,
+    <li ><code>swap(argument)</code>, swaps two lists.
+     </ul>
+    Also available are:
+    <ul>
+    <li ><code>void push_front(source)</code> to enter a new element at the head of the
+list.
+    <li ><code>void push_back(source)</code> to enter a new element at the end of the
+list.
+    <li ><code>void pop_front()</code> may be used to remove the first element from the
+list. This element is <em>not</em> returned by this member function.
+    <li ><code>void pop_back()</code> may be used to remove the last element from the
+list. This element is <em>not</em> returned by this member function.
+    <li ><code>remove(source)</code>: This member function removes all occurrences of
+<code>source</code> from the list: the two strings <code>Hello</code> are removed from the
+list <code>object</code> in the following example:
+        <pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;list&gt;
+
+int main()
+{
+    list&lt;string&gt;
+        object;
+
+    object.push_back(string("Hello"));
+    object.push_back(string("World"));
+    object.push_back(string("Hello"));
+    object.push_back(string("World"));
+
+    object.remove(string("Hello"));
+
+    while (object.size())
+    {
+        cout &lt;&lt; object.front() &lt;&lt; endl;
+        object.pop_front();
+    }
+
+    return (0);
+}
+
+
+</pre>
+
+    <li ><code>sort()</code> will sort the list. Once the list has been sorted, the
+following member function (<code>unique()</code>) may be used to remove all multiply
+occurring elements from the list, leaving only one element of each. The
+following example shows the use of both member functions.
+    <li ><code>unique()</code> makes sure that each element will occur
+only once. Here's an example, leaving each single word only once in the list:
+        <pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;list&gt;
+
+int main()
+{
+    list&lt;string&gt;
+        target;
+
+    target.push_back(string("A"));
+    target.push_back(string("rose"));
+    target.push_back(string("is"));
+    target.push_back(string("a"));
+    target.push_back(string("rose"));
+    target.push_back(string("is"));
+    target.push_back(string("a"));
+    target.push_back(string("rose"));
+    
+    cout &lt;&lt; "Initially we have: " &lt;&lt; endl;
+    list&lt;string&gt;::iterator
+        from;
+    for (from = target.begin(); from != target.end(); ++from)
+        cout &lt;&lt; *from &lt;&lt; " ";
+    cout &lt;&lt; endl;        
+    target.sort();
+    cout &lt;&lt; "After sort() we have: " &lt;&lt; endl;
+    for (from = target.begin(); from != target.end(); ++from)
+        cout &lt;&lt; *from &lt;&lt; " ";
+    cout &lt;&lt; endl;        
+    target.unique();
+    cout &lt;&lt; "After unique() we have: " &lt;&lt; endl;
+    for (from = target.begin(); from != target.end(); ++from)
+        cout &lt;&lt; *from &lt;&lt; " ";
+    cout &lt;&lt; endl;        
+
+    return (0);
+}
+
+
+</pre>
+
+    <li ><code>merge(argument)</code> combines the current list and the <code>argument</code> list.
+The merging will add elements of <code>source</code> to <code>target</code>. When both lists are
+ordered, the resulting list will be ordered as well. If both list are not
+completely ordered, the resulting list will be ordered as much as possible,
+given the initial ordering of the elements in each list. In the following
+example this is illustrated: the <code>object</code> list is not completely ordered,
+but the resulting list (<code>alpha bravo golf oscar mike november quebec zulu</code>)
+is ordered 'as much as possible': <code>mike</code> has to follow <code>oscar</code>, since this
+ordering is imposed by <code>object</code>, but given that imperfection the resulting
+list is ordered alphabetically.
+        <pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;list&gt;
+
+int main()
+{
+    list&lt;string&gt;
+        object,
+        argument;
+
+    object.push_back(string("alfa"));
+    object.push_back(string("bravo"));
+    object.push_back(string("golf"));
+    object.push_back(string("quebec"));
+
+    argument.push_back(string("oscar"));
+    argument.push_back(string("mike"));
+    argument.push_back(string("november"));
+    argument.push_back(string("zulu"));
+
+    object.merge(argument);
+    
+    list&lt;string&gt;::iterator
+        from;
+    for (from = object.begin(); from != object.end(); ++from)
+        cout &lt;&lt; *from &lt;&lt; " ";
+    cout &lt;&lt; endl;        
+
+    return (0);
+}
+
+
+</pre>
+
+     </ul>
+    Note that the members <code>merge()</code> and <code>sort()</code> both assume the
+availability of the <code>&lt;</code> and <code>==</code> operators.  
+    <ul>
+    <li ><code>target.splice(iterator position, list source)</code>: This member function
+transfers the contents of <code>source</code> to the current list. Following
+<code>splice()</code>, <code>source</code> is empty. For example:
+     <pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;list&gt;
+
+int main()
+{
+    list&lt;string&gt;
+        object;
+
+    object.push_front(string("Hello"));
+    object.push_back(string("World"));
+
+    list&lt;string&gt;
+        argument(object);
+
+    object.splice(++object.begin(), argument);
+
+    cout &lt;&lt; "Object contains " &lt;&lt; object.size() &lt;&lt; " elements, " &lt;&lt;
+            "Argument contains " &lt;&lt; argument.size() &lt;&lt; " elements," &lt;&lt; endl;
+
+    while (object.size())
+    {
+        cout &lt;&lt; object.front() &lt;&lt; endl;
+        object.pop_front();
+    }
+
+    return (0);
+}
+</pre>
+
+Alternatively, <code>source</code> may be followed by a iterator of <code>source</code>,
+indicating the first element of <code>source</code> that should be spliced, or by two
+iterators <code>begin</code> and <code>end</code> defining the iterator-range <code>[begin,
+end)</code> on <code>source</code> that should be spliced into <code>target</code>.
+     </ul>
+</p><p>Available operators with the <code>list</code> containertype are:
+    <ul>
+    <li > The assignment of a list to another: <code>=</code>,
+    <li > The test for equality of two lists: <code>==</code>,
+    <li > The test for inequality of two lists: <code>!=</code>,
+    <li ><code>&lt;</code>: This operator returns <code>true</code> if each element stored in the
+left-hand operand list is less than each corresponding element in the
+right-hand operand list, based on the <code>&lt;</code>-operator of the element-type of
+the lists. Also available are the <code>&lt;=, &gt;</code> and <code>&gt;=</code> operators.
+     </ul>
+
+</p><p><a name="l114"></a>
+<h3>8.2.3: The `queue' container</h3>
+    <a name="containers/queue"></a>
+    The <code>queue</code> class implements a queue datastructure.  To use the <code>queue</code>,
+the header file <code>queue</code> must be included:
+        <pre>
+
+    #include &lt;queue&gt;
+        
+</pre>
+
+    A queue is depicted in figure <a href="cplusplus08.html#queueFig">8</a>.
+    <a name="queueFig"></a></p><p><center><img src="containers/queue.gif" align="bottom" alt="figure 8 is shown here."><br> 
+figure 8: A queue data-structure 
+</center></p><p>
+     
+    In figure <a href="cplusplus08.html#queueFig">8</a> it is shown that a queue has one point (the
+<em>back</em>) where items can be added to the queue, and one point (the <em>front</em>)
+where items can be removed (read) from the queue.
+</p><p>Bearing this model of the queue in mind, let's see what we can do with it.
+</p><p>A queue can be initialized by an existing other queue, or it can be created
+empty: 
+        <pre>
+
+    queue&lt;int&gt;
+        queue1;
+    ...
+    queue&lt;int&gt;
+        queue2(queue1);
+        
+</pre>
+
+    Apart from these constructors, and the basic operators for comparison and
+assignment (see the <a href="cplusplus08.html#Containers">introductory paragraph</a> of this chapter),
+the following member functions are available:
+    <ul>
+    <li ><code>empty()</code>, 
+    <li ><code>size()</code>,
+    <li ><code>front()</code>: returns the first element that would be removed by
+<code>pop()</code>, Alternatively, the last element of the queue may be reassigned, as
+illustrated in the following example, in which <code>Hello World</code>, rather than
+<code>Hello</code> is displayed:
+        <pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;queue&gt;
+
+int main()
+{
+    queue&lt;string&gt;
+        q;
+
+    q.push("Hello");
+    q.front() = "Hello World";
+
+    cout &lt;&lt; q.front() &lt;&lt; endl;
+
+    return (0);
+}
+</pre>
+
+    <li ><code>back()</code>: returns the last element that was added to the
+queue.  Like <code>front(), back()</code> can be used to reassign the last item that
+was added to the queue.
+    <li ><code>push(source)</code>: adds item <code>source</code> to the back of the queue.
+    <li ><code>void pop()</code>: removes (but does not return) the element at the front of
+the queue.  
+     </ul>
+    Note that the queue does not support iterators or a subscript
+operator. The only elements that can be accessed are its front and back
+element, and a queue can only be emptied by repeatedly removing its front
+element.
+
+</p><p><a name="l115"></a>
+<h3>8.2.4: The `priority_queue' container</h3>
+    <a name="containers/priority"></a>
+    The <code>priority_queue</code> class implements a priority queue datastructure.  To
+use the priority queue, the header file <code>queue</code> must be included:
+        <pre>
+
+    #include &lt;queue&gt;
+        
+</pre>
+
+    A priority queue is identical to a <code>queue</code>, but allows the entry of data
+elements according to priority rules. An example of a situation where the
+priority queue is encountered in real-life is found at the check-in terminals
+at airports. At a terminal the passengers normally stand in line to wait for
+their turn to check in, but late passengers are usually allowed to jump the
+queue: they receive a higher priority than the other passengers.
+</p><p>The priority queue uses the <code>&lt;</code>-operator of the used data type to decide
+about the priority of the data elements. The smaller the value, the lower the
+priority. So, the priority queue <em>could</em> also be used for sorting values
+while they arrive. 
+</p><p>A simple example of a priority queue application is the following program: it
+reads words from <code>cin</code> and writes a sorted list of words to <code>cout</code>:
+    <pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;queue&gt;
+
+int main()
+{
+    priority_queue&lt;string&gt;
+        q;
+
+    string
+        word;
+
+    while (cin &gt;&gt; word)
+        q.push(word);
+
+    while (q.size())
+    {
+        cout &lt;&lt; q.top() &lt;&lt; endl;
+        q.pop();
+    }
+
+    return (0);
+}
+</pre>
+
+</p><p>Unfortunately, the words are listed in reversed order: because of the
+underlying <code>&lt;</code>-operator the words appearing later in the ascii-sequence
+appear first in the priority queue. A solution for that problem is to define a
+wrapper class around the <code>string</code> datatype, in which the <code>&lt;</code>-operator has
+been defined according to our wish, i.e., making sure that the words appearing
+early in the ascii-sequence appear first in the queue. Here is the modified
+program: 
+    <pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;queue&gt;
+
+class Text
+{
+    public:
+        Text(string const &amp;str): s(str) 
+        {}
+        operator string const &amp;() const
+        {
+            return (s);
+        }
+        bool operator&lt;(Text const &amp;right) const
+        {
+            return (s &gt; right.s);
+        }
+    private:
+        string
+            s;
+};
+
+ostream &amp;operator&lt;&lt;(ostream &amp;ostr, Text const &amp;text)
+{
+    return (ostr &lt;&lt; text);
+}
+
+int main()
+{
+    priority_queue&lt;Text&gt;
+        q;
+    string
+        word;
+    
+    while (cin &gt;&gt; word)
+        q.push(word);
+
+    while (q.size())
+    {
+        word = q.top();
+        cout &lt;&lt; word &lt;&lt; endl;
+        q.pop();
+    }
+    return (0);
+}
+</pre>
+
+    In the above program the wrapper class defines the <code>operator&lt;</code> just the
+other way around than the <code>string</code> class itself, resulting in the preferred
+ordering. Other possibilities would be to store the contents of the priority
+queue in, e.g., a vector, from which the elements can be read in reversed
+order. However, the example shows how the priority queue can be fed objects of
+a special class, in which the <code>operator&lt;</code> has been tailored to a particular
+use.
+</p><p>A priority queue can be initialized by an existing other priority queue, or it
+can be created empty:
+        <pre>
+
+    priority_queue&lt;int&gt;
+        priority_queue1;
+    ...
+    priority_queue&lt;int&gt;
+        priority_queue2(priority_queue1);
+        
+</pre>
+
+    Apart from these constructors, and the basic operators for comparison and
+assignment (see the <a href="cplusplus08.html#Containers">introductory paragraph</a> of this chapter),
+the following member functions are available:
+    <ul>
+    <li ><code>empty()</code>, 
+    <li ><code>size()</code>,
+    <li ><code>top()</code>: returns the first element that would be removed by
+<code>pop()</code>. This element is not removed from the priority queue, and could be
+given a new value, as in:
+        <pre>
+
+    priority_queue&lt;string&gt;
+        pq;
+    ...
+    pq.top() = "Hello world";
+        
+</pre>
+
+    <li ><code>push(argument)</code>: adds item <code>argument</code> to its appropriate position,
+respecting its priority.
+     </ul>
+    Note that the priority queue does not support iterators or a subscript
+operator. The only element that can be accessed is its top element, and it can
+only be emptied by repeatedly removing this element.
+</p><p>
+</p><p><a name="l116"></a>
+<h3>8.2.5: The `deque' container</h3>
+    <a name="containers/deque"></a>
+    The <code>deque</code> class implements a double ended queue (deque) datastructure.  To
+use the <code>deque</code> class, the header file <code>deque</code> must be included:
+        <pre>
+
+    #include &lt;deque&gt;
+        
+</pre>
+
+    A <em>deque</em> is comparable to a queue, but it allows reading and writing at
+both ends of the queue. Actually, the <code>deque</code> data type supports a lot more
+functionality than the <code>queue</code>, as will be clear from the following overview
+of member functions that are available for the <code>deque</code>:
+</p><p>First, several constructors are available for the <code>deque</code>:
+    <ul>
+    <li ><code>deque()</code> initializes an empty deque.
+    <li ><code>deque(argument)</code> initializes a deque with another deque <code>argument</code>.
+    <li ><code>deque(n, argument)</code> initializes a deque with <code>n</code> values
+provided by the <code>argument</code> variable. E.g., to initialize a deque with 10
+strings containing <code>Hello World</code> we do:
+        <pre>
+
+    deque&lt;string&gt;
+        hello(10, "Hello World");
+        
+</pre>
+
+    <li ><code>deque(size_type n)</code> initializes a deque with <code>n</code> default values of
+the datatype stored in the deque.
+    <li ><code>deque(iterator first, iterator last)</code> initializes the deque
+with the iterator range implied by <code>[first, last)</code>. The iterators
+<code>first</code> and <code>last</code> may also be pointers to the data-type stored in the
+deque.
+     </ul>
+    To access the individual elements of the deque, the following members are
+available:
+    <ul>
+    <li ><code>begin()</code>: this returns the iterator pointing to the front-element
+    <li ><code>end()</code>: the iterator beyond the back-element.
+    <li ><code>rbegin()</code>: the iterator pointing to the last (back) element
+    <li ><code>rend()</code>: and the corresponding one pointing just before the first
+(front) element.
+    <li > The subscript operator may be used to access random elements from the
+deque.
+    <li ><code>front()</code>: returns the element at the front of the deque. This member
+may be used for reassigning the front element as well.
+    <li ><code>back()</code>: and the element at the back of the deque. Again, reassignment
+is possible.
+    <li ><code>size()</code>, returning the number of elements in the deque.
+    <li ><code>empty()</code>, returns <code>true</code> if the deque contains no elements.
+     </ul>
+</p><p>The following operations and operator affect all elements of a deque:
+    <ul>
+    <li > The assignment operator (<code>=</code>) may be used to assign one deque
+object to another.
+    <li ><code>swap(argument)</code> is used to swap the contents of the current deque with
+deque <code>argument</code>.
+     </ul>
+    Elements may be added and removed from both ends of a deque:
+    <ul>
+    <li ><code>push_back(source)</code> adds <code>source</code> at the back of the deque,
+    <li ><code>push_front(source)</code> adds <code>source</code> at the front of the deque.
+    <li ><code>pop_back()</code> removes (but does not return) the element at the back of
+the deque.
+    <li ><code>pop_front()</code> removes (but does not return) the element at the front of
+the deque.
+     </ul>
+    Elements may also inserted somewhere within the deque:
+    <ul>
+    <li ><code>insert(position, argument)</code>: <code>argument</code> is inserted at the
+position indicated by the <code>position</code> iterator, which is itself returned by
+the function. <code>Argument</code> may be omitted, in which case the default value of
+the data-type used with the deque is inserted.
+    <li ><code>insert(pos, n, argument)</code>: At the position indicated by the
+<code>pos</code> iterator <code>n</code> new elements are inserted, all having value
+<code>argument</code>. There is no returnvalue.
+    <li ><code>insert(pos, first, last)</code>: At the position indicated by the <code>pos</code>
+iterator the elements implied by the iterator range <code>[first, last)</code> are
+inserted. There is no returnvalue.
+    <li ><code>resize(new_size, argument)</code>: the size of the deque is altered to
+<code>new_size</code>. If <code>new_size</code> exceeds <code>size()</code>, then the new elements are
+initialized to <code>argument</code>. If <code>argument</code> is omitted, the default value of
+the data type of the deque is used. If <code>new_size</code> is less than <code>size()</code>,
+then the size of the deque is merely reduced.  
+     </ul>
+    Apart from using <code>resize()</code>, elements may be removed from the deque as
+follows: 
+    <ul>
+    <li ><code>erase(pos)</code> erases all elements of the deque from the position
+indicated by the iterator <code>pos</code> to the end of the deque.
+    <li ><code>erase(first, last)</code> erases all elements implied by the iterator range
+<code>[first, last)</code>.
+    <li ><code>clear()</code> erases all elements from the deque.
+     </ul>
+
+</p><p><a name="l117"></a>
+<h3>8.2.6: The `map' container</h3>
+    <a name="containers/map"></a>
+    The <code>map</code> class implements a (sorted) associative array. To use the <code>map</code>,
+the header file <code>map</code> must be included:
+        <pre>
+
+    #include &lt;map&gt;
+        
+</pre>
+
+A <code>map</code> is filled with <em>Key/Value</em> pairs, which may be of any
+container-acceptable type. 
+</p><p>The key is used for looking up the information belonging to the key. The
+associated information is the <em>Value</em>. For example, a phonebook uses the
+names of people as the key, and uses the telephone number and maybe other
+information (e.g., the zip-code, the address, the profession) as the value.
+</p><p>Basically, the operations on a <code>map</code> are the storage of <em>Key/Value</em>
+combinations, and looking for a value, given a key. Each key can be stored
+only once in a <code>map</code>. If the same key is entered twice, the last entered 
+<em>key/value</em> pair is stored, and the pair that was entered before  is
+lost.
+</p><p>A single value that must be entered into a <code>map</code> must be constructed
+first. For this, every <code>map</code> defines a <code>value_type</code> which may be used to
+create values of that type. For example, a value for a <code>map&lt;string, int&gt;</code>
+can be constructed  as follows: 
+        <pre>
+
+    map&lt;string, int&gt;::value_type(string("Hello"), 1)
+        
+</pre>
+ 
+    The <code>value_type</code> is associated with the <code>map&lt;string, int&gt;</code> map.
+Its leftmost argument defines the key, its rightmost argument defines its
+value. 
+</p><p>Instead of using the line <code>map&lt;string, string&gt;::value_type(...)</code> over
+and over again, a <code>typedef</code> comes in handy:
+        <pre>
+
+    typedef map&lt;string, int&gt;::value_type MapStrIntValue
+        
+</pre>
+ 
+    Using this typedef, values for the <code>map&lt;string, int&gt;</code> may be constructed
+as
+        <pre>
+
+    MapStrIntValue(string("Hello"), 1);
+        
+</pre>
+ 
+    Apart from the basic operations (assignment, comparison, etc,), the
+<code>map</code> supports several more operations:
+    <ul>
+    <li > The constructor defining an empty <code>map</code>. The types of the <em>Key</em>
+and <em>Value</em> must be specified when the <code>map</code> is defined. E.g., to define a
+<code>map</code> in which the key is a <code>string</code> and the value an <code>int</code>, use:
+        <pre>
+
+    map&lt;string, int&gt;
+        object;
+        
+</pre>
+
+    To define a map in which the key is a <code>string</code> and the value is a pair
+of strings, use:
+        <pre>
+
+    map&lt;string, pair&lt;string, string&gt; &gt;
+        object;
+        
+</pre>
+
+    Note the white space between the two closing angular brackets <code>&gt;</code>: this
+is obligatory, as the immediate concatenation of the two angular brackets will
+be interpreted by the compiler as a rightshift operator (<code>&gt;&gt;</code>), which is not
+what you want here.
+    <li ><code>object(iterator first, iterator last)</code>: This constructor defines a
+<code>map</code> that is initialized by the values implied by the iterator range
+<code>[first, last)</code>. The range could be defined by pointers in an array of
+<em>Key/Value</em> pairs. For example (see section <a href="cplusplus08.html#PAIR">8.1</a> for a discussion of
+the <code>pair</code> container):
+        <pre>
+
+    pair&lt;string, int&gt;
+        pa[] = {
+            pair&lt;string,int&gt;("one", 1),
+            pair&lt;string,int&gt;("two", 2),
+            pair&lt;string,int&gt;("three", 3),
+        };
+
+    map&lt;string, int&gt;
+        object(&amp;pa[0], &amp;pa[3]);
+        
+</pre>
+ 
+    Note that <code>&amp;pa[3]</code>, as with the iterators, points to the first element
+that must <em>not</em> be included in the <code>map</code>. The particular array element
+does not have to exist. 
+</p><p>Also note that key/value pairs are only entered if the corresponding key
+has not yet been entered.  If the last element of <code>pa</code> would have been
+<code>"one", 3</code>, only two elements would have entered the <code>map</code>: <code>"one", 1</code>
+and <code>"two", 2</code>. The value <code>"one", 3</code> would have been ignored silently.
+</p><p>Finally, it is worth noting that the <code>map</code> receives its own copies of
+the data to which the iterators point. The following example illustrates
+  this:
+        <pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;utility&gt;
+#include &lt;map&gt;
+
+class MyClass
+{
+    public:
+        MyClass()
+        {
+            cout &lt;&lt; "MyClass constructor called\n";
+        }
+        MyClass(const MyClass &amp;other)
+        {
+            cout &lt;&lt; "MyClass copy constructor called\n";
+        }
+        ~MyClass()
+        {
+            cout &lt;&lt; "MyClass destructor called\n";
+        }
+};
+
+int main()
+{
+    pair&lt;string, MyClass&gt;
+        pairs[] =
+        {
+            pair&lt;string, MyClass&gt;("one", MyClass()),
+        };
+
+    cout &lt;&lt; "pairs constructed\n";
+
+    map&lt;string, MyClass&gt;
+        mapsm(&amp;pairs[0], &amp;pairs[1]);
+
+    cout &lt;&lt; "mapsm constructed\n";
+
+    return (0);
+}
+</pre>
+
+ First, the constructors of a <code>MyClass</code> object is called to
+initialize the first element of the array <code>pairs</code>. This object is copied
+into the first element of the array <code>pairs</code> by calling the copy
+constructor. Next, the original element is not needed anymore, and gets
+destroyed. At that point the array <code>pairs</code> is constructed. Next, the <code>map</code>
+constructs a temporary <code>pair</code> object, from which the map element is
+constructed. Having constructed the map element, the temporary <code>pair</code>
+objects is destroyed. Eventually, when the program terminates, the <code>pair</code>
+element stored in the <code>map</code> is destroyed too.
+</p><p>When run, the program produces the following output:
+        <pre>
+
+    MyClass constructor called
+    MyClass copy constructor called
+    MyClass destructor called
+    pairs constructed
+    MyClass copy constructor called
+    MyClass copy constructor called
+    MyClass destructor called
+    mapsm constructed
+    MyClass destructor called
+        
+</pre>
+
+    <li ><code>object(argument)</code>: This constructor initializes <code>object</code> with an
+existing map <code>argument</code> having the same key/value combinations.
+     </ul>
+    The standard iterators are also available:
+    <ul>
+    <li ><code>begin()</code>
+    <li ><code>end()</code>
+    <li ><code>rbegin()</code>
+    <li ><code>rend()</code>
+     </ul>
+    Other member functions of the <code>map</code> are:
+    <ul>
+    <li ><code>empty()</code>,
+    <li ><code>size()</code>,
+    <li ><code>swap()</code>,
+    <li > The subscript operator (<code>[]</code>), which may be used to access and
+redefine values. Here, the argument of the subscript operator is the keyvalue.
+If the provided key is not available in the <code>map</code>, a new data element is
+added to the <code>map</code>, using the default value or default constructor to
+initialize the value part of the newly added key/value combination. This
+default value is then returned. 
+</p><p>When initializing a new or reassigning another element of the map, the
+right-hand side of the assignment operator must have the type of the value
+part of the map. E.g., to add another element <code>"two"</code> to the map that was
+defined in the previous example, use the following construction:
+        <pre>
+
+    mapsm["two"] = MyClass();
+        
+</pre>
+
+    <li ><code>insert(argument)</code> is used to insert a new value <code>argument</code> in the
+map. The returnvalue is a <code>pair&lt;iterator,bool&gt;</code>. The <code>bool</code> field
+indicates whether <code>source</code> was inserted (<code>true</code> is returned) or not (in
+which case the <code>key</code> field of <code>source</code> was already available).  In both
+cases the iterator field points to the data-element in the <code>map</code>: a new
+element if <code>true</code> is returned, the existing element if <code>false</code> is
+returned. The following little program illustrates this:
+    <pre>
+#include &lt;string&gt;
+#include &lt;map&gt;
+#include &lt;iostream&gt;
+
+int main()
+{
+    pair&lt;string, int&gt;
+        pa[] = {
+            pair&lt;string,int&gt;("one", 1),
+            pair&lt;string,int&gt;("two", 2),
+            pair&lt;string,int&gt;("three", 3),
+        };
+
+    map&lt;string, int&gt;
+        xmap(&amp;pa[0], &amp;pa[3]);
+
+                            // {four, 4} and true (1) is returned  here
+    pair&lt;map&lt;string, int&gt;::iterator, bool&gt;
+        ret = xmap.insert(map&lt;string, int&gt;::value_type("four", 4));
+
+    cout &lt;&lt; ret.first-&gt;first &lt;&lt; " " &lt;&lt; ret.first-&gt;second &lt;&lt; " " &lt;&lt; 
+            ret.second &lt;&lt; " " &lt;&lt; xmap["four"] &lt;&lt; endl;
+
+                            // {four, 4} and false (0) is returned  here
+    ret = xmap.insert(map&lt;string, int&gt;::value_type("four", 0));
+    
+    cout &lt;&lt; ret.first-&gt;first &lt;&lt; " " &lt;&lt; ret.first-&gt;second &lt;&lt; " " &lt;&lt; 
+            ret.second &lt;&lt; " " &lt;&lt; xmap["four"] &lt;&lt; endl;
+
+    return (0);
+}
+</pre>
+
+    Note the somewhat peculiar constructions like 
+        <pre>
+
+    cout &lt;&lt; ret.first-&gt;first &lt;&lt; " " &lt;&lt; ret.first-&gt;second &lt;&lt; ...
+        
+</pre>
+
+    Here <code>ret</code> is the <code>pair</code> variable returned by the <code>insert</code> member
+function. Its <code>first</code> field is an iterator into the t(map&lt;string, int&gt;), so
+it can be considered a pointer to a <code>map&lt;string, int&gt;</code> value type. These
+value types themselves are pairs too, having <code>first</code> and <code>second</code>
+fields. Consequently, <code>ret.first-&gt;first</code> is the <em>key</em> field of the map
+value (a <code>string</code>), and <code>ret.first-&gt;second</code> is the <em>value</em> field (an
+<code>int</code>).
+    <li ><code>insert(position, argument)</code>. This is another way to
+insert a value, this time using a specific position within the
+<code>map</code>. <code>Position</code> is an <code>map&lt;keytype, valuetype&gt;::iterator</code>. 
+Although a specific position is given, the new element is inserted at
+its appropriate sorted location within the <code>map</code>, so <code>mapVariable.begin()</code>
+could be used for the <code>position</code>. 
+    <li ><code>insert(first, last)</code>: this member function may be
+used to insert a range of elements implied by the iterator range
+<code>[first, last)</code> into the <code>map</code>. Again, elements are only inserted if
+their keys are not yet in the <code>map</code>, and the <code>map</code> remains sorted by key
+values.  Instead of iterators <em>pointers</em> to elements of the same value type
+as stored in the <code>map</code> may be used.
+    <li ><code>erase(position)</code>: erases the element at the indicated
+position, which is an iterator of the particular map.
+    <li ><code>erase(key)</code>: erases the element having <code>key</code> as its key
+value. 
+    <li ><code>erase(first, last)</code>: erases the range of elements
+implied by the iterator range <code>[first, last)</code>.
+    <li ><code>clear()</code>: erases all elements from the <code>map</code>.
+    <li ><code>find(key)</code>: an iterator is returned pointing to the
+element whose key is <code>key</code>. If the element isn't available, the iterator 
+<code>end()</code> is returned. The following example illustrates the use of the
+<code>find()</code> member function:
+    <pre>
+
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;utility&gt;
+#include &lt;map&gt;
+
+int main()
+{
+    map&lt;string, int&gt;
+        mapsi;
+
+    mapsi["one"] = 1;
+
+    map&lt;string, int&gt;::iterator
+        it = mapsi.find("one");
+
+    cout &lt;&lt; "\"one\" " &lt;&lt; 
+            (it == mapsi.end() ? "not " : "") &lt;&lt; 
+            "found\n";
+
+    it = mapsi.find("three");
+
+    cout &lt;&lt; "\"three\" " &lt;&lt; 
+            (it == mapsi.end() ? "not " : "") &lt;&lt; 
+            "found\n";
+
+    return (0);
+}
+</pre>
+
+</ul>
+The following members have special meanings with the <a href="cplusplus08.html#MULTIMAP">multimap</a>,
+but they are defined with the plain <code>map</code> too:
+<ul>
+    <li ><code>count(key)</code>: returns 1 if the provided key is available in
+the <code>map</code>, otherwise 0 is returned.
+    <li ><code>lower_bound(key)</code>: returns an iterator pointing to the
+first element having a key equal to or exceeding
+the key value that is passed to the member function. If no such value exists,
+<code>target.end()</code> is returned.
+    <li ><code>upper_bound(key_type key)</code>: same as the previous function.
+    <li ><code>equal_range(key_type key)</code>: a <code>pair&lt;iterator,iterator&gt;</code> is
+returned. In the case of a <code>map</code>, the range consists of the data element
+having as its key the key value that is passed to the function. If no such
+data element could be found, the pair <code>(end(), end())</code> is returned.  
+     </ul>
+
+</p><p>
+    <a name="MULTIMAP"></a><a name="l118"></a>
+<h3>8.2.7: The `multimap' container</h3>
+    <a name="containers/multimap"></a>
+    Like the <code>map</code>, the <code>multimap</code> class implements also a (sorted)
+associative array. To use the <code>multimap</code>, the header file <code>multimap</code> must
+be included:
+        <pre>
+
+    #include &lt;multimap&gt;
+        
+</pre>
+
+The main difference between the <code>map</code> and the <code>multimap</code> is that the
+multimap supports multiple entries of the same key, whereas the <code>map</code>
+contains only unique keys. Note that multiple entries of the same key <em>and</em>
+the same value are also accepted.
+</p><p>The functions that are available with the multimap and the map are practically
+the same, with the exception of the subscript operator (<code>[]</code>), which is not
+supported with the multimap. This is understandable: if multiple entries of
+the same key are allowed, which of the possible values should be returned for
+<code>myMap[myKey]</code>?
+</p><p>Below the available constructors and member functions are mentioned. They are
+presented without further comment if their function is identical to that of
+the <code>map</code> container. 
+</p><p>A single value that is to be entered into a multimap must be constructed. For
+this, a multimap defines a <code>value_type</code>, corresponding to a particular
+multimap type, which may be used to create values of that type. For example,
+with a <code>multimap&lt;string, string&gt;</code> it can be used as follows:
+        <pre>
+
+    multimap&lt;string, string&gt;::value_type(string("Hello"), 1)
+        
+</pre>
+ 
+</p><p>Here are the constructors that are available for the
+multimap: 
+    <ul>
+    <li > The constructor defining an empty multimap. E.g.,
+        <pre>
+
+    multimap&lt;string, int&gt;
+        object;
+        
+</pre>
+
+    <li ><code>object(first, last)</code>: This constructor defines a multimap that is
+initialized by the values implied by the iterator range <code>[first, last)</code>.
+    <li ><code>object(argument)</code>: This constructor initializes <code>object</code> with an
+existing multimap.
+     </ul>
+     The standard iterator producing member functions are available:
+    <ul>
+    <li ><code>begin()</code>
+    <li ><code>end()</code>
+    <li ><code>rbegin()</code>
+    <li ><code>rend()</code>
+     </ul>
+    Other available member functions are:
+    <ul>
+    <li ><code>empty()</code>
+    <li ><code>size()</code>
+    <li ><code>swap()</code>
+    <li ><code>insert(argument)</code> is used to insert a new value <code>argument</code> in the
+multimap. The returnvalue is an <em>iterator</em> (and <em>not</em> a 
+<code>pair&lt;iterator,bool&gt;</code> as with the map container), pointing to the newly
+added element.
+    <li ><code>insert(position, argument)</code>.
+    <li ><code>insert(first, last)</code>.
+    <li ><code>erase(position)</code>.
+    <li ><code>erase(key)</code>.
+    <li ><code>erase(first, last)</code>.
+    <li ><code>clear()</code>.
+    <li ><code>find(key)</code>: an iterator is returned pointing to the
+(first) element whose key is <code>key</code>. If the element isn't available,
+<code>target.end()</code> is returned.
+    <li ><code>count(key)</code>: returns the number of times the provided key is
+available in the multimap.
+    <li ><code>lower_bound(key)</code>: returns an iterator pointing to the first
+of a series of data element having the same keys of which the value is equal
+to or exceeds the key value that is passed to the member function. If no such
+value exists, the behavior of the function is undefined.
+    <li ><code>upper_bound(key)</code>: returns an iterator pointing to the last
+of a series of data element having the same keys of which the value is equal
+to or exceeds the key value that is passed to the member function. If no such
+value exists, the behavior of the function is undefined.
+    <li ><code>equal_range(key)</code>: a <code>pair&lt;iterator,iterator&gt;</code> is returned,
+defining the range of data elements all having key value <code>key</code>.  If no such
+data element could be found, the pair <code>(end(), end())</code> is returned.  
+     </ul>
+    The subscript operator is <em>not</em> available.
+</p><p>
+</p><p><a name="l119"></a>
+<h3>8.2.8: The `set' container</h3>
+    <a name="containers/set"></a>
+    The <code>set</code> class implements a set of (sorted) values. To use the <code>set</code>,
+the header file <code>set</code> must be included:
+        <pre>
+
+    #include &lt;set&gt;
+        
+</pre>
+ 
+    A set is filled with values, which may be of any container-acceptable
+type. Each value can be stored only once in a set.
+</p><p>A single value that is to be entered in a set must be constructed. For this, a
+set defines a <code>value_type</code>, corresponding to a particular type of set, which
+may be used to create values of that type. For example, with a <code>set&lt;string&gt;</code>
+it can be used as follows:
+        <pre>
+
+    set&lt;string&gt;::value_type(string("Hello"))
+        
+</pre>
+ 
+    Instead of using the line <code>set&lt;string&gt;::value_type(...)</code> over and
+over again, a <code>typedef</code> may come in handy here:
+        <pre>
+
+    typedef set&lt;string&gt;::value_type SetSValue 
+        
+</pre>
+ 
+    Using this typedef, values for the <code>set&lt;string&gt;</code> may be
+constructed as follows:
+        <pre>
+
+    SetSValue(string("Hello"))
+        
+</pre>
+ 
+    Apart from the basic operations (assignment, comparison, etc,), the
+<code>set</code> supports several more operations. They are:
+    <ul>
+    <li > The constructor defining an empty set. When the set is
+defined, the type of the value must be specified. E.g., to
+define a set in which <code>int</code>s can be stored, use:
+        <pre>
+
+    set&lt;int&gt;
+        object;
+        
+</pre>
+
+    <li ><code>object(iterator first, iterator last)</code>: This constructor defines a set
+that is initialized by the values implied by the iterator range <code>[first,
+last)</code>. The range may also be defined by pointers in an array of values of the
+same type as the values that must be stored in the set.
+For example:
+        <pre>
+
+    int
+        ia[] = {1, 2, 3, 4, 5};
+
+    set&lt;int&gt;
+        object(&amp;ia[0], &amp;ia[5]);
+        
+</pre>
+
+    Note that <code>&amp;ia[5]</code> points to the first element that must <em>not</em> be
+included in the set. Also note that all values in the set will be
+different: it is not possible to store the same value more than once.
+    <li ><code>object(argument)</code>: This constructor initializes <code>object</code> with an
+existing set <code>argument</code>, constructing a copy of the set <code>argument</code>.
+     </ul>
+    The standard iterators are all available:
+    <ul>
+    <li ><code>begin()</code>
+    <li ><code>end()</code>
+    <li ><code>rbegin()</code>
+    <li ><code>rend()</code>
+     </ul>
+</p><p>Other member functions are:
+    <ul>
+    <li ><code>empty()</code>,
+    <li ><code>size()</code>,
+    <li ><code>swap(argument)</code>, swapping the contents of the current set and the set
+<code>argument</code>. 
+    <li ><code>insert(argument)</code> is used to insert a new value <code>argument</code> in the
+set. <code>Argument</code> is a value of the appropriate value type of the set. The
+returnvalue is a <code>pair&lt;iterator, bool&gt;</code>. The <code>bool</code> field indicates whether
+<code>source</code> was inserted (<code>true</code> is returned) or not (in which case the
+<code>key</code> field of <code>source</code> was already available).  In both cases the
+iterator field points to the data-element in the set: a new element if
+<code>true</code> is returned, the existing element if <code>false</code> is returned. An
+example using the <code>insert()</code> member function is given below:
+    <pre>
+#include &lt;set&gt;
+#include &lt;utility&gt;
+
+int main()
+{
+    set&lt;int&gt;
+        object;
+
+    pair&lt;set&lt;int&gt;::iterator, bool&gt;
+        result = object.insert(set&lt;int&gt;::value_type(4));
+
+    cout &lt;&lt; "Element " &lt;&lt; *result.first &lt;&lt; " was " &lt;&lt;
+        (result.second ? "" : "not ") &lt;&lt; "inserted\n";
+
+    result = object.insert(set&lt;int&gt;::value_type(4));
+
+    cout &lt;&lt; "Element " &lt;&lt; *result.first &lt;&lt; " was " &lt;&lt;
+        (result.second ? "" : "not ") &lt;&lt; "inserted\n";
+
+    return (0);
+}
+</pre>
+
+    <li ><code>insert(position, argument)</code>. This is another way to insert a value
+<code>argument</code>, this time using a specific position within the set, indicated by
+<code>set&lt;type&gt;::iterator position</code>. Although a specific position is given, the
+new element is inserted at its appropriate sorted location within the set. An
+insertion could therefore be realized using a statement like
+        <pre>
+
+    object.insert(object.begin(), set&lt;int&gt;::value_type(1));
+        
+</pre>
+
+    <li ><code>insert(first, last)</code>: this member function may be
+used to insert a range of elements implied by the iterator range
+<code>[first, last)</code> into the set. Again, elements are only inserted if their
+keys are not yet in the set, and the set remains sorted.  Instead of iterators
+<em>pointers</em> to elements of the same value type as stored in the set may be
+used.
+    <li ><code>erase(position)</code>: erases the element at the indicated
+<code>set&lt;type&gt;::iterator position</code>. 
+    <li ><code>erase(argument)</code>: erases the element having <code>argument</code> as its 
+value. 
+    <li ><code>erase(first, last)</code>: erases the range of elements implied by the
+iterator range <code>[first, last)</code>.
+    <li ><code>clear()</code>: erases all elements from the set.
+    <li ><code>find(argument)</code>: an iterator is returned pointing to the element
+whose value is <code>argument</code>.  If the element isn't available, <code>object.end()</code>
+is returned.  
+     </ul>
+    The following members have special meanings with the
+<a href="cplusplus08.html#MULTISET">multiset</a>, but they are defined with the plain set too:
+    <ul>
+    <li ><code>count(argument)</code>: returns 1 if the provided value is available in
+the set, otherwise 0 is returned.
+    <li ><code>lower_bound(argument)</code>: returns an iterator pointing to the
+(first) data element having a  value which is equal to or exceeds
+the value that is passed to the member function. If no such value exists,
+the behavior of the function is undefined.
+    <li ><code>upper_bound(argument)</code>: same as the previous function.
+    <li ><code>equal_range(argument)</code>: a <code>pair&lt;set&lt;type&gt;::iterator,
+set&lt;type&gt;::iterator&gt;</code> is returned. In the case of a set, the range consists of
+a pair of iterators of which the first iterator points to the element of the
+set containing the value <code>argument</code>, while the second iterator points beyond
+that element (or to <code>end()</code> if the first iterator points to the last
+element in the set).  If the set does not contain a data element having value
+<code>argument</code> the pair <code>(end(), end())</code> is returned.
+     </ul>
+
+</p><p>
+    <a name="MULTISET"></a><a name="l120"></a>
+<h3>8.2.9: The `multiset' container</h3>
+    <a name="containers/multiset"></a>
+    Like the <code>set</code>, the <code>multiset</code> class also implements a (sorted)
+set of values. To use the <code>multiset</code>, the header file <code>multiset</code> must
+be included:
+        <pre>
+
+    #include &lt;multiset&gt;
+        
+</pre>
+
+The main difference between the <code>set</code> and the <code>multiset</code> is that the
+multiset supports multiple entries of the same value, whereas the <code>set</code>
+contains only unique values.
+</p><p>The member functions that are available for the set are also available for the
+multiset.  They are presented below without further comment if their functions
+and parameters are comparable to those used by the  <code>set</code> container's
+members. 
+</p><p>A single value that is to be entered into a multiset must be constructed. For
+this, a multiset defines a <code>value_type</code>, corresponding to a particular
+multiset type, which may be used to create values of that type. For example,
+with a <code>multiset&lt;string&gt;</code> it can be used as follows:
+        <pre>
+
+    multiset&lt;string&gt;::value_type(string("Hello"))
+        
+</pre>
+ 
+    Here are the constructors that are available for the
+multiset: 
+    <ul>
+    <li > The constructor defining an empty multiset. E.g.,
+        <pre>
+
+    multiset&lt;string&gt;
+        object;
+        
+</pre>
+
+    <li ><code>object(first, last)</code>: This constructor defines a
+multiset that is initialized by the values implied by the iterator range
+<code>[first, last)</code>.
+    <li ><code>object(argument)</code>: This constructor initializes <code>object</code> with an
+existing multiset <code>argument</code>, creating a copy of that multiset.
+     </ul>
+ The standard iterators:
+    <ul>
+    <li ><code>begin()</code>
+    <li ><code>end()</code>
+    <li ><code>rbegin()</code>
+    <li ><code>rend()</code>
+     </ul>
+    Other member functions are:
+    <ul>
+    <li ><code>empty()</code>,
+    <li ><code>size()</code>,
+    <li ><code>swap(argument)</code>, <code>argument</code> is an existing  multiset.
+    <li ><code>insert(argument)</code> is used to insert a new value
+<code>multiset&lt;type&gt;::value_type(argument)</code> into the multiset. The returnvalue is
+an <em>iterator</em> (and <em>not</em> a <code>pair&lt;iterator, bool&gt;</code> as with the set
+container), pointing to the newly added element.
+    <li ><code>insert(position, argument)</code>. <code>Position</code> is an iterator of the
+multiset, and <code>argument</code> is a value for the multiset.
+    <li ><code>insert(first, last)</code>, inserting values defined by the iterator range
+<code>[first, last)</code>.
+    <li ><code>erase(position)</code>, 
+    <li ><code>erase(argument)</code>,
+    <li ><code>erase(first, last)</code>,
+    <li ><code>clear()</code>.
+    <li ><code>find(argument)</code>: an iterator is returned pointing to the
+(first) element whose value is <code>argument</code>. If the element isn't available,
+<code>object.end()</code> is returned.
+    <li ><code>count(argument)</code>: returns the number of times the provided
+value <code>argument</code> is available in the multiset.
+    <li ><code>lower_bound(argument)</code>: returns an iterator pointing to the first of a
+series of data element having values which are equal to or exceed the value
+<code>argument</code> that is passed to the member function. If no such value exists,
+the behavior of the function is undefined.
+    <li ><code>upper_bound(value)</code>: returns an iterator pointing to the last of a
+series of data element having values which are equal to or exceed the value
+<code>argument</code> that is passed to the member function. If no such value exists,
+the behavior of the function is undefined.
+    <li ><code>equal_range(argument)</code>: a <code>pair&lt;iterator, iterator&gt;</code> is returned,
+defining the range of data elements all having the value <code>argument</code>. If no
+such elements could be found, the pair <code>(end(), end())</code> is returned.
+     </ul>
+</p><p>A small example showing the use of various member functions of a multiset is
+given below:
+    <pre>
+    #include &lt;string&gt;
+    #include &lt;set&gt;
+    #include &lt;iostream&gt;
+    
+    int main()
+    {
+        string
+            sa[] = 
+            {
+                "alpha", 
+                "echo", 
+                "hotel", 
+                "mike", 
+                "romeo"
+            };
+     
+        multiset&lt;string&gt;
+            xset(&amp;sa[0], &amp;sa[5]);
+    
+        xset.insert(multiset&lt;string&gt; ::value_type("echo"));
+        xset.insert(multiset&lt;string&gt; ::value_type("echo"));
+        xset.insert(multiset&lt;string&gt; ::value_type("echo"));
+    
+        multiset&lt;string&gt;::iterator
+            it = xset.find("echo");
+    
+        for (; it != xset.end(); ++it)
+            cout &lt;&lt; *it &lt;&lt; " ";
+        cout &lt;&lt; endl;
+    
+        pair
+        &lt;
+            multiset&lt;string&gt;::iterator,
+            multiset&lt;string&gt;::iterator
+        &gt;
+            itpair = xset.equal_range("echo");
+    
+        for (; itpair.first != itpair.second; ++itpair.first)
+            cout &lt;&lt; *itpair.first &lt;&lt; " ";
+    
+        cout &lt;&lt; endl &lt;&lt; 
+                xset.count("echo") &lt;&lt; " occurrences of 'echo'" &lt;&lt; endl;
+    
+    
+        return (0);
+    }
+</pre>
+
+
+</p><p><a name="l121"></a>
+<h3>8.2.10: The `stack' container</h3>
+    <a name="containers/stack"></a>
+    The <code>stack</code> class implements a stack datastructure.  To use the <code>stack</code>,
+the header file <code>stack</code> must be included:
+        <pre>
+
+    #include &lt;stack&gt;
+        
+</pre>
+
+    A stack is also called a <em>first-in last-out</em> datastructure, as the first
+item to enter the stack is the last item that will be removed from it.
+A stack is an extremely useful datastructure in situations where data
+must be temporarily be available. For example, programs maintain a stack to
+store local variables of functions: these variables live only as long as the
+functions live, contrary to global (or static local) variables, which live for
+as long as the program itself lives. Another example is found in calculators
+using the <em>Reverse Polish Notation (RPN)</em>, in which the operands of
+expressions are entered in the stack, and the operators pop their operands and
+push the results of their work.
+</p><p>As an example of the use of a stack, consider figure <a href="cplusplus08.html#StackFig">9</a>, in which
+the contents of the stack is shown while the expression <code>(3 + 4) * 2</code> is
+evaluated. In the RPN this expression becomes <code>3 4 + 2 *</code>, and figure
+<a href="cplusplus08.html#StackFig">9</a> shows the stack contents after each <em>token</em> (i.e., the
+operands and the operators) is read from the input. Notice that indeed each
+operand is pushed on the stack, while each operator changes the contents of
+the stack.
+    <a name="StackFig"></a></p><p><center><img src="containers/stack/stack.gif" align="bottom" alt="figure 9 is shown here."><br> 
+figure 9: The contents of a stack while evaluating <code>3 4 + 2 *</code> 
+</center></p><p>
+    
+    The expression is evaluated in five steps. The caret between the tokens in
+the expressions shown on the first line of figure <a href="cplusplus08.html#StackFig">9</a> shows what
+token has just been read. The next line shows the actual stack-contents, and
+the final line shows the steps for referential purposes. Note that at step 2,
+two numbers have been pushed on the stack. The first number (<code>3</code>) is now at
+the bottom of the stack. Next, in step 3, the <code>+</code> operator is read. The
+operator pops two operands (so that the stack is empty at that moment),
+calculates their sum, and pushes the resulting value (<code>7</code>) on the
+stack. Then, in step 4, the number <code>2</code> is read, which is dutifully pushed on
+the stack again. Finally, in step 5 the final operator <code>*</code> is read, which
+pops the values <code>2</code> and <code>7</code> from the stack, computes their product, and
+pushes the result back on the stack. This result (<code>14</code>) could then be popped
+to be displayed on some medium.
+</p><p>From figure <a href="cplusplus08.html#StackFig">9</a> we see that a stack has one point (the <em>top</em>)
+where items can be added to and removed from the stack. Furthermore, values
+can be pushed and popped from a stack.
+</p><p>Bearing this model of the stack in mind, let's see what we can formally 
+do with it, using the <code>stack</code> container.
+</p><p>A stack can be initialized by an existing other stack, or it can be created
+empty: 
+        <pre>
+
+    stack&lt;int&gt;
+        stack1;
+    ...
+    stack&lt;int&gt;
+        stack2(stack1);
+        
+</pre>
+
+    Apart from these constructors, and the basic operators for comparison and
+assignment (see the <a href="cplusplus08.html#Containers">introductory paragraph</a> of this chapter),
+the following member functions are available:
+    <ul>
+    <li ><code>empty()</code>, 
+    <li ><code>size()</code>,
+    <li ><code>top()</code>: returns the first element that would be removed by
+<code>pop()</code>. Using <code>top()</code> the value at the top of the stack may be inspected
+or reassigned.
+    <li ><code>push(argument)</code>: pushes item <code>argument</code> on the stack.
+    <li ><code>void pop()</code>: removes (but does not return) the element at the top of
+the stack.
+     </ul>
+    Note that the stack does not support iterators or a subscript
+operator. The only elements that can be accessed is its top element, and it
+can only be emptied by repeatedly popping the element at the top.
+</p><p>
+</p><p>
+    <a name="HASHMAP"></a><a name="l122"></a>
+<h3>8.2.11: The `hash_map' and other hashing-based containers</h3>
+    <a name="containers/hashmap"></a>
+    The <code>(multi) map</code> and <code>(multi) set</code> containertypes store sorted keys. This
+is in general not the fastest way to store keys with respect to storage and
+retrieval. The main benefit of sorted keys is that a listing of sorted keys
+appeals more to humans than an unsorted list.  However, a by far faster method
+of storing keys is to use <em>hashing</em>. 
+</p><p>Hashing uses a function (called the <em>hash</em>-function) to compute a (unsigned)
+number from the key, which number is thereupon used as an index in the table
+in which the keys are stored. Retrieval of a key is as simple as computing the
+hashvalue of the provided key, and looking at the table in the computed
+indexlocation: if the key is present, it is stored in the table, and its value
+can be returned. If it's not present, the key is not stored.
+</p><p>Boundary conditions arise when a computed index position is already occupied
+by another element. For these situations the abstract containers have
+solutions available, but that topic is beyond the subject of this chapter.
+</p><p>The <em>GNU g++</em> compiler supports the <em>hash_(multi)map</em> and
+<code>hash_(multi)set</code> containers. Below the <code>hash_map</code> container is
+illustrated. The other containers using hashing (<code>hash_multimap, hash_set</code>
+and <code>hash_multiset</code>) operate correspondingly.
+</p><p>Concentrating on the <code>hash_map</code>, its constructor needs a key-type, a
+value-type, an object creating a hashvalue for the key, and an object
+comparing two keys for equality.
+</p><p>The <code>hash_map</code> class implements an associative array in which the key is
+stored according to some hashing scheme. To use the <code>hash_map</code>, the header
+file <code>hash_map</code> must be included:
+        <pre>
+
+    #include &lt;hash_map&gt;
+        
+</pre>
+
+    Hash functions are available for <code>char const *</code> keys, and for all the
+scalar numerical types <code>char, short, int</code> etc.. If another datatype must be
+used, a hash function and an equality test must be implemented, possibly using
+<em>function objects</em> (see section <a href="cplusplus07.html#FUNOBJ">7.8</a>). For both situations examples
+are given below.
+</p><p>The class implementing the hash-function could be called <code>hash</code>.  Its
+function-call operator returns the hashvalue of the key which is passed as its
+argument.
+</p><p>A <em>generic algorithm</em> (see section <a href="cplusplus11.html#STL">11</a>) exists for the test of equality
+(i.e., <code>equal_to()</code>), which can be used if the key's data type supports the
+equality operator. Alternatively, a function object could also be constructed
+here, supporting the equality test of two keys. Again, both situations are
+illustrated below.
+</p><p>In the first example a <code>hash_map</code> is defined for a <code>string, int</code>
+combination using existing template functions. 
+</p><p>The test for equality is implemented using an instantiation of the
+<code>equal_to</code> generic algorithm. The hash function uses a <em>template
+specialization</em> for the <code>hash</code> template class. The how and why of template
+specializations are covered in chapter <a href="cplusplus17.html#Templates">17</a>.
+</p><p>The <code>hash&lt;string&gt;</code> explicit specialization in fact uses the predefined
+<code>hash&lt;char const *&gt;</code> template, but the roundabout way is chosen here to
+illustrate how a template explicit specialization can be constructed. Here it
+is: 
+        <pre>
+
+    template &lt;&gt;
+    class hash&lt;string&gt;
+    {
+        public:
+            size_t operator()(string const &amp;str) const
+            {
+                hash&lt;char const *&gt;
+                    h;
+
+                return (h(str.c_str()));
+            }
+    };
+        
+</pre>
+
+    The following program defines a map containing the names of the
+months of the year and the number of days these months (usually) have. Then,
+using the subscript operator the days in several months are displayed. The
+equality operator used the generic algorithm <code>equal_to&lt;string&gt;</code>, which is
+the default fourth argument of the <code>hash_map</code> constructor:
+        <pre>
+
+    #include &lt;iostream&gt;
+    #include &lt;string&gt;
+    #include &lt;hash_map&gt;
+    
+    template &lt;&gt; class hash&lt;string&gt;; // insert the above mentioned template
+                                    // here 
+
+    int main()
+    {
+        hash_map&lt;string, int, hash&lt;string&gt; &gt;
+            months;
+    
+        months["january"] = 31;
+        months["february"] = 28;
+        months["march"] = 31;
+        months["april"] = 30;
+        months["may"] = 31;
+        months["june"] = 30;
+        months["july"] = 31;
+        months["august"] = 31;
+        months["september"] = 30;
+        months["october"] = 31;
+        months["november"] = 30;
+        months["december"] = 31;
+      
+        cout &lt;&lt; "september -&gt; " &lt;&lt; months["september"] &lt;&lt; endl &lt;&lt;
+                "april     -&gt; " &lt;&lt; months["april"] &lt;&lt; endl &lt;&lt;
+                "june      -&gt; " &lt;&lt; months["june"] &lt;&lt; endl &lt;&lt;
+                "november  -&gt; " &lt;&lt; months["november"] &lt;&lt; endl;
+    
+        return (0);
+    }
+        
+</pre>
+
+    Note that the definition <code>hash_map&lt;string, int, hash&lt;string&gt; &gt; months;</code>
+may be written simpler if the key is a <code>char const *</code>: 
+<code>hash_map&lt;char const *, int&gt; months;</code>
+</p><p>The next example shows an alternative implementation, using function
+objects. The class <code>Equal</code> defines the equality test of two keys in its
+function call operator <code>operator()</code>, and a <code>Equal</code> object is now
+explicitly mentioned when the <code>hash_map</code> is constructed. Similarly, the
+<code>hashString</code> class defines the hash function of the key. A <code>hashString</code>
+object is also passed explicitly to the constructor of the <code>hash_map</code>:
+        <pre>
+    #include &lt;iostream&gt;
+    #include &lt;string&gt;
+    #include &lt;hash_map&gt;
+
+    class Equal
+    {
+        public:
+            size_t operator()(string const &amp;s1, string const &amp;s2) const
+            {
+                return (s1 == s2);
+            }
+    };
+
+    class hashString
+    {
+        public:
+            size_t operator()(string const &amp;str) const
+            {
+                hash&lt;char const *&gt;
+                    h;
+
+                return (h(str.c_str()));
+            }
+    };
+
+    int main()
+    {
+        hash_map
+        &lt;
+            string, 
+            int,
+            hashString,
+            Equal    
+        &gt;
+            months;
+
+        months["january"] = 31;
+        months["february"] = 28;
+        months["march"] = 31;
+        months["april"] = 30;
+        months["may"] = 31;
+        months["june"] = 30;
+        months["july"] = 31;
+        months["august"] = 31;
+        months["september"] = 30;
+        months["october"] = 31;
+        months["november"] = 30;
+        months["december"] = 31;
+
+        cout &lt;&lt; "february -&gt; " &lt;&lt; months["february"] &lt;&lt; endl &lt;&lt;
+                "april     -&gt; " &lt;&lt; months["april"] &lt;&lt; endl &lt;&lt;
+                "june      -&gt; " &lt;&lt; months["june"] &lt;&lt; endl &lt;&lt;
+                "november  -&gt; " &lt;&lt; months["november"] &lt;&lt; endl &lt;&lt;
+                "december  -&gt; " &lt;&lt; months["december"] &lt;&lt; endl;
+
+        return (0);
+    }
+</pre>
+
+</p><p>Like the <code>map</code>, a single value that will be entered into a hash_map must
+be constructed. For this, a <code>hash_map</code> defines a <code>value_type</code>,
+corresponding to a particular <code>hash_map</code>-type, which may be used to create
+values of that type. For example, with a <code>hash_map&lt;string, int&gt;</code> it can be
+used as follows:
+        <pre>
+
+    hash_map&lt;string, int&gt;::value_type(string("Hello"), 1)
+        
+</pre>
+ 
+    All the member functions and constructors that are available for the
+<code>map</code> datatype can also be used for the <code>hash_map</code>. The constructor
+<code>object(n)</code> defines a <code>hash_map</code> consisting of an initial number of <code>n</code>
+slots to put key/value combinations in. This number is automatically extended
+when needed.
+</p><p>The <code>hash_multimap, hash_set</code> and <code>hash_multiset</code> containers are used
+analogously. For these containers the <code>equal</code> and <code>hash</code> classes must also
+be defined. The <code>hash_multimap</code> also requires the <code>hash_map</code> header file,
+the <code>hash_set</code> and <code>hash_multiset</code> containers can be used after including
+the <code>hash_set</code> header file. Be careful not to use the subscript operator
+with the <code>hash_multimap</code> and <code>hash_multiset</code>, as this operator is not
+defined for the <code>multi_...</code> containers.
+</p><p>
+</p><p><a name="l123"></a>
+<h2>8.3: The `complex' container</h2>
+<a name="containers/complex"></a>
+    The <code>complex</code> container is a specialized container in that it defines
+operations that can be performed on complex numbers, given possible numerical
+real and imaginary data types. 
+</p><p>In order to use the <code>complex</code> container, the headerfile 
+        <pre>
+
+    #include &lt;complex&gt;
+        
+</pre>
+
+    must be included.
+</p><p>The <code>complex</code> container can be used to define complex numbers, consisting of
+two parts, representing the real and complex parts of a complex number.
+</p><p>While initializing (or assigning) a complex variable, the imaginary part may
+be left out of the initialization or assignment, in which case this part is
+<code>0</code> (zero). By default, both parts are zero.
+</p><p>When complex numbers are defined, the typedefinition requires the
+specification of the datatype of the real and imaginary parts. E.g.,
+        <pre>
+
+    complex&lt;double&gt;
+    complex&lt;int&gt;        
+    complex&lt;float&gt;      
+        
+</pre>
+
+    Note that the real and imaginary parts of complex numbers have the same
+datatypes. 
+</p><p>Below it is silently assumed that the used <code>complex</code> type is
+<code>complex&lt;double&gt;</code>. Given this assumption, complex numbers may be initialized
+as follows:
+    <ul>
+    <li ><code>target</code>:   A default initialization: real and imaginary parts are 0.
+    <li ><code>target(1)</code>: The real part is 1, imaginary part is 0
+    <li ><code>target(0, 3.5)</code>: The real part is 0, imaginary part is 3.5
+    <li ><code>target(source)</code>: <code>target</code> is initialized with the values of
+<code>source</code>. 
+     </ul>
+    Anonymous complex values may also be used. In the following example two
+anonymous complex values are pushed on a stack of complex numbers, to be
+popped again thereafter:
+    <pre>
+#include &lt;iostream&gt;
+#include &lt;complex&gt;
+#include &lt;stack&gt;
+
+int main()
+{
+    stack&lt;complex&lt;double&gt; &gt;
+        cstack;
+
+    cstack.push(complex&lt;double&gt;(3.14, 2.71));
+    cstack.push(complex&lt;double&gt;(-3.14, -2.71));
+
+    while (cstack.size())
+    {
+        cout &lt;&lt; cstack.top().real() &lt;&lt; ", " &lt;&lt; 
+                cstack.top().imag() &lt;&lt; "i" &lt;&lt; endl;
+        cstack.pop();
+    }
+
+    return (0);
+}
+
+</pre>
+
+    Note that a blank is required between the two consecutive <code>&gt;</code>-barckets
+used in the definition of <code>cstack</code>. If the blank is omitted, the resulting
+<code>&gt;&gt;</code> is read as the right-shift operator, which of course makes no sense
+here. 
+</p><p>The following member functions and operators are defined for complex numbers:
+    <ul>
+        <li > The standard assignment and comparison operators that are
+available for containers are also available for complex numbers.
+        <li ><code> real()</code>: this member function returns the real part of a complex
+number. 
+        <li ><code> imag()</code>: this member function returns the imaginary part of a
+complex number. 
+        <li > The following operations are defined for <code>complex</code> containers:
+<code>+, -, *, /, +=, -=, *=, /=</code>.
+     </ul>
+    Furthermore, several mathematical functions are available for complex
+numbers. They are <code>abs()</code>, arg(), conj(), cos(), cosh(), exp(), log(),
+norm(), polar(), pow(), sin(), sinh()) and <code>sqrt()</code>. These functions are
+normal functions, not member functions. They accept complex numbers as their
+arguments. For example,
+        <pre>
+
+    abs(complex&lt;double&gt;(3, -5));
+    pow(target, complex&lt;int&gt;(2, 3));
+        
+</pre>
+
+    Complex numbers may be extracted from <code>istream</code> objects and
+inserted into <code>ostream</code> objects. The insertion results in an ordered pair
+<code>(x, y)</code>, in which <code>x</code> represents the real part and <code>y</code> the imaginary
+part of the complex number. The same form may also be used when extracting a
+complex number from an <code>istream</code> object. However, simpler forms are also
+allowed. E.g., <code>1.2345</code>: only the real part, the imaginary part will be set
+to 0; <code>(1.2345)</code>: the same value.
+</p><p>Finally, ordinary numbers may be used in expressions involving complex
+numbers. E.g., 
+        <pre>
+
+    // assume target is complex&lt;double&gt;:
+    target *= 3;
+        
+</pre>
+
+    Note, however, that the reverse does not hold true: a complex number
+cannot be assigned to a non-complex type variable. In these situations the
+<code>real(), imag()</code> or other functions must be used. E.g.:
+        <pre>
+
+    // assume x is double:
+    x = target;         // error: x is not complex&lt;double&gt;
+    x = target.real();  // ok.
+        
+</pre>
+
+</p><p>
+</p><p>
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus09.html">Next chapter</a>
+    <li> <a href="cplusplus07.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

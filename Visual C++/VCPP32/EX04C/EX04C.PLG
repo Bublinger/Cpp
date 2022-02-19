@@ -1,0 +1,44 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: ex04c - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Creating command line "rc.exe /l 0x407 /fo"Debug/ex04c.res" /d "_DEBUG" /d "_AFXDLL" "C:\vcpp32\ex04c\ex04c.rc"" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP3241.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Fp"Debug/ex04c.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"C:\vcpp32\ex04c\ex04c.cpp"
+"C:\vcpp32\ex04c\ex04cDoc.cpp"
+"C:\vcpp32\ex04c\ex04cView.cpp"
+"C:\vcpp32\ex04c\MainFrm.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP3241.TMP" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP3242.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Fp"Debug/ex04c.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"C:\vcpp32\ex04c\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP3242.TMP" 
+Erstellen der Befehlzeile "link.exe /nologo /subsystem:windows /incremental:yes /pdb:"Debug/ex04c.pdb" /debug /machine:I386 /out:"Debug/ex04c.exe" /pdbtype:sept  .\Debug\ex04c.obj .\Debug\ex04cDoc.obj .\Debug\ex04cView.obj .\Debug\MainFrm.obj .\Debug\StdAfx.obj .\Debug\ex04c.res "
+<h3>Ausgabefenster</h3>
+Ressourcen werden kompiliert...
+Kompilierung läuft...
+StdAfx.cpp
+Kompilierung läuft...
+ex04c.cpp
+ex04cDoc.cpp
+ex04cView.cpp
+MainFrm.cpp
+Generieren von Code...
+Linker-Vorgang läuft...
+
+
+
+<h3>Ergebnisse</h3>
+ex04c.exe - 0 Fehler, 0 Warnung(en)
+</pre>
+</body>
+</html>

@@ -1,0 +1,1098 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus05.html">Next chapter</a>
+    <li> <a href="cplusplus03.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="String"></a><a name="l50"></a>
+<h1>Chapter 4: The `string' data type</h1>
+<a name="string"></a>
+    
+
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="string/string"></a>
+    <strong>C++</strong> offers a large number of facilities to implement solutions for common
+problems. Most of these facilities are part of the <em>Standard Template
+Library</em> or they are implemented as <em>generic algorithms</em> (see chapter
+<a href="cplusplus11.html#STL">11</a>). 
+</p><p>Among the facilities <strong>C++</strong> programmers have developed over and over again
+(as reflected in the Annotations) are those for manipulating chunks of text,
+commonly called <em>strings</em>. The <strong>C</strong> programming language offers rudimentary
+string support: the <em>ascii-z</em> terminated series of characters is the
+foundation on which a large amount of code has been built. 
+</p><p>Standard <strong>C++</strong> now offers a <code>string</code> type of its own. In order to use
+<code>string</code>-type objects, the header file <code>string</code> must be included in 
+sources. 
+</p><p>Actually, <code>string</code> objects are <em>class type</em> variables, and the <code>class</code>
+is introduced for the first time in chapter <a href="cplusplus05.html#Classes">5</a>. However, in order to
+use a string, it is not necessary to know what a class is. In this section the
+operators that are available for strings and some other operations are
+discussed. The operations that can be performed on strings take the form 
+</p><p><center><code>stringVariable.operation(argumentList)</code> </center>
+</p><p>For example, if <code>string1</code> and <code>string2</code> are variables of type <code>string</code>,
+then 
+</p><p><center><code>string1.compare(string2)</code> </center>
+</p><p>can be used to compare both strings. A function like <code>compare()</code>, which is
+part of the <code>string</code>-class is called a <em>member function</em>. The <code>string</code>
+class offers a large number of these member functions, as well as extensions of
+some well-known operators, like the assignment (<code>=</code>) and the comparison
+operator (<code>==</code>). These operators and functions are discussed in the
+following sections.
+</p><p>
+</p><p><a name="l51"></a>
+<h2>4.1: Operations on strings</h2>
+<a name="string/ops"></a>
+    Some of the operations that can be performed on strings return indices within
+the strings. Whenever such an operation fails to find an appropriate index,
+the <em>value</em> <code>string::npos</code> is returned. This value is a (symbolic) value
+of type <code>string::size_type</code>, which is (for all practical purposes) an
+<code>int</code>. 
+</p><p>Note that in all operations where <code>string</code> objects can be used as arguments,
+<code>char const *</code> values and variables can be used as well.
+</p><p>Some <code>string</code>-member functions use <em>iterators</em>. Iterators will be covered
+in section <a href="cplusplus11.html#ITERATORS">11.1</a>. The member functions that use iterators are listed
+in the next section (<a href="cplusplus04.html#STRINGOVERVIEW">4.2</a>), they are not further illustrated
+below. 
+</p><p>The following operations can be performed on strings:
+</p><p><ul>
+    <li > String objects can be <em>initialized</em>. For the initialization a plain
+<code>ascii-z</code> string, another <code>string</code> object, or an implicit initialization
+can be used. In the example, note that the implicit initialization does not
+have an argument, and does not use the function argumentlist notation. 
+        <pre>
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne("Hello World"),   // using plain ascii-Z
+            stringTwo(stringOne),       // using another string object
+            stringThree;                // implicit initialization to ""
+                                        // do not use: stringThree();    
+        return (0);
+    }
+</pre>
+
+</p><p><li > String objects can be assigned to each other. For this the assignment
+operator (i.e., the <code>=</code> operator) can be used, which accepts both a
+<code>string</code> object and a <strong>C</strong>-style characterstring as its right-hand
+argument:
+        <pre>
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne("Hello World"),
+            stringTwo;                  
+
+        stringTwo = stringOne;      // assign stringOne to stringTwo
+        stringTwo = "Hello world";  // assign a C-string to StringTwo
+
+        return (0);
+    }
+</pre>
+
+</p><p><li > In the previous example a standard <strong>C</strong>-string (an ascii-Z string) 
+was implicitly
+converted to a <code>string</code>-object. The reverse conversion (converting a
+<code>string</code> object to a standard <strong>C</strong>-string) is not performed
+automatically. In order to obtain the <code>C</code>-string that is stored within the
+<code>string</code> object itself, the member function <code>c_str()</code>, which returns a
+<code>char const *</code>, can be used:
+        <pre>
+    #include &lt;iostream&gt;
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne("Hello World");
+        char const
+            *Cstring = stringOne.c_str();
+
+        cout &lt;&lt; Cstring &lt;&lt; endl;
+
+        return (0);
+    }
+</pre>
+
+</p><p><li > The individual elements of a string object can be reached for reading
+or writing. For this operation the subscript-operator (<code>[]</code>) is available,
+but <em>not</em> the pointer dereferencing operator (<code>*</code>). The subscript operator
+does not perform range-checking. If range-checking is required, the <code>at()</code>
+member function can be used instead of the subscript-operator:
+        <pre>
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne("Hello World");
+
+        stringOne[6] = 'w';         // now "Hello world"
+        if (stringOne[0] == 'H')
+            stringOne[0] = 'h';     // now "hello world"
+
+        // THIS WON'T COMPILE:
+        //  *stringOne = 'H';        
+
+        // Now using the at() memberfunction:
+
+        stringOne.at(6) = 
+                stringOne.at(0);    // now "Hello Horld"
+        if (stringOne.at(0) == 'H')
+            stringOne.at(0) = 'W';  // now "Wello Horld"
+
+        return (0);
+    }
+</pre>
+
+    When an illegal index is passed to the <code>at()</code> member function, the
+program aborts. 
+</p><p><li > Two strings can be compared for (in)equality or ordering, using the
+<code>==, !=, &lt;, &lt;=, &gt;</code> and <code>&gt;=</code> operators or the <code>compare()</code> member function
+can be used. The <code>compare()</code> member function comes in different flavors, the
+plain one (having another <code>string</code> object as argument) offers a bit more
+information than the operators do.  The returnvalue of the <code>compare()</code>
+member function may be used for lexicographical ordering: a negative value is
+returned if the string stored in the string object using the <code>compare()</code>
+member function (in the example: <code>stringOne</code>) is located earlier in the
+alphabet (based on the standard ascii-characterset) than the string stored in
+the string object passed as argument to the <code>compare()</code>
+member function.
+        <pre>
+    #include &lt;iostream&gt;
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne("Hello World"),
+            stringTwo;                  
+
+        if (stringOne != stringTwo)
+            stringTwo = stringOne;
+
+        if (stringOne == stringTwo)
+            stringTwo = "Something else";
+
+        if (stringOne.compare(stringTwo) &gt; 0)
+            cout &lt;&lt; "stringOne after stringTwo in the alphabet\n";
+        else if (stringOne.compare(stringTwo) &lt; 0)
+            cout &lt;&lt; "stringOne before stringTwo in the alphabet\n";
+        else
+            cout &lt;&lt; "Both strings are the same";
+
+        // Alternatively:
+
+        if (stringOne &gt; stringTwo)
+            cout &lt;&lt; "stringOne after stringTwo in the alphabet\n";
+        else if (stringOne &lt; stringTwo)
+            cout &lt;&lt; "stringOne before stringTwo in the alphabet\n";
+        else
+            cout &lt;&lt; "Both strings are the same";
+
+        return (0);
+    }
+</pre>
+
+    There is no member function to perform a  case insensitive comparison of
+strings. 
+</p><p>Overloaded forms of the <code>compare()</code> member function have one or
+two extra arguments. 
+    <ul>
+    <li > If the <code>compare()</code> member function is used with two arguments, then
+the second argument is an index position in the current <code>string</code>-object. It
+indicates the index position in the current <code>string</code> object where the
+comparison should start.
+    <li > If the <code>compare()</code> member function is used with three arguments,
+then the third argument indicates the number of characters that
+should be compared.
+     </ul>
+    
+    See the following example for further details about the <code>compare()</code>
+function.
+        <pre>
+    #include &lt;iostream&gt;
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne("Hello World");
+
+        // comparing from a certain offset in stringOne
+
+        if (!stringOne.compare("ello World", 1))
+            cout &lt;&lt; "comparing 'Hello world' from index 1"
+                    " to 'ello World': ok\n";
+
+        // comparing from a certain offset in stringOne over a certain 
+        // number of characters in "World and more"
+
+        if (!stringOne.compare("World and more", 6, 5))
+            cout &lt;&lt; "comparing 'Hello World' from index 6 over 5 positions"
+                    " to 'World and more': ok\n";
+
+        // The same, but this fails, as all of the chars in stringOne 
+        // starting at index 6 are compared, not just 3 chars.
+        // number of characters in "World and more"
+
+        if (!stringOne.compare("World and more", 6, 3))
+            cout &lt;&lt; "comparing 'Hello World' from index 6 over 3 positions"
+                    " to 'World and more': ok\n";
+        else
+            cout &lt;&lt; "Unequal (sub)strings\n";
+
+
+        return (0);
+    }
+</pre>
+
+</p><p><li > A <code>string</code> can be appended to another string. For this the <code>+=</code>
+operator can be used, as well as the <code>append()</code> member function. Like the
+<code>compare()</code> function, the <code>append()</code> member function may have two extra
+arguments. The first argument is the string to be appended, the second
+argument specifies the index position of the first character that will be
+appended. The third argument specifies the number of characters that will be
+appended.  If the first argument is of type <code>char const *</code>, only a second
+argument may be specified. In that case, the second argument specifies the
+number of characters of the first argument that are appended to the <code>string</code>
+object.  Furthermore, the <code>+</code> operator can be used to append two strings
+within an expression:
+     <pre>
+    #include &lt;iostream&gt;
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne("Hello"),
+            stringTwo("World");
+
+        stringOne += " " + stringTwo;
+        
+        stringOne = "hello";
+        stringOne.append(" world");
+
+        // append only 5 characters:
+        stringOne.append(" ok. &gt;This is not used&lt;", 5);
+
+        cout &lt;&lt; stringOne &lt;&lt; endl;
+
+        string
+            stringThree("Hello");
+
+        // append " World":
+        stringThree.append(stringOne, 5, 6);
+
+        cout &lt;&lt; stringThree &lt;&lt; endl;
+
+        return (0);
+    }
+</pre>
+ 
+ The <code>+</code> operator can be used in cases where at least one term of the <code>+</code>
+operator is a <code>string</code> object (the other term can be a <code>string, char const
+*</code> or <code>char</code>). 
+</p><p>When neither operand of the <code>+</code> operator is a <code>string</code>, at least one
+operand must be converted to a <code>string</code> object first. An easy way
+to do this is to use an <em>anonymous string object</em>:
+        <center><code>string("hello") + " world";</code> </center>
+</p><p><li > So, the <code>append()</code> member function is used to append characters at
+the end of a <code>string</code>. It is also possible to insert characters
+somewhere within a <code>string</code>. For this the member function <code>insert()</code> is
+available.
+</p><p>The <code>insert()</code> member function to insert (parts of) a <code>string</code> has at least
+two, and at most four arguments:
+    <ul>
+    <li > The first argument is the offset in the current <code>string</code> object
+where another string should be inserted. 
+    <li > The second argument is the string to be inserted.
+    <li > The third argument specifies the index position of the
+first character in the provided <code>string</code>-argument that will be inserted.
+    <li > The fourth argument specifies the number of characters that will be
+inserted.
+     </ul>
+    If the first argument is of type <code>char const *</code>, the fourth argument is
+not available. In that case, the third argument indicates the number of
+characters of the provided <code>char const *</code> value that will be inserted.
+        <pre>
+    #include &lt;iostream&gt;
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne("Hell ok.");
+
+        stringOne.insert(4, "o ");   // Insert "o " at position 4
+
+        string
+            world("The World of C++");
+
+                                    // insert "World" into stringOne
+        stringOne.insert(6, world, 4, 5);   
+
+        cout &lt;&lt; "Guess what ? It is: " &lt;&lt; stringOne &lt;&lt; endl;
+
+        return (0);
+    }
+</pre>
+
+    Several other variants of <code>insert()</code> are available. See section
+<a href="cplusplus04.html#STRINGOVERVIEW">4.2</a> for details.
+</p><p><li > At times, the contents of <code>string</code> objects must be replaced by
+other information. To replace parts of the contents of a <code>string</code> object by
+another string the member function <code>replace()</code> can be used. 
+</p><p>The member function has at least three and possibly five arguments, having
+the following meanings
+(see section <a href="cplusplus04.html#STRINGOVERVIEW">4.2</a> for overloaded versions of
+<code>replace()</code>, using different types of arguments):
+    <ul>
+    <li > The first argument indicates the position of the first character that
+must be replaced 
+    <li > The second argument gives the number of characters that
+must be replaced. 
+    <li > The third argument defines the replacement text (a
+<code>string</code> or <code>char const *</code>). 
+    <li > The fourth argument specifies the index position of
+the first character in the provided <code>string</code>-argument that will be inserted.
+    <li > The fifth argument can be used to specify the number of
+characters that will be inserted.
+     </ul>
+    If the third argument is of type <code>char const *</code>, the fifth argument is
+not available. In that case, the fourth argument indicates the number of
+characters of the provided <code>char const *</code> value that will be inserted. 
+</p><p>The following example shows a very simple <em>filechanger</em>: it reads lines from
+<code>cin</code>, and replaces occurrences of a `searchstring' by a
+`replacestring'. Simple tests for the correct number of arguments and the
+contents of the provided strings (they should be unequal) are implemented
+using the <code>assert()</code> macro.  <a name="REPLACECC"></a>
+        <pre>
+    #include &lt;iostream&gt;
+    #include &lt;string&gt;
+    #include &lt;cassert&gt;
+    
+    int main(int argc, char **argv)
+    {
+        assert(argc == 3 &amp;&amp; 
+            "Usage: &lt;searchstring&gt; &lt;replacestring&gt; to process stdin");
+            
+        string
+            line,
+            search(argv[1]),    
+            replace(argv[2]);
+
+        assert(search != replace);
+
+        while (getline(cin, line))
+        {
+            while (true)
+            {
+                string::size_type
+                    idx;
+
+                idx = line.find(search);
+
+                if (idx == string::npos)
+                    break;
+
+                line.replace(idx, search.size(), replace);
+            }                        
+            cout &lt;&lt; line &lt;&lt; endl;
+        }
+        return (0);
+    }
+
+</pre>
+
+</p><p><li > A particular form of replacement is swapping: the member function
+<code>swap()</code> swaps the contents of two <code>string</code>-objects. For example:
+        <pre>
+    #include &lt;iostream&gt;
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne("Hello"),
+            stringTwo("World");
+        
+        cout &lt;&lt; "Before: stringOne: " &lt;&lt; stringOne &lt;&lt; ", stringTwo: "
+            &lt;&lt; stringTwo &lt;&lt; endl;
+
+        stringOne.swap(stringTwo);
+
+        cout &lt;&lt; "After: stringOne: " &lt;&lt; stringOne &lt;&lt; ", stringTwo: "
+            &lt;&lt; stringTwo &lt;&lt; endl;
+        return (0);
+    }
+</pre>
+
+</p><p><li > Another form of replacement is to remove characters from the
+string. For this the member function <code>erase()</code> is available. The standard
+form has two optional arguments:
+    <ul>
+    <li > If no arguments are specified, the stored string is erased
+completely: it becomes the empty string (<code>string()</code> or <code>string("")</code>).
+    <li > The first argument may be used to specify the offset of the first
+character that must be erased. 
+    <li > The second argument may be used to specify the number of characters
+that are to be erased.  
+     </ul>
+    See section <a href="cplusplus04.html#STRINGOVERVIEW">4.2</a> for overloaded versions of <code>erase()</code>. An
+example of the use of <code>erase()</code> is given below:
+        <pre>
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne("Hello Cruel World");
+
+        stringOne.erase(5, 6);
+
+        cout &lt;&lt; stringOne &lt;&lt; endl;
+
+        stringOne.erase();
+
+        cout &lt;&lt; "'" &lt;&lt; stringOne &lt;&lt; "'\n";
+
+        return (0);
+    }
+</pre>
+
+</p><p><li > To find substrings in a <code>string</code> the member function <code>find()</code> can
+be used. This function looks for the string that is provided as its first
+argument in the <code>string</code> object calling <code>find()</code> and returns the index of
+the first character of the substring if found. If the string is not found
+<code>string::npos</code> is returned. The member function <code>rfind()</code> looks for the
+substring from the end of the <code>string</code> object back to its beginning. An
+example using <code>find()</code> was given <a href="cplusplus04.html#REPLACECC">earlier.</a>
+</p><p><li > To extract a substring from a <code>string</code> object, the member function
+<code>substr()</code> is available. The returned <code>string</code> object contains a copy of
+the substring in the <code>string</code>-object calling <code>substr()</code> The member function
+has two optional arguments: 
+    <ul>
+    <li > Without arguments, a copy of the <code>string</code> itself is returned.
+    <li > The first argument may be used to specify the offset of the first
+character to be returned. 
+    <li > The second argument may be used to specify the number of characters
+that are to be returned. 
+     </ul>
+    For example:
+        <pre>
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne("Hello World");
+
+        cout &lt;&lt; stringOne.substr(0, 5)  &lt;&lt; endl
+             &lt;&lt; stringOne.substr(6)     &lt;&lt; endl
+             &lt;&lt; stringOne.substr()      &lt;&lt; endl;
+
+        return (0);
+    }
+</pre>
+
+</p><p><li > Whereas <code>find()</code> is used to find a substring, the functions
+<code>find_first_of(), find_first_not_of(), find_last_of()</code> and
+<code>find_last_not_of()</code> can be used to find <em>sets</em> of characters
+(Unfortunately, regular expressions are not supported here). The
+following program reads a line of text from the standard input stream, and
+displays the substrings starting at the first vowel, starting at the last
+vowel, and not starting at the first digit:
+        <pre>
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            line;
+
+        getline(cin, line);
+
+        string::size_type
+            pos;
+
+        cout &lt;&lt; "Line: " &lt;&lt; line &lt;&lt; endl 
+            &lt;&lt; "Starting at the first vowel:\n"
+            &lt;&lt; "'" 
+                &lt;&lt; (
+                    (pos = line.find_first_of("aeiouAEIOU")) != string::npos ?
+                        line.substr(pos) 
+                    : 
+                        "*** not found ***"
+                    ) &lt;&lt; "'\n"
+            &lt;&lt; "Starting at the last vowel:\n"
+            &lt;&lt; "'" 
+                &lt;&lt; (
+                    (pos = line.find_last_of("aeiouAEIOU")) != string::npos ?
+                        line.substr(pos) 
+                    : 
+                        "*** not found ***"
+                    ) &lt;&lt; "'\n"
+            &lt;&lt; "Not starting at the first digit:\n"
+            &lt;&lt; "'" 
+                &lt;&lt; (
+                    (pos = line.find_first_not_of("1234567890"))
+                                                            != string::npos ?
+                        line.substr(pos) 
+                    : 
+                        "*** not found ***"
+                    ) &lt;&lt; "'\n";
+        return (0);
+    }
+</pre>
+
+</p><p><li > The number of characters that are stored in a string are obtained by
+the <code>size()</code> member function, which, like the standard <strong>C</strong> function
+<code>strlen()</code> does not include the terminating ascii-Z character. For example:
+     <pre>
+    #include &lt;iostream&gt;
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne("Hello World");
+
+        cout &lt;&lt; "The length of the stringOne string is " 
+            &lt;&lt; stringOne.size() &lt;&lt; " characters\n";
+
+        return (0);
+    }
+</pre>
+
+</p><p><li > If the size of a string is not enough (or if it is too large), the
+member function <code>resize()</code> can be used to make it longer or shorter. Note
+that operators like <code>+</code> automatically resize the <code>string</code> when needed.
+</p><p><li > The <code>size()</code> member function can be used to determine whether a
+string holds no characters as well. Alternatively, the <code>empty()</code>
+member function can be used:
+     <pre>
+    #include &lt;iostream&gt;
+    #include &lt;string&gt;
+    
+    int main()
+    {
+        string
+            stringOne;
+
+        cout &lt;&lt; "The length of the stringOne string is " 
+            &lt;&lt; stringOne.size() &lt;&lt; " characters\n" 
+                "It is " &lt;&lt; (stringOne.empty() ? "" : " not ") 
+            &lt;&lt; "empty\n";
+
+        stringOne = "";
+        
+        cout &lt;&lt; "After assigning a \"\"-string to a string-object\n"
+                "it is " &lt;&lt; (stringOne.empty() ? "also" : " not") 
+            &lt;&lt; " empty\n";
+        
+
+        return (0);
+    }
+</pre>
+
+</p><p><li > The <code>istream &amp;getline(istream instream, string target, char
+delimiter)</code> member function may be used to read a line of text (up to
+the first delimiter or the end of the stream) from <code>instream</code>. 
+</p><p>The delimiter has a default value <code>'\n'</code>. It is removed from <code>instream</code>,
+but it is <em>not</em> stored in <code>target</code>. The function <code>getline()</code> was used in
+several earlier examples (e.g., with the <a href="cplusplus04.html#REPLACECC">replace()</a>
+member function).
+     </ul>
+
+</p><p><a name="STRINGOVERVIEW"></a><a name="l52"></a>
+<h2>4.2: Overview of operations on strings</h2>
+    <a name="string/overview"></a>
+    In this section the available operations on strings are summarized. There are
+four subparts here: the <code>string</code>-initializers, the <code>string</code>-iterators, the
+<code>string</code>-operators and the <code>string</code>-member functions. 
+</p><p>The member functions are ordered alphabetically by the name of the
+operation. Below, <code>object</code> is a <code>string</code>-object, and <code>argument</code> is
+either a <code>string</code> or a <code>char const *</code>, unless overloaded versions tailored
+to <code>string</code> and <code>char const *</code> parameters are explicitly
+mentioned. <code>Object</code> is used in cases where a <code>string</code> object is
+initialized or given a new value. <code>Argument</code> remains unchanged. 
+</p><p>With member functions the types of the parameters are given in a
+function-prototypical way. With several member functions <em>iterators</em> are
+used. At this point in the Annotations it's a bit premature to discuss
+iterators, but for referential purposes they have to be mentioned
+nevertheless. So, a forward reference is used here: see section <a href="cplusplus11.html#ITERATORS">11.1</a>
+for a more detailed discussion of <em>iterators</em>.
+</p><p>Finally, note that all <code>string</code>-member functions returning indices in 
+<code>object</code> return the predefined constant <code>string::npos</code> if no
+suitable index could be found.
+
+</p><p><a name="l53"></a>
+<h3>4.2.1: The string-initializers</h3>
+        <a name="string/initializers"></a>
+            <ul>
+        <li ><code>string object</code>:
+            <blockquote>Initializes <code>object</code> to an empty string.</blockquote> 
+        <li ><code>string object(string::size_type n, char c)</code>:
+            <blockquote>Initializes <code>object</code> with <code>n</code> characters <code>c</code>.</blockquote>
+        <li ><code>string object(string argument)</code>:
+            <blockquote>Initializes <code>object</code> with <code>argument</code>.</blockquote>
+        <li ><code>string object(string argument, string::size_type idx,
+string::size_type n = pos)</code>:
+            <blockquote>Initializes <code>object</code> with <code>argument</code>,
+using <code>n</code> characters of <code>argument</code>, starting at index <code>idx</code>.</blockquote>
+        <li ><code>string object(InputIterator begin, InputIterator end)</code>:
+            <blockquote>Initializes <code>object</code> with the range of characters implied
+by the provided <code>InputIterators</code>.</blockquote>
+         </ul>
+</p><p>
+</p><p><a name="l54"></a>
+<h3>4.2.2: The <code>string</code>-iterators</h3> 
+        <a name="string/iterators"></a>
+            See section <a href="cplusplus11.html#ITERATORS">11.1</a> for details about <em>iterators</em>.
+        <ul>
+        <li > Forward iterators:
+            <ul>
+            <li ><code>begin()</code>
+            <li ><code>end()</code>
+             </ul>
+        <li > Reverse iterators:
+            <ul>
+            <li ><code>rbegin()</code>
+            <li ><code>rend()</code>
+             </ul>
+         </ul>
+
+</p><p><a name="l55"></a>
+<h3>4.2.3: The <code>string</code>-operators</h3>
+        <a name="string/operators"></a>
+            <ul>
+        <li ><code>object = argument</code>.
+            <blockquote>Assignment of <code>argument</code> to <code>object</code>.  May also be used
+for initializing <code>string</code> objects.</blockquote>
+        <li ><code>object = c</code>.
+            <blockquote>Assignment of <code>char c</code> to <code>object</code>.  May <em>not</em> be used
+for initializing <code>string</code> objects.</blockquote>
+        <li ><code>object += argument</code>.
+            <blockquote>Appends <code>argument</code> to <code>object</code>. <code>Argument</code> may also be
+a <code>char</code> value.</blockquote>
+        <li ><code>argument1 + argument2</code>.
+            <blockquote>Within expressions, <code>strings</code> may be added. At least one
+term of the expression (the left-hand term or the right-hand term) should be a
+<code>string</code> object. The other term may be a <code>string</code>, a <code>char const *</code>
+value or a <code>char</code> value, as illustrated by the following example:</blockquote>
+            <pre>
+
+    void fun()
+    {
+        char const 
+            *asciiz = "hello";
+        string
+            first = "first",
+            second;
+
+            // all expressions compile ok:
+        second = first + asciiz;  
+        second = asciiz + first;  
+        second = first + 'a';
+        second = 'a' + first;
+    }
+            
+</pre>
+
+        <li ><code>object[string::size_type pos]</code>.
+            <blockquote>The subscript-operator may be used to assign individual
+characters of <code>object</code> or to retrieve these characters. There is no
+range-checking. If range checking is required, use the <code>at()</code>
+member function, summarized earlier.</blockquote>
+        <li ><code>argument1 == argument2</code>.
+            <blockquote>The equality operator may be used to compare a <code>string</code>
+object to another <code>string</code> or <code>char const *</code> value. The operator <code>!=</code> is
+available as well. The returnvalue is a <code>bool</code>, which is <code>true</code> if the two
+strings are equal (i.e., contain the same characters). <code>!=</code> returns
+<code>false</code> in that case.</blockquote>
+        <li ><code>argument1 &lt; argument2</code>.
+            <blockquote>The less-than operator may be used to compare the ordering
+within the Ascii-character set of <code>argument1</code> and <code>argument2</code>. The
+operators <code>&lt;=, &gt;</code> and <code>&gt;=</code> are available as well.</blockquote>
+        <li ><code>ostream stream; stream &lt;&lt; argument</code>.
+            <blockquote>The insertion-operator may be used with <code>string</code> objects.</blockquote>
+        <li ><code>istream stream; stream &gt;&gt; object</code>.
+            <blockquote>The extraction-operator may be used with <code>string</code>
+objects. It operates analogously to the extraction of characters into a
+character array, but <code>object</code> is automatically resized to the required
+number of characters.</blockquote>
+         </ul>
+
+</p><p><a name="l56"></a>
+<h3>4.2.4: The string member functions</h3>
+        <a name="string/members"></a>
+            <ul>
+        <li ><code>char &amp;object.at(string::size_type pos)</code>:
+            <blockquote>The character (reference) at the indicated position is
+returned (it may be reassigned). The member function performs range-checking,
+aborting the program if an invalid index is passed.</blockquote>
+        <li ><code>string &amp;object.append(InputIterator begin, InputIterator end)</code>:
+            <blockquote> Using this member function the range of characters implied
+by the <code>begin</code> and <code>end InputIterators</code> are appended to <code>object</code>.</blockquote>
+        <li ><code>string &amp;object.append(string argument, string::size_type pos = 0;
+string::size_type n = string::npos)</code>:
+            <blockquote>
+            <ul>
+            <li > If only <code>argument</code> is given, it is appended to <code>object</code>. 
+            <li > If <code>pos</code> is specified as well, <code>argument</code> is appended from
+index position <code>pos</code> until the end of <code>argument</code>.
+            <li > If all three arguments are provided, <code>n</code> characters of
+<code>argument</code>, starting at index position <code>pos</code> are appended to <code>object</code>.
+             </ul> 
+    If <code>argument</code> is of type <code>char const *</code>, parameter <code>pos</code>
+is not available.  So, with <code>char const *</code> arguments, either <em>all</em>
+characters or an <em>initial subset</em> of the characters of the provided <code>char
+const *</code> argument are appended to <code>object</code>.
+            <ul>
+            <li ><code>string &amp;object.append(string::size_type n, char c)</code>: Using this
+member function, <code>n</code> characters <code>c</code> can be appended to <code>object</code>.
+             </ul>
+            </blockquote>
+        <li ><code>string &amp;object.assign(string argument, string::size_type pos = 0;
+string::size_type n = string::npos)</code>:
+            <blockquote>
+            <ul>
+            <li > If only <code>argument</code> is given, it is assigned to <code>object</code>. 
+            <li > If <code>pos</code> is specified as well, <code>object</code> is assigned from
+index position <code>pos</code> until the end of <code>argument</code>.
+            <li > If all three arguments are provided, <code>n</code> characters of
+<code>argument</code>, starting at index position <code>pos</code> are assigned to <code>object</code>.
+             </ul>
+    If <code>argument</code> is of type <code>char const *</code>, no parameter <code>pos</code> is
+available.  So, with <code>char const *</code> arguments, either <em>all</em> characters or
+an <em>initial subset</em> of the characters of the provided <code>char const *</code>
+argument are assigned to <code>object</code>.
+            <ul>
+            <li ><code>string &amp;object.assign(string::size_type n, char c)</code>: Using this
+member function, <code>n</code> characters <code>c</code> can be assigned to <code>object</code>.
+             </ul>
+            </blockquote>
+        <li ><code>string::size_type object.capacity()</code>:
+            <blockquote>returns the number of characters that can currently be
+stored inside <code>object</code>.</blockquote>
+        <li ><code>int object.compare(string argument, string::size_type pos,
+string::size_type n)</code>:
+            <blockquote>This member function may be used to compare (according to the
+ascii-character set) the strings stored in <code>object</code> and
+<code>argument</code>. The parameter <code>n</code> may be used to specify the number of
+characters in <code>argument</code> that are used in the comparison, the parameter
+<code>pos</code> may be used to specify the initial character in <code>object</code> that is
+used in the comparison.</blockquote>
+        <li ><code>string::size_type object.copy(char const *argument,
+string::size_type n, string::size_type pos)</code>:
+            <blockquote>If the third argument is omitted, the first <code>n</code> characters
+of <code>object</code> are copied to <code>argument</code>.  If the thirst argument is given,
+copying starts from <code>&amp;object[pos]</code>. Following the copying, no <code>ascii-Z</code> is
+appended to the copied string. If <code>n</code> exceeds <code>object.length()</code>, at most
+<code>object.length()</code> characters are copied. The actual number of characters
+that were copied is returned.</blockquote>
+        <li ><code>char const *object.c_str</code>:
+            <blockquote>the member function returns the contents of <code>object</code> as
+an <code>ascii-Z</code> <strong>C</strong>-string.</blockquote>
+        <li ><code>char const *object.data()</code>:
+            <blockquote>returns the raw text stored in <code>object</code>.</blockquote>
+        <li ><code>bool object.empty()</code>:
+            <blockquote>returns <code>true</code> if <code>object</code> contains no data.</blockquote>
+        <li ><code>string &amp;object.erase(string::size_type pos; string::size_type
+n)</code>:
+            <blockquote>This member function can be used to erase (a sub)string of
+<code>object</code>. The basic form erases <code>object</code> completely. The working of other
+forms of <code>erase()</code> depend on the specification of extra arguments:
+            <ul>
+            <li > If <code>pos</code> is specified, the contents of <code>object</code> are erased
+from index position <code>pos</code> until the end of <code>object</code>.
+            <li > If <code>pos</code> and <code>n</code> are provided, <code>n</code> characters of
+<code>object</code>, starting at index position <code>pos</code> are erased.
+             </ul>
+            </blockquote>
+        <li ><code>iterator object.erase(iterator p)</code>:
+            <blockquote>The contents of <code>object</code> are erased until (iterator)
+position <code>p</code>. The iterator <code>p</code> is returned.</blockquote>
+        <li ><code>iterator object.erase(iterator f, iterator l)</code>:
+            <blockquote>The range of characters of <code>object</code>, implied by the
+<code>iterators f</code> and <code>l</code> are erased.  The iterator <code>f</code> is returned.</blockquote>
+        <li ><code>string::string::size_type object.find(string argument,
+string::size_type pos)</code>:
+            <blockquote>Returns the index in <code>object</code> where
+<code>argument</code> is found. If <code>pos</code> is omitted, the search starts at the
+beginning of <code>object</code>. If <code>pos</code> is provided, it refers to the index in
+<code>object</code> where the search for <code>argument</code> should start.</blockquote>
+        <li ><code>string::size_type object.find(char const *argument,
+string::size_type pos, string::size_type n)</code>:
+            <blockquote>Returns the index in <code>object</code> where
+<code>argument</code> is found. The parameter <code>n</code> indicates the number of characters
+of <code>argument</code> that should be used in the search: it defines a partial
+string starting at the beginning of <code>argument</code>. If omitted, all characters
+in <code>argument</code> are used.  The parameter <code>pos</code> refers to the index in
+<code>object</code> where the search for <code>argument</code> should start. If the
+parameter <code>pos</code> is omitted as well, <code>object</code> is scanned completely.</blockquote>
+        <li ><code>string::size_type object.find(char c, string::size_type pos)</code>:
+            <blockquote> Returns the index in <code>object</code> where
+<code>c</code> is found. If the argument <code>pos</code> is omitted, the search starts at the
+beginning of <code>object</code>. If provided, it refers to the index in <code>object</code>
+where the search for <code>object</code> should start.</blockquote>
+        <li ><code>string::size_type object.find_first_of(string argument,
+string::size_type pos)</code>:
+            <blockquote>Returns the index in <code>object</code> where
+any character in <code>argument</code> is found. If the argument <code>pos</code> is omitted,
+the search starts at the beginning of <code>object</code>. If provided, it refers to
+the index in <code>object</code> where the search for <code>argument</code> should start.</blockquote>
+        <li ><code>string::size_type object.find_first_of(char const* argument,
+string::size_type pos, string::size_type n)</code>:
+            <blockquote>Returns the index in <code>object</code> where
+a character of <code>argument</code> is found, no matter which character.  The
+parameter <code>n</code> indicates the number of characters of <code>object</code> that
+should be used in the search: it defines a partial string starting at the
+beginning of <code>object</code>. If omitted, all characters in <code>object</code> are
+used.  The parameter <code>pos</code> refers to the index in <code>object</code> where the
+search for <code>argument</code> should start. If the parameter <code>pos</code> is omitted as
+well, <code>object</code> is scanned completely.</blockquote>
+        <li ><code>string::size_type object.find_first_of(char c, string::size_type
+pos)</code>:
+            <blockquote>Returns the index in <code>object</code> where
+character <code>c</code> is found. If the argument <code>pos</code> is omitted, the search
+starts at the beginning of <code>object</code>. If provided, it refers to the index
+in <code>object</code> where the search for <code>c</code> should start.</blockquote>
+        <li ><code>string::size_type object.find_first_not_of(string argument,
+string::size_type pos)</code>:
+            <blockquote>Returns the index in <code>object</code> where
+a character not appearing in <code>argument</code> is found. If the argument <code>pos</code>
+is omitted, the search starts at the beginning of <code>object</code>. If provided,
+it refers to the index in <code>object</code> where the search for <code>argument</code>
+should start.</blockquote>
+        <li ><code>string::size_type object.find_first_not_of(char const*
+argument, string::size_type pos, string::size_type n)</code>:
+            <blockquote>Returns the index in <code>object</code> where
+any character not appearing in <code>argument</code> is found.  The parameter <code>n</code>
+indicates the number of characters of <code>object</code> that should be used in the
+search: it defines a partial string starting at the beginning of
+<code>object</code>. If omitted, all characters in <code>object</code> are used.  The
+parameter <code>pos</code> refers to the index in <code>object</code> where the search for
+<code>argument</code> should start. If the parameter <code>pos</code> is omitted as well,
+<code>object</code> is scanned completely.</blockquote>
+        <li ><code>string::size_type object.find_first_not_of(char c,
+string::size_type pos)</code>:
+            <blockquote>Returns the index in <code>object</code> where
+another character than <code>c</code> is found. If the argument <code>pos</code> is omitted, the
+search starts at the beginning of <code>object</code>. If provided, it refers to the
+index in <code>object</code> where the search for <code>c</code> should start.</blockquote>
+        <li ><code>string::size_type object.find_last_of(string argument,
+string::size_type pos)</code>:
+            <blockquote>Returns the last index in <code>object</code>
+where a character in <code>argument</code> is found. If the argument <code>pos</code> is
+omitted, the search starts at the beginning of <code>object</code>. If provided, it
+refers to the index in <code>object</code> where the search for <code>argument</code> should
+start.</blockquote>
+        <li ><code>string::size_type object.find_last_of(char const* argument,
+string::size_type pos, string::size_type n)</code>:
+            <blockquote>Returns the last index in <code>object</code>
+where a character of <code>argument</code> is found.  The parameter <code>n</code> indicates
+the number of characters of <code>object</code> that should be used in the search:
+it defines a partial string starting at the beginning of <code>object</code>. If
+omitted, all characters in <code>object</code> are used.  The parameter <code>pos</code>
+refers to the index in <code>object</code> where the search for <code>argument</code> should
+start. If the parameter <code>pos</code> is omitted as well, <code>object</code> is scanned
+completely.</blockquote>
+        <li ><code>string::size_type object.find_last_of(char c, string::size_type
+pos)</code>:
+            <blockquote>Returns the last index in <code>object</code>
+where character <code>c</code> is found. If the argument <code>pos</code> is omitted, the search
+starts at the beginning of <code>object</code>. If provided, it refers to the index
+in <code>object</code> where the search for <code>c</code> should start.</blockquote>
+        <li ><code>string::size_type object.find_last_not_of(string argument,
+string::size_type pos)</code>:
+            <blockquote>Returns the last index in <code>object</code>
+where any character not appearing in <code>argument</code> is found. If the argument
+<code>pos</code> is omitted, the search starts at the beginning of <code>object</code>. If
+provided, it refers to the index in <code>object</code> where the search for
+<code>argument</code> should start.</blockquote>
+        <li ><code>string::size_type object.find_last_not_of(char const*
+argument, string::size_type pos, string::size_type n)</code>:
+            <blockquote>Returns the last index in <code>object</code>
+where any character not appearing in <code>argument</code> is found.  The parameter
+<code>n</code> indicates the number of characters of <code>object</code> that should be used
+in the search: it defines a partial string starting at the beginning of
+<code>object</code>. If omitted, all characters in <code>object</code> are used.  The
+parameter <code>pos</code> refers to the index in <code>object</code> where the search for
+<code>argument</code> should start. If the parameter <code>pos</code> is omitted as well, all
+of <code>object</code> is scanned.</blockquote>
+        <li ><code>string::size_type object.find_last_not_of(char c,
+string::size_type pos)</code>:
+            <blockquote>Returns the last index in <code>object</code>
+where another character than <code>c</code> is found. If the argument <code>pos</code> is
+omitted, the search starts at the beginning of <code>object</code>. If provided, it
+refers to the index in <code>object</code> where the search for <code>c</code> should start.</blockquote>
+        <li ><code>istream &amp;getline(istream instream, string object, char
+delimiter)</code>:
+            <blockquote>This member function can be used to read a line of text (up
+to the first delimiter or the end of the stream) from <code>instream</code>. The
+delimiter has a default value <code>'\n'</code>. It is removed from <code>instream</code>, but
+it is not stored in <code>object</code>.</blockquote>
+        <li ><code>string &amp;object.insert(string::size_type t_pos, string argument,
+string::size_type pos; string::size_type n)</code>:
+            <blockquote>This member function can be used to insert (a sub)string of
+<code>argument</code> into <code>object</code>, <em>at</em> <code>object</code>'s index position
+<code>t_pos</code>. The basic form inserts <code>argument</code> completely at index
+<code>t_pos</code>. The way other forms of <code>insert()</code> work depend on the
+specification of extra arguments:
+            <ul>
+                <li > If <code>pos</code> is specified, <code>argument</code> is inserted from
+index position <code>pos</code> until the end of <code>argument</code>.
+                <li > If <code>pos</code> and <code>n</code> are provided, <code>n</code> characters of
+<code>argument</code>, starting at index position <code>pos</code> are inserted into <code>object</code>.
+             </ul>
+    If <code>argument</code> is of type <code>char const *</code>, no parameter <code>pos</code> is
+available.  So, with <code>char const *</code> arguments, either <em>all</em> characters or
+an <em>initial subset</em> of the characters of the provided <code>char const *</code>
+argument are inserted into <code>object</code>.
+            <ul>
+                <li ><code>string &amp;object.insert(string::size_type t_pos,
+string::size_type n, char c)</code>: Using this member function, <code>n</code> characters
+<code>c</code> can be inserted to <code>object</code>.
+             </ul>
+            </blockquote>
+        <li ><code>iterator object.insert(iterator p, char c)</code>:
+            <blockquote>The character <code>c</code> is inserted at the (iterator) position
+<code>p</code> in <code>object</code>. The iterator <code>p</code> is returned.</blockquote>
+        <li ><code>iterator object.insert(iterator p, string::size_type n, char c)</code>:
+            <blockquote> <code>N</code> characters <code>c</code> are inserted at the (iterator)
+position <code>p</code> in <code>object</code>. The iterator <code>p</code> is returned.</blockquote>
+        <li ><code>iterator object.insert(iterator p, InputIterator first,
+InputIterator last)</code>:
+            <blockquote>The range of characters implied by the <code>InputIterators
+first</code> and <code>last</code> are inserted at the (iterator) position <code>p</code> in
+<code>object</code>. The iterator <code>p</code> is returned.</blockquote>
+        <li ><code>string::size_type object.length()</code>:
+            <blockquote>returns the number of characters stored in <code>object</code>.</blockquote>
+        <li ><code>string::size_type object.max_size()</code>:
+            <blockquote>returns the maximum number of characters that can be stored
+in <code>object</code>.</blockquote>
+        <li ><code>string&amp; object.replace(string::size_type pos1, string::size_type
+n1, const string argument, string::size_type pos2, string::size_type n2)</code>:
+            <blockquote>The substring of <code>n1</code> characters of <code>object</code>, starting
+at position <code>pos1</code> is replaced by <code>argument</code>. If <code>n1</code> is set to 0, the
+member function <em>inserts</em> <code>argument</code> into <code>object</code>.<br>
+        The basic form uses <code>argument</code> completely. The way other
+forms of <code>replace()</code> work depends on the specification of extra arguments:
+            <ul>
+                <li > If <code>pos2</code> is specified, <code>argument</code> is inserted from
+index position <code>pos2</code> until the end of <code>argument</code>.
+                <li > If <code>pos2</code> and <code>n2</code> are provided, <code>n2</code> characters of
+<code>argument</code>, starting at index position <code>pos2</code> are inserted into <code>object</code>.
+             </ul>
+    If <code>argument</code> is of type <code>char const *</code>, no parameter <code>pos2</code> is
+available.  So, with <code>char const *</code> arguments, either <em>all</em> characters or
+an <em>initial subset</em> of the characters of the provided <code>char const *</code>
+argument are replaced in <code>object</code>.
+            </blockquote>
+        <li ><code>string &amp;object.replace(string::size_type pos, string::size_type
+n1, string::size_type n2, char c)</code>:
+            <blockquote>This member function can be used to replace <code>n1</code> characters
+of <code>object</code>, starting at index position <code>pos</code>, by <code>n2 c</code>-characters. The
+argument <code>n2</code> may be omitted, in which case the string to be replaced is
+replaced by just one character <code>c</code>.</blockquote>
+        <li ><code>string&amp; object.replace (iterator i1, iterator i2, string
+argument)</code>:
+            <blockquote>Here, the string implied by the iterators <code>i1</code> and <code>i2</code>
+are replaced by the string <code>str</code>. If <code>argument</code> is a <code>char const *</code>, an
+extra argument <code>n</code> may be used, specifying the number of characters of
+<code>argument</code> that are used in the replacement.</blockquote>
+        <li ><code>iterator object.replace(iterator f, iterator l, string argument)</code>:
+            <blockquote> The range of characters of <code>object</code>, implied by the
+<code>iterators f</code> and <code>l</code> are replaced by <code>argument</code>.  If <code>argument</code> is a
+<code>char const *</code>, an extra argument <code>n</code> may be used, specifying the number
+of characters of <code>argument</code> that are used in the replacement. The string
+<code>object</code> is returned.</blockquote>
+        <li ><code>iterator object.replace(iterator f, iterator l, string::size_type
+n, char c)</code>:
+            <blockquote>The range of characters of <code>object</code>, implied by the
+<code>iterators f</code> and <code>l</code> are replaced by <code>n c</code>-characters. The iterator
+<code>f</code> is returned.</blockquote>
+        <li ><code>string object.replace(iterator i1, iterator i2, InputIterator j1,
+InputIterator j2)</code>:
+            <blockquote>Here the range of characters implied by the iterators <code>i1</code>
+and <code>i2</code> is replaced by the range of characters implied by the
+<code>InputIterators j1</code> and <code>j2</code>.</blockquote>
+        <li ><code>void object.resize(string::size_type n, char c)</code>:
+            <blockquote>The string stored in <code>object</code> is resized to <code>n</code>
+characters. The second argument is optional. If provided and the string is
+enlarged, the extra characters are initialized to <code>c</code>.</blockquote>
+        <li ><code>string::size_type object.rfind(string argument,
+string::size_type pos)</code>:
+            <blockquote>Returns the index in <code>object</code> where
+<code>argument</code> is found. Searching proceeds from the end of <code>object</code> back
+to the beginning. If the argument <code>pos</code> is omitted, the search starts at
+the beginning of <code>object</code>. If provided, it refers to the index in
+<code>object</code> where the search for <code>argument</code> should start.</blockquote>
+        <li ><code>string::size_type object.rfind(char const *argument,
+string::size_type pos, string::size_type n)</code>:
+            <blockquote>Returns the index in <code>object</code> where
+<code>argument</code> is found. Searching proceeds from the end of <code>object</code> back
+to the beginning.  The parameter <code>n</code> indicates the number of characters of
+<code>argument</code> that should be used in the search: it defines a partial string
+starting at the beginning of <code>argument</code>. If omitted, all characters in
+<code>argument</code> are used.  The parameter <code>pos</code> refers to the index in
+<code>object</code> where the search for <code>argument</code> should start. If the
+parameter <code>pos</code> is omitted as well, all of <code>object</code> is scanned.</blockquote>
+        <li ><code>string::size_type object.rfind(char c, string::size_type pos)</code>:
+            <blockquote> Returns the index in <code>object</code>
+where <code>c</code> is found.  Searching proceeds from the end of <code>object</code> back
+to the beginning. If the argument <code>pos</code> is omitted, the search starts at
+the beginning of <code>object</code>. If provided, it refers to the index in
+<code>object</code> where the search for <code>argument</code> should start.</blockquote>
+        <li ><code>string::size_type object.size()</code>:
+            <blockquote>returns the number of characters stored in <code>object</code>.</blockquote>
+        <li ><code>string object.substr(string::size_type pos, string::size_type
+n)</code>:
+            <blockquote>Returns a substring of <code>object</code>. The
+parameter <code>n</code> may be used to specify the number of characters of
+<code>argument</code> that are returned. The parameter <code>pos</code> may be used to specify
+the index of the first character of <code>argument</code> that is returned. Either
+<code>n</code> or both arguments may be omitted.</blockquote>
+        <li ><code>string::size_type object.swap(string argument)</code>:
+            <blockquote>swaps the contents of the <code>object</code> and <code>argument</code>. In
+this case, <code>argument</code> must be a <code>string</code> and cannot be a <code>char const *</code>.</blockquote>
+         </ul>
+</p><p>
+
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus05.html">Next chapter</a>
+    <li> <a href="cplusplus03.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

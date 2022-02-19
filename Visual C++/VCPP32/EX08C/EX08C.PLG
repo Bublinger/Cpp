@@ -1,0 +1,60 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: ex08c - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x409 /fo"Release/ex08c.res" /d "NDEBUG" /d "_AFXDLL" "D:\vcpp32\ex08c\ex08c.rc"" 
+Creating temporary file "c:\windows\TEMP\RSP92.TMP" with contents
+[
+/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /Fp"Release/ex08c.pch" /Yu"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\vcpp32\ex08c\ex08c.cpp"
+"D:\vcpp32\ex08c\ex08cDoc.cpp"
+"D:\vcpp32\ex08c\ex08cView.cpp"
+"D:\vcpp32\ex08c\MainFrm.cpp"
+"D:\vcpp32\ex08c\Persist.cpp"
+"D:\vcpp32\ex08c\webbrowser.cpp"
+]
+Creating command line "cl.exe @c:\windows\TEMP\RSP92.TMP" 
+Creating temporary file "c:\windows\TEMP\RSP0093.TMP" with contents
+[
+/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /Fp"Release/ex08c.pch" /Yc"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\vcpp32\ex08c\StdAfx.cpp"
+]
+Creating command line "cl.exe @c:\windows\TEMP\RSP0093.TMP" 
+Creating temporary file "c:\windows\TEMP\RSP0094.TMP" with contents
+[
+/nologo /subsystem:windows /incremental:no /pdb:"Release/ex08c.pdb" /machine:I386 /out:"Release/ex08c.exe" 
+.\Release\ex08c.obj
+.\Release\ex08cDoc.obj
+.\Release\ex08cView.obj
+.\Release\MainFrm.obj
+.\Release\Persist.obj
+.\Release\StdAfx.obj
+.\Release\webbrowser.obj
+.\Release\ex08c.res
+]
+Creating command line "link.exe @c:\windows\TEMP\RSP0094.TMP"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+StdAfx.cpp
+Compiling...
+ex08c.cpp
+ex08cDoc.cpp
+ex08cView.cpp
+MainFrm.cpp
+Persist.cpp
+webbrowser.cpp
+Generating Code...
+Linking...
+
+
+
+<h3>Results</h3>
+ex08c.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

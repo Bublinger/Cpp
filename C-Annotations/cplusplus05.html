@@ -1,0 +1,2375 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus06.html">Next chapter</a>
+    <li> <a href="cplusplus04.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="Classes"></a><a name="l57"></a>
+<h1>Chapter 5: Classes</h1>
+<a name="classes"></a>
+    
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="classes/intro"></a>
+    
+In this chapter classes are the topic of discussion. Two special member
+functions, the constructor and the destructor, are introduced.
+</p><p>In steps we will construct a class <code>Person</code>, which could be used in a
+database application to store a name, an address and a phone number of a 
+person. 
+</p><p><a name="PERSON"></a>
+</p><p>Let's start off by introducing the declaration of a <code>class Person</code> 
+right away. The class declaration is normally contained in the <em>header file</em>
+of the class, e.g., <code>person.h</code>. The class declaration is generally not called
+a <em>declaration</em>, though. Rather, the common name for class declarations is
+<em>class interface</em>, to be distinguished from the definitions of the function
+members, called the <em>class implementation</em>. Thus, the interface of the 
+<code>class Person</code> is given next:
+</p><p><pre>
+
+    class Person
+    {
+        public:                 // interface functions
+            void setname(char const *n);
+            void setaddress(char const *a);
+            void setphone(char const *p);
+
+            char const *getname(void);
+            char const *getaddress(void);
+            char const *getphone(void);
+
+        private:                // data fields
+            char *name;         // name of person
+            char *address;      // address field
+            char *phone;        // telephone number
+    };
+
+</pre>
+
+</p><p>The data fields in this class are <code>name</code>, <code>address</code> and <code>phone</code>. The
+fields are <code>char *</code>s which point to allocated memory. The data are
+<code>private</code>, which means that they can only be accessed by the functions of
+the class <code>Person</code>.
+</p><p>The data are manipulated by interface functions which take care of all
+communication with code outside of the class. Either to set the data fields
+to a given value (e.g., <code>setname()</code>) or to inspect the data (e.g.,
+<code>getname()</code>).
+</p><p>Note once again how similar the <code>class</code> is to the <code>struct</code>. The 
+fundamental difference being that by default classes have <em>private</em> members,
+whereas structs have <em>public</em> members. Since the convention calls for the 
+public members of a class to appear first, the keyword <code>private</code> is needed
+to switch back from public members to the (default) private situation.
+</p><p>
+</p><p><a name="l58"></a>
+<h2>5.1: Constructors and destructors</h2>
+    <a name="classes/consdesc"></a>
+    A class in <strong>C++</strong> may contain two special categories of member functions 
+which are involved in the internal workings of the class. These member function 
+categories are, on the one hand, the constructors and, on the other hand, the 
+destructor.
+</p><p>The basic forms and functions of these two categories are discussed next.
+</p><p>
+</p><p><a name="l59"></a>
+<h3>5.1.1: The constructor</h3>
+        <a name="classes/construc"></a>
+    The constructor member function has by definition the same name as the
+corresponding class. The constructor has <em>no return value</em> specification,
+not even <code>void</code>.  E.g., for the class <code>Person</code> the constructor is
+<code>Person::Person()</code>. The <strong>C++</strong> run-time system makes sure that the
+constructor of a class, if defined, is called when an object of the class is
+created. It is of course possible to define a class which has no constructor
+at all; in that case the run-time system either calls no function or it calls
+a dummy constructor (i.e., a constructor which performs no actions) when a
+corresponding object is created. The actual generated code of course depends
+on the compiler (A compiler-supplied constructor in a class which
+contains composed objects (see section <a href="cplusplus05.html#Composition">5.5</a>) will `automatically'
+call the member initializers, and therefore does perform some actions. We
+postpone the discussion of such constructors to <a href="cplusplus05.html#MemberInitializers">5.5.1</a>.).
+</p><p>Objects may be defined at a local (function) level, or at a global level (in 
+which its status is comparable to a global variable.
+</p><p>When an object is a local (non-static) variable of a function, the constructor
+is called every time the function is called at the point where the
+variable is defined (a subtlety here is that a variable may be defined
+implicitly as, e.g., a temporary variable in an expression).
+</p><p>When an object is a static variable, the constructor is
+called when the function in which the static variable is defined is called for
+the first time.
+</p><p>When an object is a global variable the constructor is
+called when the program starts. Note that in even this case the constructor is
+called even before the function <code>main()</code> is started.  This feature is
+illustrated in the following listing:
+</p><p><pre>
+
+    #include &lt;iostream&gt;
+
+    // a class Test with a constructor function
+    class Test
+    {
+        public:                 // 'public' function:
+            Test();             // the constructor
+    };
+
+    Test::Test()                // here is the
+    {                           // definition
+        cout &lt;&lt; "constructor of class Test called\n";
+    }
+
+    // and here is the test program:
+    Test                
+        g;                      // global object
+
+    void func()
+    {
+        Test                    // local object
+            l;                  // in function func()
+
+        cout &lt;&lt; "here's function func()" &lt;&lt; endl;
+    }
+
+    int main()
+    {
+        Test                    // local object
+            x;                  // in function main()
+
+        cout &lt;&lt; "main() function" &lt;&lt; endl;
+        func();
+        return (0);
+    }
+
+</pre>
+
+</p><p>The listing shows how a class <code>Test</code> is defined which consists of only one
+function: the constructor. The constructor performs only one action; a message
+is printed. The program contains three objects of the class <code>Test</code>: one
+global object, one local object in <code>main()</code> and one local object in
+<code>func()</code>.
+</p><p>Concerning the definition of a constructor we have the following remarks:
+</p><p><ul>
+</p><p><li > The constructor has the same name as its class.
+</p><p><li > The constructor may not be defined with a return value. This is
+    true for the declaration of the constructor in the class definition, as
+    in:
+</p><p><pre>
+
+        class Test
+        {
+            public:
+                /* no return value here */ Test();
+        };
+    
+</pre>
+
+</p><p>and also holds true for the definition of the constructor function, as in:
+</p><p><pre>
+
+        /* no return value here */ Test::Test()
+        {
+            // statements ...
+        }
+    
+</pre>
+
+</p><p><li > The constructor function in the example above has no
+arguments. Therefore it is also called the <em>default constructor</em>.  That the
+function has no arguments is, however, no requirement <em>per se</em>. We shall
+later see that it is possible to define constructors with arguments. Once a
+constructor function is defined explicitly, the default constructor doesn't
+exist anymore, unless the default constructor is definied explicitly itself.
+</p><p></ul>
+</p><p>The constructor of the three objects of the class <code>Test</code> in the above
+listing are called in the following order:
+</p><p><ul>
+</p><p><li > The constructor is first called for the global object <code>g</code>.
+</p><p><li > Next the function <code>main()</code> is started. The object <code>x</code> is
+    created as a local variable of this function and hence the constructor is
+    called again. After this we expect to see the text <code>main()</code>
+    <code>function</code>.
+</p><p><li > Finally the function <code>func()</code> is activated from <code>main()</code>. In
+    this function the local object <code>l</code> is created and hence the constructor
+    is called. After this, the message <code>here's</code> <code>function</code> <code>func()</code>
+    appears.
+</p><p></ul>
+</p><p>As expected, the program yields therefore the following output (the text in
+parentheses is added for illustration purposes):
+</p><p><pre>
+
+    constructor of class Test called        (global object g)
+    constructor of class Test called        (object x in main())
+    main() function
+    constructor of class Test called        (object l in func())
+    here's function func()
+
+</pre>
+
+
+</p><p><a name="l60"></a>
+<h3>5.1.2: The destructor</h3>
+        <a name="classes/destruc"></a>
+    The second special member function is the destructor. This function is the
+opposite of the constructor in the sense that it is invoked when an object
+ceases to exist. For objects which are local non-static variables, the
+destructor is called when the block in which the object is defined is left:
+the destructors of objects that are defined in nested blocks of functions are
+therefore usually called before the function itself terminates. The
+destructors of objects that are defined somewhere in the outer block of a
+function are called just before the function returns (terminates). For static
+or global variables the destructor is called before the program terminates.
+</p><p>However, when a program is interrupted using an <code>exit()</code> call, the
+destructors are called <em>only</em> for global objects which exist at that time.
+Destructors of objects defined <em>locally</em> within functions are not called
+when a program is forcefully terminated using <code>exit()</code>.
+</p><p>When defining a destructor for a given class the following rules apply:
+</p><p><ul>
+</p><p><li > The destructor function has the same name as the class but prefixed
+    by a tilde.
+</p><p><li > The destructor has neither arguments nor a return value.
+</p><p></ul>
+</p><p>The destructor for the class <code>Test</code> from the previous section could be
+declared as follows:
+</p><p><pre>
+
+    class Test
+    {
+        public:
+            Test();                    // constructor
+            ~Test();                   // destructor
+            // any other members
+    };
+
+</pre>
+
+</p><p>The position of the constructor(s) and destructor in the class definition is
+dictated by convention: First the constructors are declared, then the 
+destructor, and only then any other members follow.
+
+</p><p><a name="l61"></a>
+<h3>5.1.3: A first application</h3>
+        <a name="classes/application"></a>
+    One of the applications of constructors and destructors is the management of
+memory allocation. This is illustrated using the class <code>Person</code>.
+</p><p>As illustrated at the beginning of this chapter, the class <code>Person</code>
+contains three <code>private</code> pointers, all <code>char *</code>s. These data members are
+manipulated by the interface functions. The internal workings of the class are
+as follows: when a name, address or phone number of a <code>Person</code> is defined,
+memory is allocated to store these data. An obvious setup is described below:
+</p><p><ul>
+</p><p><li > The constructor of the class makes sure that the data members are
+    initially 0-pointers.
+</p><p><li > The destructor releases all allocated memory.
+</p><p><li > The defining of a name, address or phone number (by means of the
+    <code>set...()</code> functions) consists of two steps. First, previously
+    allocated memory is released. Next, the string which is supplied as an
+    argument to the <code>set...()</code> function is duplicated in memory.
+</p><p><li > Inspecting a data member by means of one of the <code>get...()</code>
+    functions simply returns the corresponding pointer: either a 0-pointer,
+    indicating that the data is not defined, or a pointer to
+    allocated memory holding the data.
+</p><p></ul>
+</p><p>The <code>set...()</code> functions are illustrated below. Strings are duplicated in
+this example by an imaginary function <code>xstrdup()</code>, which would duplicate a
+string or terminate the program when the memory pool is exhausted ( As
+a word to the initiated reader it is noted here that many other ways to handle
+the memory allocation are possible here: As discussed in section
+<a href="cplusplus06.html#STRDUPNEW">6</a>, <code>new</code> could be used, together with <code>set_new_handler()</code>, or
+exceptions could be used to catch any failing memory allocation. However,
+since we haven't covered that subject yet, and since these annotations start
+from <strong>C</strong>, we used the tried and true method of a `protected allocation
+function' <code>xstrdup()</code> here for didactical reasons.).
+</p><p><pre>
+
+    // interface functions set...()
+    void Person::setname(char const *n)
+    {
+        free(name);
+        name = xstrdup(n);
+    }
+
+    void Person::setaddress(char const *a)
+    {
+        free(address);
+        address = xstrdup(a);
+    }
+
+    void Person::setphone(char const *p)
+    {
+        free(phone);
+        phone = xstrdup(p);
+    }
+
+</pre>
+
+</p><p>Note that the statements <code>free(...)</code> in the above listing are executed
+unconditionally. This never leads to incorrect actions: when a name, address
+or phone number is defined, the corresponding pointers point to previously
+allocated memory which should be freed. When the data are not (yet) defined,
+then the corresponding pointer is a 0-pointer; and <code>free(0)</code> performs no
+action (Actually, free(0) should perform no action. However, later on
+we'll introduce the operators <code>new</code> and <code>delete</code>. With the <code>delete</code>
+operator <code>delete 0</code> is formally ignored.). 
+</p><p>Furthermore it should be noted that this code example uses the
+standard <code>C</code> function <code>free()</code> which should be familiar to most
+<code>C</code> programmers. The <code>delete</code> statement, which has more
+`<code>C++</code> flavor', will be discussed later.
+</p><p>The interface functions <code>get...()</code> are defined now. Note the 
+occurence of the keyword <code>const</code> following the parameter lists of the 
+functions: the member functions are <em>const member functions</em>, indicating 
+that they will not modify their object when they're called.
+The matter of <em>const member functions</em> is postponed to section 
+<a href="cplusplus05.html#ConstFunctions">5.2</a>, where it will be discussed in greater detail.
+</p><p><pre>
+
+    // interface functions get...()
+    char const *Person::getname() const
+    {
+        return (name);
+    }
+
+    char const *Person::getaddress() const
+    {
+       return (address);
+    }
+
+    char const *Person::getphone() const
+    {
+       return (phone);
+    }
+
+</pre>
+
+</p><p>The destructor, constructor and the class definition are given below.
+</p><p><pre>
+
+    // class definition
+    class Person
+    {
+        public:
+            Person();          // constructor
+            ~Person();         // destructor
+
+            // functions to set fields
+            void setname(char const *n);
+            void setaddress(char const *a);
+            void setphone(char const *p);
+
+            // functions to inspect fields
+            char const *getname() const;
+            char const *getaddress() const;
+            char const *getphone() const;
+
+        private:
+            char *name;             // name of person
+            char *address;          // address field
+            char *phone;            // telephone number
+    };
+
+    // constructor
+    Person::Person()
+    {
+        name = 0;
+        address = 0;
+        phone = 0;
+    }
+
+    // destructor
+    Person::~Person()
+    {
+        free(name);         
+        free(address);
+        free(phone);
+    }
+
+</pre>
+
+</p><p>To demonstrate the usage of the class <code>Person</code>, a code example follows
+next. An object is initialized and passed to a function <code>printperson()</code>,
+which prints the contained data. Note also the usage of the reference operator
+<code>&amp;</code> in the argument list of the function <code>printperson()</code>. This way
+only a reference to a <code>Person</code> object is passed, rather than a whole object.
+The fact that <code>printperson()</code> does not modify its argument is evident from
+the fact that the argument is declared <code>const</code>. Also note that the example
+doesn't show where the destructor is called; this action occurs implicitly
+when the below function <code>main()</code> terminates and hence when its local
+variable <code>p</code> ceases to exist.
+</p><p>It should also be noted that the function <code>printperson()</code> could be defined
+as a <code>public</code> member function of the class <code>Person</code>.
+</p><p><pre>
+
+    #include &lt;iostream&gt;
+
+    void printperson(Person const &amp;p)
+    {
+        cout &lt;&lt; "Name    : " &lt;&lt; p.getname() &lt;&lt; endl
+             &lt;&lt; "Address : " &lt;&lt; p.getaddress() &lt;&lt; endl
+             &lt;&lt; "Phone   : " &lt;&lt; p.getphone() &lt;&lt; endl;
+    }
+
+    int main()
+    {
+        Person
+            p;
+
+        p.setname("Linus Torvalds");
+        p.setaddress("E-mail: Torvalds@cs.helsinki.fi");
+        p.setphone(" - not sure - ");
+
+        printperson(p);
+        return (0);
+    }
+
+</pre>
+
+</p><p>When <code>printperson()</code> receives a fully defined <code>Person</code> object (i.e.,
+containing a name, address and phone number), the data are correctly printed.
+However, when a <code>Person</code> object is only partially filled, e.g. with only a
+name, <code>printperson()</code> passes 0-pointers to <code>cout</code>. This unesthetic
+feature can be remedied with a little more code:
+</p><p><pre>
+
+    void printperson(Person const &amp;p)
+    {
+        if (p.getname())
+            cout &lt;&lt; "Name   : " &lt;&lt; p.getname() &lt;&lt; "\n";
+        if (p.getaddress())
+            cout &lt;&lt; "Address : " &lt;&lt; p.getaddress() &lt;&lt; "\n";
+        if (p.getphone())
+            cout &lt;&lt; "Phone  : " &lt;&lt; p.getphone() &lt;&lt; "\n";
+    }
+
+</pre>
+
+</p><p>Alternatively, the constructor <code>Person::Person()</code> might initialize the
+members to `printable defaults', like <code>" ** undefined ** "</code>.
+
+</p><p><a name="l62"></a>
+<h3>5.1.4: Constructors with arguments</h3>
+        <a name="classes/arguments"></a>
+    In the above declaration of the class <code>Person</code> the constructor 
+has no arguments. <strong>C++</strong> allows  constructors to be defined
+with argument lists. The arguments are supplied when an object is created.
+</p><p>For the class <code>Person</code> a constructor may be handy which expects three
+strings: the name, address and phone number. Such a constructor is shown
+below:
+</p><p><pre>
+
+    Person::Person(char const *n, char const *a, char const *p)
+    {
+        name = xstrdup(n);
+        address = xstrdup(a);
+        phone = xstrdup(p);
+    }
+
+</pre>
+
+</p><p>The constructor must be included in the class declaration, as illustrated
+here:
+</p><p><pre>
+
+    class Person
+    {
+        public:
+            Person::Person(char const *n,
+                char const *a, char const *p);
+            .
+            .
+            .
+    };
+
+</pre>
+
+</p><p>Since <strong>C++</strong> allows function overloading, such a declaration of a constructor
+can co-exist with a constructor without arguments. The class <code>Person</code> would
+thus have two constructors.
+</p><p>The usage of a constructor with arguments is illustrated in the following code
+fragment. The object <code>a</code> is initialized at its definition:
+</p><p><pre>
+
+    int main()
+    {
+        Person
+            a("Karel", "Rietveldlaan 37", "542 6044"),
+            b;
+
+        return (0);
+    }
+
+</pre>
+
+</p><p>In this example, the <code>Person</code> objects <code>a</code> and <code>b</code> are created when 
+<code>main()</code> is started. For the object <code>a</code> the constructor with arguments
+is selected by the compiler. For the object <code>b</code> the default constructor
+(without arguments) is used.
+
+</p><p>
+<a name="l63"></a>
+
+             
+<strong>5.1.4.1: The order of construction</strong></p><p>
+            <a name="classes/order"></a>
+    The possibility to pass arguments to constructors offers us the chance to
+monitor at which exact moment in a program's execution an object is created or
+destroyed. This is shown in the next listing, using a class <code>Test</code>:
+</p><p><pre>
+
+    class Test
+    {
+        public:
+            // constructors:
+            Test();                    // argument-free
+            Test(char const *name);    // with a name argument
+            // destructor:
+            ~Test();
+
+        private:
+            // data:
+            char *n;                    // name field
+    };
+
+    Test::Test()
+    {
+        n = xstrdup("without name");
+        printf("Test object without name created\n");
+    }
+
+    Test::Test(char const *name)
+    {
+        n = xstrdup(name);
+        cout &lt;&lt; "Test object " &lt;&lt; name &lt;&lt; " created" &lt;&lt; endl;
+    }
+
+    Test::~Test()
+    {
+        cout &lt;&lt; "Test object " &lt;&lt; n &lt;&lt; " destroyed" &lt;&lt; endl;
+        free(n);
+    }
+
+</pre>
+
+</p><p>By defining objects of the class <code>Test</code> with specific names, the
+construction and destruction of these objects can be monitored:
+</p><p><pre>
+
+    Test
+        globaltest("global");
+
+    void func()
+    {
+        Test
+            functest("func");
+    }
+
+    int main()
+    {
+        Test
+            maintest("main");
+
+        func();
+        return (0);
+    }
+
+</pre>
+
+</p><p>This test program thus leads to the following (and expected) output:
+</p><p><pre>
+
+    Test object global created
+    Test object main created
+    Test object func created
+    Test object func destroyed
+    Test object main destroyed
+    Test object global destroyed
+
+</pre>
+
+
+</p><p><a name="ConstFunctions"></a><a name="l64"></a>
+<h2>5.2: Const member functions and const objects</h2>
+    <a name="classes/member"></a>
+    The keyword <code>const</code> is often seen in the declarations of member functions
+following the argument list. This keyword is used to indicate that a member
+function does not alter the data fields of its object, but only inspects them.
+Using the example of the class <code>Person</code>, the <code>get...()</code> functions should
+be declared <code>const</code>:
+</p><p><pre>
+
+    class Person
+    {
+        public:
+            .
+            .
+            // functions to inspect fields
+            char const *getname(void) const;
+            char const *getaddress(void) const;
+            char const *getphone(void) const;
+
+        private:
+            .
+            .
+    };
+
+</pre>
+
+</p><p>As is illustrated in this fragment, the keyword <code>const</code> occurs
+<em>following</em> the argument list of functions. Note that in this situation
+the rule of thumb given in 
+section <a href="cplusplus03.html#ConstRule">3.1.3</a> applies once again: whichever appears <strong>before</strong> the
+keyword <code>const</code>, may not be altered and doesn't alter (its own) data. 
+</p><p>The same specification must be repeated in the definition of member functions
+themselves:
+</p><p><pre>
+
+    char const *Person::getname() const
+    {
+        return (name);
+    }
+
+</pre>
+
+</p><p>A member function which is declared and defined as <code>const</code> may not alter
+any data fields of its class. In other words, a statement like
+</p><p><pre>
+
+    name = 0;
+
+</pre>
+
+</p><p>in the above <code>const</code> function <code>getname()</code> would result in  a compilation
+error.
+</p><p>The  <code>const</code> member functions exist because <strong>C++</strong> allows
+<code>const</code> objects to be created, or references to <code>const</code> objects to be
+passed on to functions. For such objects only member functions which do
+not modify it, i.e., the <code>const</code> member functions, may be called. The only
+exception to this rule are the constructors and destructor: these are called
+`automatically'. The possibility of calling constructors or destructors 
+is comparable to the definition of a variable
+<code>int const max = 10</code>. In situations like these, no <em>assignment</em> but
+rather an <em>initialization</em> takes place at creation-time. 
+Analogously, the constructor can
+<strong>initialize</strong> its object when the variable is created, 
+but subsequent assignments cannot take place.
+</p><p>The following example shows how a <code>const</code> object of the class
+<code>Person</code> can be defined. When the object is created the data fields are
+initialized by the constructor:
+</p><p><pre>
+
+    Person const
+        me("Karel", "karel@icce.rug.nl", "542 6044");
+
+</pre>
+
+</p><p>Following this definition it would be illegal to try to redefine the name,
+address or phone number for the object <code>me</code>: a statement as
+</p><p><pre>
+
+    me.setname("Lerak");
+
+</pre>
+
+</p><p>would not be accepted by the compiler. Once more, look at the position of the
+<code>const</code> keyword in the variable definition: <code>const</code>, following <code>Person</code> 
+and preceding <code>me</code> associates to the left: the <code>Person</code> object in general
+must remain unaltered. Hence, if multiple objects were defined here, both
+would be constant <code>Person</code> objects, as in:
+</p><p><pre>
+
+    Person const        // all constant Person objects
+        kk("Karel", "karel@icce.rug.nl", "542 6044"),
+        fbb("Frank", "frank@icce.rug.nl", "403 2223");
+
+</pre>
+
+</p><p>Member functions which do not modify
+their object should be defined as <code>const</code> member functions. 
+This subsequently allows the use of these functions with  <code>const</code> 
+objects or with <code>const</code> references.
+
+</p><p><a name="l65"></a>
+<h2>5.3: The operators new and delete</h2>
+    <a name="classes/new"></a>
+    The <strong>C++</strong> language defines two operators which are specific for the
+allocation and deallocation of memory. These operators are <code>new</code> and
+<code>delete</code>.
+</p><p>The most basic example of the use of these operators is given below. An
+<code>int</code> pointer variable is used to point to memory which is allocated by the
+operator <code>new</code>. This memory is later released by the operator <code>delete</code>.
+<pre>
+
+    int
+        *ip;
+
+    ip = new int;
+    // any other statements
+    delete ip;
+ 
+</pre>
+
+ Note that <code>new</code> and <code>delete</code> are <em>operators</em> and therefore do not
+require parentheses, which are required for <em>functions</em> like <code>malloc()</code>
+and <code>free()</code>. The operator <code>delete</code> returns <code>void</code>, the operator <code>new</code>
+returns a pointer to the kind of memory that's asked for by its argument
+(e.g., a pointer to an <code>int</code> in the above example).
+</p><p>
+</p><p><a name="l66"></a>
+<h3>5.3.1: Allocating and deallocating arrays</h3>
+        <a name="classes/arrays"></a>
+    When the operator <code>new</code> is used to allocate an array, the size of
+the variable is placed between square brackets following the type:
+</p><p><pre>
+
+    int
+        *intarr;
+
+    intarr = new int [20];    // allocates 20 ints
+
+</pre>
+
+</p><p>The syntactical rule for the operator <code>new</code> is that this operator must be
+followed by a type, optionally followed by a number in square brackets. The
+type and number specification lead to an expression which is used by the
+compiler to deduce its size; in <strong>C</strong> an expression like <code>sizeof(int[20])</code>
+might be used.
+</p><p>An array is deallocated by using the operator <code>delete</code>:
+</p><p><pre>
+
+    delete [] intarr;
+
+</pre>
+
+</p><p>In this statement the array operators <code>[]</code> indicate that an array is
+being deallocated. The rule of thumb here is: whenever <code>new</code> is
+followed by <code>[]</code>, <code>delete</code> should be followed by it too.
+</p><p>What happens if <code>delete</code> rather than <code>delete []</code> is used? Consider the 
+following situation: a <code>class X</code> is defined having a destructor telling us
+that it's called. In a <code>main()</code> function an array of two <code>X</code> objects
+is allocated by new, to be deleted by <code>delete []</code>. Next, the same actions 
+are repeated, albeit that the <code>delete</code> operator is called without <code>[]</code>:
+</p><p><pre>
+
+#include &lt;iostream&gt;
+
+class X
+{ 
+    public:
+        ~X();
+};
+
+X::~X()
+{
+    cout &lt;&lt; "X destructor called" &lt;&lt; endl;
+}
+
+int main()
+{
+    X 
+      *a;
+
+    a = new X[2];
+             
+    cout &lt;&lt; "Destruction with []'s" &lt;&lt; endl;
+
+    delete [] a;
+    
+    a = new X[2];
+    
+    cout &lt;&lt; "Destruction without []'s" &lt;&lt; endl;
+                             
+    delete a;
+
+    return (0);
+}
+
+</pre>
+
+</p><p>Here's the generated output:
+<pre>
+
+    Destruction with []'s
+    X destructor called
+    X destructor called
+    Destruction without [] 's
+    X destructor called
+
+</pre>
+
+</p><p>So, as we can see, the destructor of the individual <code>X</code> objects are called
+if the <code>delete []</code> syntax is followed, and not if the <code>[]</code> is omitted.
+</p><p>If no destructor is defined, it is not called. Consider the following fragment:
+</p><p><pre>
+
+#include &lt;iostream&gt;
+
+class X
+{ 
+    public:
+        ~X();
+};
+
+X::~X()
+{
+    cout &lt;&lt; "X destructor called" &lt;&lt; endl;
+}
+
+int main()
+{
+    X 
+      **a;
+
+    a = new X* [2];
+             
+    a[0] = new X [2];
+    a[1] = new X [2];
+                         
+    delete [] a;
+
+    return (0);
+}
+
+</pre>
+
+</p><p>This program produces no messages at all. Why is this?
+The variable <code>a</code> is defined as a pointer to a pointer. For this situation,
+however, 
+there is no defined destructor as we do not have something as a 'class pointer 
+to X objects'. Consequently, the <code>[]</code> is ignored. 
+</p><p>Now, because of the <code>[]</code> 
+being ignored, not all elements of the array <code>a</code> points to are considered 
+when <code>a</code> is deleted. The two pointer elements of <code>a</code> <em>are</em> deleted,
+though, because <code>delete a</code> (note that the <code>[]</code> is not written here) frees
+the memory pointed to by <code>a</code>. That's all there is to it.
+</p><p>What if we don't want this, but require the <code>X</code> objects pointed to by the
+elements of <code>a</code> to be deleted as well? In this case we have two options:
+</p><p><ul>
+    <li >    Explicitly walk all the elements of the <code>a</code> array, deleting them
+        in turn. This will call the destructor for a pointer to <code>X</code> objects,
+        which will destroy all elements if the <code>[]</code> operator is used, as in:
+</p><p><pre>
+
+#include &lt;iostream&gt;
+
+class X
+{ 
+    public:
+        ~X();
+};
+
+X::~X()
+{
+    cout &lt;&lt; "X destructor called" &lt;&lt; endl;
+}
+
+int main()
+{
+    X 
+      **a;
+
+    a = new X* [2];
+             
+    a[0] = new X [2];
+    a[1] = new X [2];
+
+    for (int index = 0; index &lt; 2; index++)
+        delete [] a[index];
+             
+    delete a;
+
+    return (0);
+}
+
+</pre>
+
+</p><p><li > Define a class containing a pointer to <code>X</code> objects, and allocate
+        a pointer to this super-class, rather than a pointer to a pointer
+        to <code>X</code> objects. The topic of containing classes in classes,
+        <em>composition</em>, is discussed in section <a href="cplusplus05.html#Composition">5.5</a>.
+</p><p></ul>
+</p><p>
+</p><p><a name="l67"></a>
+<h3>5.3.2: New and delete and object pointers</h3>
+        <a name="classes/objectp"></a>
+    
+The operators <code>new</code> and <code>delete</code> are also used when an object of a given
+class is allocated. As we have seen in the previous section, 
+the advantage of the operators <code>new</code> and <code>delete</code> over functions like
+<code>malloc()</code> and <code>free()</code> lies in the fact that <code>new</code> and <code>delete</code>
+call the corresponding constructors or destructor. This is illustrated in the
+next example:
+</p><p><pre>
+
+    Person
+        *pp;                    // ptr to Person object
+
+    pp = new Person;            // now constructed
+    ...
+    delete pp;                  // now destroyed
+
+</pre>
+
+</p><p>The allocation of a new <code>Person</code> object pointed to by <code>pp</code> is a two-step
+process. First, the memory for the object itself is allocated. Second, the
+constructor is called which initializes the object. In the above example the
+constructor is the argument-free version; it is however also possible to
+choose an explicit constructor:
+</p><p><pre>
+
+    pp = new Person("Frank", "Oostumerweg 17", "050 403 2223");
+    ...
+    delete pp;
+
+</pre>
+
+</p><p>Note that, analogously to the construction of an object, the destruction is
+also a two-step process: first, the destructor of the class is called to
+deallocate the memory used by the object. Then the memory which is used by
+the object itself is freed.
+</p><p>Dynamically allocated arrays of objects can also be manipulated with <code>new</code>
+and <code>delete</code>. In this case the size of the array is given between the
+<code>[]</code> when the array is created:
+</p><p><pre>
+
+    Person
+        *personarray;
+
+    personarray = new Person [10];
+
+</pre>
+
+</p><p>The compiler will generate code to call the default constructor for each
+object which is created. As we have seen, the array operator <code>[]</code>
+must be used with the <code>delete</code> operator to destroy such an array in the 
+proper way:
+</p><p><pre>
+
+    delete [] personarray;
+
+</pre>
+
+</p><p>The presence of the <code>[]</code> ensures that the destructor is called for each
+object in the array. Note again 
+that <code>delete personarray</code> would only release the
+memory of the array itself.
+</p><p>
+</p><p>
+    <a name="NEWHANDLER"></a><a name="l68"></a>
+<h3>5.3.3: The function set_new_handler()</h3>
+        <a name="classes/setnew"></a>
+    The <strong>C++</strong> run-time system makes sure that when memory allocation fails, an
+error function is activated. By default this function returns the value 0 to
+the caller of <code>new</code>, so that the pointer which is assigned by <code>new</code> is
+set to zero. The error function can be redefined, but it must comply with a
+few prerequisites, which are, unfortunately, compiler-dependent.
+E.g., for the
+Microsoft <code>C/C++</code> compiler version 7, the prerequisites are:
+</p><p><ul>
+</p><p><li > The function is supplied one argument, a <code>size_t</code> value which
+    indicates how many bytes should have been allocated (The type
+    <code>size_t</code> is usually identical to <code>unsigned</code>.).
+</p><p><li > The function must return an <code>int</code>, which is the value passed by
+    <code>new</code> to the assigned pointer.
+</p><p></ul>
+</p><p>The Gnu <code>C/C++</code> compiler <code>gcc</code>, which is present on many Unix
+platforms, requires that the error handler:
+</p><p><ul>
+</p><p><li > has no arguments, and
+</p><p><li > returns no value (a <code>void</code> return type).
+</p><p></ul> 
+</p><p>Then again, Microsoft's <code>Visual C++</code> interprets the returnvalue of the 
+the function as follows:
+</p><p><ul>
+</p><p><li > The run-time system retries allocation each time the function returns
+a nonzero value and fails new if the function returns 0.
+</p><p></ul>
+</p><p>In short: there's no standard here, so make sure that you lookup the
+particular characteristics of the <code>set_new_handler</code> function for your
+compiler. Whatever you do, in any case make sure you use this function: it
+saves you a lot of checks (and problems with a failing allocation that you just
+happened to forget to protect with a check...).
+</p><p>The redefined error function might, e.g., print a message and terminate the
+program. The user-written error function becomes part of 
+the allocation system through  the
+function <code>set_new_handler()</code>, defined in the header file <code>new.h</code>. With
+some compilers, the
+installing function is called <code>_set_new_handler()</code> (note the leading
+underscore).
+</p><p>The implementation of an error function is illustrated below. This
+implementation applies to the <code>Gnu</code> <strong>C/C++</strong> requirements (
+The actual try-out of the program is not encouraged, as it will slow down
+the computer enormously due to the resulting occupation of 
+<em>Unix's swap area</em>):
+</p><p><pre>
+
+    #include &lt;new.h&gt;
+    #include &lt;iostream&gt;
+
+    void out_of_memory()
+    {
+        cout &lt;&lt; "Memory exhausted. Program terminates." &lt;&lt; endl;
+        exit(1);
+    }
+
+    int main()
+    {
+        int
+            *ip;
+        long
+            total_allocated = 0;
+            
+        // install error function
+        set_new_handler(out_of_memory);
+
+        // eat up all memory
+        puts("Ok, allocating..");
+        while (1)
+        {
+            ip = new int [10000];
+            total_allocated += 10000 * sizeof(int);
+            printf("Now got a total of %ld bytes\n",
+                    total_allocated);
+        }
+
+        return (0);
+    }
+
+</pre>
+
+</p><p>The advantage of an allocation error function lies in the fact that
+once installed, <code>new</code> can be used without wondering whether the allocation
+succeeded or not: upon failure the error function is automatically invoked and
+the program exits. It is good practice to install a <code>new</code> handler in each
+<strong>C++</strong> program, even when the actual code of the program does not allocate
+memory. Memory allocation can also fail in not directly visible code, e.g.,
+when streams are used or when strings are duplicated by low-level functions.
+</p><p>Note that it may <em>not</em> be assumed that the 
+standard <strong>C</strong> functions which allocate memory, such as
+<code>strdup()</code>, <code>malloc()</code>, <code>realloc()</code> etc. will 
+trigger the <code>new</code> handler
+when memory allocation fails. This means that once a <code>new</code> handler is
+installed, such functions should not automatically be used in an unprotected 
+way in a <strong>C++</strong> program. As an example of the use of <code>new</code> for duplicating
+a string, a rewrite of the function <code>strdup()</code> using the operator <code>new</code> is
+given in section <a href="cplusplus06.html#STRDUPNEW">6</a>. It is strongly suggested to revert to this
+approach, rather than to using functions like <code>xstrdup()</code>, when the
+allocation of memory is required. 
+</p><p>
+</p><p><a name="INLINE"></a><a name="l69"></a>
+<h2>5.4: The keyword inline</h2>
+    <a name="classes/inline"></a>
+    Let us take another look at the implementation of the function
+<code>Person::getname()</code>:
+</p><p><pre>
+
+    char const *Person::getname() const
+    {
+        return (name);
+    }
+
+</pre>
+
+</p><p>This function is used to retrieve the name field of an object of the class
+<code>Person</code>. In a code fragment, like:
+</p><p><pre>
+
+    Person
+        frank("Frank", "Oostumerweg 17", "403 2223");
+
+    puts(frank.getname());
+
+</pre>
+    
+</p><p>the following actions take place:
+</p><p><ul>
+</p><p><li > The function <code>Person::getname()</code> is called.
+</p><p><li > This function returns the value of the pointer <code>name</code> of the
+    object <code>frank</code>.
+</p><p><li > This value, which is a pointer to a string, is passed to
+    <code>puts()</code>.
+</p><p><li > The function <code>puts()</code> finally is called and prints a string.
+</p><p></ul>
+</p><p>Especially the first part of these actions leads to some time loss, since an
+extra function call is necessary to retrieve the value of the <code>name</code> field.
+Sometimes a faster process may be desirable, in which the <code>name</code> field
+becomes immediately available; thus avoiding the call to <code>getname()</code>. This
+can be realized by using <code>inline</code> functions, which can be defined in two
+ways.
+
+</p><p><a name="l70"></a>
+<h3>5.4.1: Inline functions within class declarations</h3>
+        <a name="classes/inclass"></a>
+    Using the first method to implement <code>inline</code> functions, the code of a
+function is defined <em>in a class declaration itself</em>. For the class
+<code>Person</code> this would lead to the following implementation of <code>getname()</code>:
+ <pre>
+
+    class Person
+    {
+        public:
+            ...
+            char const *getname(void) const
+            { 
+                return (name); 
+            }
+            ...
+    };
+ 
+</pre>
+
+Note that the code of the function <code>getname()</code> now literally occurs in the
+interface of the class <code>Person</code>. The keyword <code>const</code> occurs after the
+function declaration, and before the code block.
+</p><p>Thus, <code>inline</code> functions appearing in the class interface show their full
+(and standard) definition <em>within</em> the class interface itself.
+</p><p>The effect of this is the following. When <code>getname()</code> is called in a
+program statement, the compiler <em>generates the code of the function</em>
+when the function is used in the source-text, rather than a call to the 
+function, appearing only once in the compiled program.
+</p><p>This construction, where the function code itself is inserted rather than a
+call to the function, is called an inline function.  Note that the use of
+inline function results in duplication of the code of the function for each
+invokation of the inline function. This is probably ok if the function is a
+small one, and needs to be executed fast. It's not so desirable if the code of
+the function is extensive.
+
+</p><p><a name="l71"></a>
+<h3>5.4.2: Inline functions outside of class declarations</h3>
+        <a name="classes/outclass"></a>
+    The second way to implement inline functions leaves a class interface intact,
+but mentions the keyword <code>inline</code> in the function definition. The interface 
+and implementation in this case are as follows:
+</p><p><pre>
+
+    class Person
+    {
+        public:
+            ...
+            char const *getname(void) const;
+            ...
+    };
+
+    inline char const *Person::getname() const
+    {
+        return (name);
+    }
+
+</pre>
+
+</p><p>Again, the compiler will insert the code of the function <code>getname()</code> instead
+of generating a call.
+</p><p>However, the <code>inline</code> function must still appear in the same file as the 
+class interface, and cannot be compiled to be stored in, e.g., a library.
+The reason for this is that the <em>compiler</em> rather than the <em>linker</em> must 
+be able to insert the code of the function in a source text offered for 
+compilation. Code stored in a library is inaccessible to the compiler. 
+Consequently, inline functions are always defined together with the class 
+interface. 
+</p><p>
+</p><p><a name="l72"></a>
+<h3>5.4.3: When to use inline functions</h3>
+        <a name="classes/when2use"></a>
+    When should <code>inline</code> functions be used, and when not? There is a number of
+simple rules of thumb which may be followed:
+</p><p><ul>
+</p><p><li > In general <code>inline</code> functions should <strong>not</strong> be used.
+    <em>Voil&agrave;</em>, that's simple, isn't it?
+</p><p><li > Defining <code>inline</code> functions can be considered once a fully
+    developed and tested program runs too slowly and shows `bottlenecks' in
+    certain functions. A profiler, which runs a program and determines where
+    most of the time is spent, is necessary for such optimization.
+</p><p><li > <code>inline</code> functions can be used when member functions consist of
+    one very simple statement (such as the return statement in the function
+    <code>Person::getname()</code>).
+</p><p><li > By defining a function as <code>inline</code>, its implementation is inserted
+in the code wherever the function is used. As a consequence, when the
+<em>implementation</em> of the inline function changes, all sources using the
+inline function must be recompiled. In practice that means that all functions
+must be recompiled that include (either directly or indirectly) the header
+file of the class in which the inline function is defined.
+</p><p><li > It is only useful to implement an <code>inline</code> function when the
+    time which is spent during a function call is long compared to the code in
+    the function. An example where an <code>inline</code> function has no effect at
+    all is the following:
+</p><p><pre>
+
+        void Person::printname() const
+        {
+            cout &lt;&lt; name &lt;&lt; endl;
+        }
+    
+</pre>
+
+</p><p>This function, which is, for the sake of the argument, presumed to be a 
+    member of the class <code>Person</code>, contains only one statement.
+</p><p>However, the statement
+    takes  a relatively long time to execute. In general, functions which
+    perform input and output take lots of time. The effect of the conversion
+    of this function <code>printname()</code> to <code>inline</code> would therefore lead to
+    a very insignificant gain in execution time.
+</p><p></ul>
+</p><p>All <code>inline</code> functions have one disadvantage: the actual code is inserted by
+the compiler and must therefore be known compile-time. Therefore, as mentioned
+earlier, an
+<code>inline</code> function can never be located in a run-time library. Practically
+this means that an <code>inline</code> function is placed near the interface of a
+class, usually in the same header file. The result is a header file which not
+only shows the <strong>declaration</strong> of a class, but also part of its
+<strong>implementation</strong>, thus blurring the distinction between interface and 
+implementation.
+</p><p>Finally, note that using the keyword <code>inline</code> is not really an <em>order</em> for
+the compiler. Rather, it is a <em>suggestion</em> the compiler may either choose to
+follow or to ignore.
+</p><p>
+</p><p><a name="Composition"></a><a name="l73"></a>
+<h2>5.5: Objects in objects: composition</h2>
+    <a name="classes/composition"></a>
+    An often recurring situation is one where objects are used as data fields in
+class definitions. This is referred to as <strong>composition</strong>.
+</p><p>For example, the class <code>Person</code> could hold information about the name,
+address and phone number, but additionally a class <code>Date</code> could be used to
+keep the information about the birth date:
+</p><p><pre>
+
+    class Person
+    {
+        public:
+            // constructor and destructor
+            Person();
+            Person(char const *nm, char const *adr,
+                    char const *ph);
+            ~Person();
+
+            // interface functions
+            void setname(char const *n);
+            void setaddress(char const *a);
+            void setphone(char const *p);
+            void setbirthday(int yr, int mnth, int d);
+
+            char const *getname() const;
+            char const *getaddress() const;
+            char const *getphone() const;
+            int getbirthyear() const;
+            int getbirthmonth() const;
+            int getbirthday() const;
+
+        private:
+            // data fields
+            char *name, *address, *phone;
+            Date birthday;
+    };          
+
+</pre>
+
+</p><p>We shall not further elaborate on the class <code>Date</code>: this class could, e.g.,
+consist of three <code>int</code> data fields to store a year, month and day. These
+data fields would be set and inspected using interface functions
+<code>setyear()</code>, <code>getyear()</code> etc..
+</p><p>The interface functions of the class <code>Person</code> would then use <code>Date</code>'s
+interface functions to manipulate the birth date. As an example the function
+<code>getbirthyear()</code> of the class <code>Person</code> is given below:
+</p><p><pre>
+
+    int Person::getbirthyear() const
+    {
+        return (birthday.getyear());
+    }
+
+</pre>
+
+</p><p>Composition is not extraordinary or <strong>C++</strong> specific: in <strong>C</strong> it is quite
+common to include <code>struct</code>s or <code>union</code>s in other compound types.
+Note that the composed objects can be reached through their member functions: 
+the normal field selector operators are used for this.
+</p><p>However, the initialization of the composed objects deserves some extra 
+attention: the topics of the coming sections.
+
+</p><p>
+    <a name="MemberInitializers"></a><a name="l74"></a>
+<h3>5.5.1: Composition and const objects: const member initializers</h3>
+        <a name="classes/comconst"></a>
+    Composition of objects has an important consequence for the
+constructor functions of the `composed' (embedded) object. Unless explicitly
+instructed otherwise, the compiler generates code to call the default
+constructors of all composed classes in the constructor of the composing
+class.
+</p><p>Often it is desirable to initialize a composed object from the constructor of
+the composing class. This is illustrated below for the composed class
+<code>Date</code> in a <code>Person</code>. In this fragment it assumed that a constructor for
+a <code>Person</code> should be defined expecting six arguments: the name, address and
+phone number plus the year, month and day of the birth date. It is furthermore
+assumed that the composed class <code>Date</code> has a constructor with three
+<code>int</code> arguments for the year, month and day:
+</p><p><pre>
+
+    Person::Person(char const *nm, char const *adr,
+                    char const *ph,
+                    int d, int m, int y)
+    : 
+        birthday(d, m, y)
+    {
+        name = xstrdup(nm);
+        address = xstrdup(adr);
+        phone = xstrdup(ph);
+    }
+
+</pre>
+
+</p><p>Note that following the argument list of the constructor
+<code>Person::Person()</code>, the constructor of the data field <code>Date</code> is
+specifically called, supplied with three arguments. This constructor is
+explicitly called for the composed object <code>birthday</code>. This occurs even
+<strong>before</strong> the code block of <code>Person::Person()</code> is executed. This means
+that when a <code>Person</code> object is constructed and when six arguments are
+supplied to the constructor, the <code>birthday</code> field of the object is
+initialized even before <code>Person</code>'s own data fields are set to their values.
+</p><p>In this situation, the constructor of the composed data member is also 
+referred to as <em>member initializer</em>.
+</p><p>When several composed data members of a class exist, all member
+initializers can be called using a `constructor list': this list consists
+of the constructors of all composed objects, separated by commas.
+</p><p>When member initializers are <em>not</em> used, the compiler automatically
+supplies a call to the <em>default constructor</em> (i.e., the constructor without
+arguments). In this case a default constructor <em>must</em> have been
+defined in the composed class.
+</p><p>Member initializers should be used as much as possible: not using member 
+initializers can result in inefficient code, and can be downright necessary.
+As an example showing the inefficiency of not using a member initializer,
+consider the following code fragment where the <code>birthday</code> field is not
+initialized by the <code>Date</code> constructor, but instead the <code>setday()</code>,
+<code>setmonth()</code> and <code>setyear()</code> functions are called:
+</p><p><pre>
+
+    Person::Person(char const *nm, char const *adr,
+                    char const *ph,
+                    int d, int m, int y)
+    {
+        name = xstrdup(nm);
+        address = xstrdup(adr);
+        phone = xstrdup(ph);
+
+        birthday.setday(d);
+        birthday.setmonth(m);
+        birthday.setyear(y);
+    }
+
+</pre>
+
+</p><p>This code is inefficient because:
+</p><p><ul>
+</p><p><li > first the default constructor of <code>birthday</code> is called (this
+    action is implicit),
+</p><p><li > and subsequently the desired date is set explicitly by member
+    functions of the class <code>Date</code>.
+</p><p></ul>
+</p><p>This method is not only inefficient, but even more: it may not work 
+when the composed
+object is declared as a <code>const</code> object. 
+A data field like <code>birthday</code> is a good
+candidate for being <code>const</code>, since a person's birthday usually doesn't 
+change.
+</p><p>This means that when the definition of a <code>Person</code> is changed so that the
+data member <code>birthday</code> is declared as a <code>const</code> object, 
+the implementation of the
+constructor <code>Person::Person()</code> with six arguments <em>must</em> use member
+initializers. Calling the <code>birthday.set...()</code> would be illegal, since these
+are no <code>const</code> functions.
+</p><p>Concluding, the rule of thumb is the following: when composition of
+objects is used, the member initializer method is preferred to explicit
+initialization of the composed object. This not only results in more efficient
+code, but it also allows the composed object to be declared as a <code>const</code> 
+object.
+
+</p><p><a name="l75"></a>
+<h3>5.5.2: Composition and reference objects: reference memberinitializers</h3>
+        <a name="classes/comref"></a>
+    Apart from using member initializers to initialize composed objects (be they
+<code>const</code> objects or not), there is another situation where member 
+initializers must be used. Consider the following situation.
+</p><p>A program uses an object of the class <code>Configfile</code>, defined in <code>main()</code>
+to access the information in a configuration file. The configuration file
+contains parameters of the program which may be set by changing the values in 
+the configuration file, rather than by supplying command line arguments.
+</p><p>Assume that another object that is used in the function <code>main()</code> is an 
+object of the class <code>Process</code>, doing `all the work'. What possibilities do 
+we have to tell the object of the class <code>Process</code> that an object of the 
+class <code>Configfile</code> exists?
+</p><p><ul>                                        
+    <li > The objects could have been declared as <em>global</em> objects. This
+    <em>is</em> a possibility, but not a very good one, since all the advantages
+        of local objects are lost. 
+    <li >    The <code>Configfile</code> object may be passed to the <code>Process</code> object 
+    at construction time. Passing an object in a blunt way (i.e., by value)
+    might not be a very good idea, since the object must be copied into the
+    <code>Configfile</code> parameter, and then a data member of the <code>Process</code>
+    class can be used to make the <code>Configfile</code> object accessible 
+    throughout the <code>Process</code> class. This might involve yet another 
+    object-copying task, as in the following situation:
+<pre>
+
+    Process::Process(Configfile conf)   // a copy from the caller
+    {
+        conf_member = conf;             // copying to conf_member
+        ...
+    }
+
+</pre>
+
+    <li > The copy-instructions can be avoided by using <em>pointers</em> to
+        the <code>Configfile</code> objects, as in:
+<pre>
+
+    Process::Process(Configfile *conf)  // a pointer to an external object
+    {
+        conf_ptr = conf;                // the conf_ptr is a Configfile *
+        ...
+    }
+
+</pre>
+
+    This construction as such is ok, but forces us to use the <code>-&gt;</code> field
+    selector operator, rather than the <code>.</code> operator, which is (disputably)
+    awkward: conceptually one tends to think of the <code>Configfile</code> object as
+    an object, and not as a pointer to an object. In <strong>C</strong> this would 
+        probably have been the preferred method, but in <strong>C++</strong> we can do 
+        better.
+    <li > Rather than using value or pointer parameters, the <code>Configfile</code>
+    parameter could be defined as a <em>reference parameter</em> to the <code>Process</code>
+    constructor. Next, we can define a <code>Config</code> reference data member in the
+    <code>class Process</code>. Using the reference variable effectively uses a 
+    pointer, disguised as a variable. 
+</ul>
+</p><p>However, the following construction will
+    <em>not</em> result in the correct initialization of the  
+    <code>Configfile &amp;conf_ref</code> reference data member:
+<pre>
+
+    Process::Process(Configfile &amp;conf)
+    {
+        conf_ref = conf;        // wrong: no assignment
+    }
+
+</pre>
+
+    The statement <code>conf_ref = conf</code> fails, because the compiler won't
+    see this as an initialization, but considers this an assignment of
+    one <code>Configfile</code> object (i.e., <code>conf</code>), to another (<code>conf_ref</code>).
+    It does so, because that's the normal interpretation: an assignment to 
+    a reference variable is actually an assignment to the variable the 
+    reference variable refers to. But to what variable does <code>conf_ref</code>
+    refer? To no variable, since we haven't initialized <code>conf_ref</code>. 
+    After all, the whole purpose of the statement <code>conf_ref = conf</code> was
+    to initialize <code>conf_ref</code>....
+</p><p>So, how do we proceed when <code>conf_ref</code> must be initialized? In this
+    situation we once again use the member-initializer syntax. The following
+    example shows the correct way to initialize <code>conf_ref</code>:
+</p><p><pre>
+
+    Process::Process(Configfile &amp;conf)
+    :
+        conf_ref(conf)      // initializing reference member
+    {
+        ...
+    }
+
+</pre>
+
+    Note that this syntax can be used in all cases where reference data 
+    members are used. If <code>int_ref</code> would be an <code>int</code> reference data member,
+    a construction like
+<pre>
+
+    Process::Process(int &amp;ir)
+    :
+        int_ref(ir)
+    {
+        ...
+    }
+
+</pre>
+
+    would have been called for.
+</p><p>
+</p><p><a name="ClassFriend"></a><a name="l76"></a>
+<h2>5.6: Friend functions and friend classes</h2>
+    <a name="classes/friend"></a>
+    As we have seen in the previous sections, <code>private</code> data or function
+members are normally only accessible by the code which is part of the
+corresponding class. However, situations may arise in which it is desirable to
+allow the explicit access to <code>private</code> members of one class to one or
+more other classless functions or member functions of classes.
+</p><p>E.g., consider the following code example (all functions are <code>inline</code>
+for purposes of brevity):
+</p><p><pre>
+
+    class A                         // class A: just stores an
+    {                               // int value via the constructor
+        public:                     // and can retrieve it via
+            A(int v)                // getval
+                { value = v; }
+            int getval()
+                { return (value); }
+
+        private:
+            int value;
+    };
+
+    void decrement(A &amp;a)            // function decrement: tries
+    {                               // to alter A's private data
+        a.value--;
+    }
+
+    class B                         // class B: tries to touch
+    {                               // A's private parts
+        public:
+            void touch(A &amp;a)
+                { a.value++; }
+    };
+
+</pre>
+
+</p><p>This code will not compile, since the classless 
+function <code>decrement()</code> and the function <code>touch()</code> of the class
+<code>B</code> attempt to access a <code>private</code> datamember of <code>A</code>.
+</p><p>We can explicitly allow <code>decrement()</code> to access <code>A</code>'s data, and
+we can explicitly allow the class <code>B</code> to access these data. To
+accomplish this, the offending classless function <code>decrement()</code> and the
+class <code>B</code> are declared to be friends of <code>A</code>:
+</p><p><pre>
+
+    class A
+    {
+        public:
+            friend class B;             // B's my buddy, I trust him
+
+            friend void decrement(A     // decrement() is also a good pal
+                &amp;what);
+            ...
+    };
+
+</pre>
+
+</p><p>Concerning friendship between classes, we remark the following:
+</p><p><ul>
+</p><p><li > Friendship is not mutual by default. This means that once
+    <code>B</code> is declared as a friend of <code>A</code>, this does not give
+    <code>A</code> the right to access <code>B</code>'s private members.
+</p><p><li > Friendship, when applied to program design, is an 
+    <em>escape mechanism</em>
+    which circumvents the principle of data hiding. Using friend classes
+    should therefore be <em>minimized</em> to those cases where it is absolutely
+    essential. 
+</p><p><li > If friends are used, realize that the implementation of 
+    classes or functions that are friends to other classes become 
+    implementation dependent on these classes. In the above example: once the
+    internal organization of the data of the class <code>A</code> changes, all its
+    friends must be recompiled (and possibly modified) as well. 
+</p><p><li > As a rule of thumb: <em>don't</em> use friend functions or classes.
+</p><p></ul> 
+</p><p>Having thus issued some warnings against the use of friends, we'll leave our
+discussion of friends for the time being.
+However, in section <a href="cplusplus14.html#Friends">14</a> we'll continue the discussion,
+having covered, by that time, the topic of operator overloading.
+
+</p><p><a name="CLASSHEADER"></a><a name="l77"></a>
+<h2>5.7: Header file organization with classes</h2>
+    <a name="classes/headers"></a>
+    In section <a href="cplusplus02.html#CHeaders">2.5.11</a> the requirements for header files when a <strong>C++</strong>
+program also uses <strong>C</strong> functions were discussed. 
+</p><p>When classes are used, there are more requirements for the organization of
+header files. In this section these requirements are covered.
+</p><p>First, the source files. With the exception of the occasional classless
+function, source files should contain the code of member functions of classes.
+With source files there are basically two approaches:
+</p><p><ul>
+    <li > All required header files for a member function are included in each
+individual source file.
+    <li > All required header files for all member functions are included in the
+class-headerfile, and each sourcefile of that class includes only the header
+file of its class.
+</ul>
+</p><p>The first alternative has the advantage of economy for the compiler: it only
+needs to read the header files that are necessary for a particular source
+file. It has the disadvantage that the program developer must include multiple
+header files again and again in sourcefiles: it both takes time to type in the
+<code>include</code>-directives and to think about the header files which are needed in
+a particular source file. 
+</p><p>The second alternative has the advantage of economy for the program developer:
+the header file of the class accumulates header files, so it tends to become
+more and more generally useful. It has the disadvantage that the compiler will
+often have to read header files which aren't actually used by the function
+defined in the source file.
+</p><p>With computers running faster and faster we think the second alternative is to
+be preferred over the first alternative. So, we suggest that 
+source files of a particular class <code>MyClass</code> are organized according to
+the following example:
+<pre>
+
+    #include &lt;myclass.h&gt;
+
+    int MyClass::aMemberFunction()
+    {
+        ...
+    }
+
+</pre>
+
+    There is only one <code>include</code>-directive. Note that the directive refers to
+a header file in a directory mentioned in the <code>INCLUDE</code>-file environment
+variable. Local header files (using <code>#include "myclass.h"</code>) could be used
+too, but that tends to complicate the organization of the class header file
+itself somewhat. If name-collisions with existing header files might occur it
+pays off to have a subdirectory of one of the directories mentioned in the
+<code>INCLUDE</code> environment variable (comparable to, e.g., the <code>sys</code>
+subdirectory). If <code>class MyClass</code> is developed as part of some larger
+project, create a subdirectory (or subdirectory link) of one of the
+<code>INCLUDE</code> directories, to contain all header files of all classes that are
+developed as part of the project. The <code>include</code>-directives will then be
+similar to <code>#include &lt;myproject/myclass.h&gt;</code>, and name collisions with other
+header files are avoided. 
+</p><p>The organization of the header-file itself requires some attention. Consider
+the following example, in which two classes <code>File</code> and <code>String</code> are
+used. The <code>File</code> class has a member <code>gets(String &amp;destination)</code>, which
+reads a line from a file, and stores the line in the <code>String</code> object passed
+to the <code>gets()</code> member function as reference, while the class <code>String</code> has
+a member function <code>getLine(File &amp;file)</code>, which reads one line from the
+<code>File</code> object which is passed to the <code>getLine()</code> member function as a
+reference. The (partial) header file for the <code>class String</code> is then:
+<pre>
+
+    #ifndef _String_h_
+    #define _String_h_
+
+    #include &lt;project/file.h&gt;   // to know about a File
+
+    class String
+    {
+        public:
+            void getLine(File &amp;file);
+        ...
+    };
+    #endif
+
+</pre>
+
+</p><p>However, a similar setup is required for the class <code>File</code>:
+<pre>
+
+    #ifndef _File_h_
+    #define _File_h_
+
+    #include &lt;project/string.h&gt;   // to know about a String
+
+    class File
+    {
+        public:
+            void gets(String &amp;string);
+        ...
+    };
+    #endif
+
+</pre>
+
+</p><p>Now we have created a problem. The compiler, trying to compile
+<code>File::gets()</code> proceeds as follows:
+<ul>
+    <li > The header file <code>project/string.h</code> is opened to be read
+    <li > <code>_String_h_</code> is defined
+    <li > The header file <code>project/file.h</code> is opened to be read
+    <li > <code>_File_h_</code> is defined
+    <li > The header file <code>project/string.h</code> is opened to be read
+    <li > <code>_String_h_</code> has been defined, so <code>project/string.h</code> is skipped
+    <li > The definition of the <code>class File</code> is parsed.
+    <li > In the class definition contains a reference to a <code>String</code> object
+    <li > As the <code>class String</code> hasn't been parsed yet, a <code>String</code> is
+        an undefined type, and the compiler quits with an error.
+</ul>
+</p><p>The solution for this problem is to use a <em>forward class reference</em> before
+the class definition, and to include the corresponding class header file after
+the class definition. So we get:
+</p><p><pre>
+
+    #ifndef _String_h_
+    #define _String_h_
+
+    class File;                 // forward reference
+
+    class String
+    {
+        public:
+            void getLine(File &amp;file);
+        ...
+    };
+
+    #include &lt;project/file.h&gt;   // to know about a File
+
+    #endif
+
+</pre>
+
+</p><p>However, a similar setup is required for the class <code>File</code>:
+<pre>
+
+    #ifndef _File_h_
+    #define _File_h_
+
+    class String;               // forward reference
+
+    class File
+    {
+        public:
+            void gets(String &amp;string);
+        ...
+    };
+
+    #include &lt;project/string.h&gt;   // to know about a String
+
+    #endif
+
+</pre>
+
+</p><p>This works well in all situations where either references or pointers to
+another class are involved. But it doesn't work with composition. Assume the
+class <code>File</code> has a <em>composed</em> data member of the class <code>String</code>. In that
+case, the class definition of the class <code>File</code> <em>must</em> include the header
+file of the class <code>String</code> before the class definition itself, because
+otherwise the compiler can't tell how big a <code>File</code> object will be, as it
+doesn't know the size of a <code>String</code> object once the definition of the
+<code>File</code> class is completed. 
+</p><p>In cases where classes contain composed objects (or are derived from other
+classes, see chapter <a href="cplusplus15.html#Inheritance">15</a>) the header files of the classes of the
+composed objects must have been read <em>before</em> the class definition itself.
+In such a case the <code>class File</code> might be defined as follows:
+<pre>
+
+    #ifndef _File_h_
+    #define _File_h_
+
+    #include &lt;project/string.h&gt;   // to know about a String
+
+    class File
+    {
+        public:
+            void gets(String &amp;string);
+        ...
+        private:
+            String              // composition !
+                line;
+    };
+    #endif
+
+</pre>
+
+</p><p>Note that the class <code>String</code> can't have a <code>File</code> object as a composed
+member: such a situation would result again in an undefined class while
+compiling the sources of these classes.
+</p><p>All other required header files are either related to classes that are used
+only within the source files themselves (without being part of the current
+class definition), or they are related to classless functions (like
+<code>memcpy()</code>). All headers that are not required by the compiler to parse the
+current class definition can be mentioned below the class definition.
+</p><p>To summarize, a <code>class</code> header file should be organized as follows:
+<ul>
+    <li > Everything is contained within the block defined by 
+         the standard <code>ifndef</code> and <code>endif</code> directives.
+    <li > Header files of classes of objects that are either composed or
+        inherited (see chapter <a href="cplusplus15.html#Inheritance">15</a>) are mentioned first.
+    <li > The classes of objects appearing only as references or as pointers 
+        in the class definition are specified as forward references.
+    <li > Next comes the class definition itself.
+    <li > Following the class definition the header files of all classes given
+        as forward references are included.
+    <li > Finally, all other header files that are required in the source files
+        of the class are included.
+</ul>
+An example of such an header file is:
+<pre>
+
+    #ifndef _File_h_
+    #define _File_h_
+
+    #include &lt;fstream&gt;    // for composed 'instream'
+
+    class String;           // forward reference
+
+    class File              // class definition
+    {
+        public:
+            void gets(String &amp;string);
+        ...
+        private:
+            ifstream
+                instream;
+    };
+                            // for the class String
+    #include &lt;project/string.h&gt;
+
+                            // for remaining software
+    #include &lt;memory.h&gt;
+    #include &lt;sys/stat.h&gt;
+
+    #endif
+
+</pre>
+    
+
+</p><p><a name="NESTING"></a><a name="l78"></a>
+<h2>5.8: Nesting Classes</h2>
+    <a name="classes/nesting"></a>
+    Classes can be defined inside other classes. Classes that are defined inside
+other classes are called <em>nested classes</em>. 
+</p><p>A class can be nested in every part of the surrounding class: in the
+<code>public, protected</code> or <code>private</code> section. Such a nested class can be
+considered a member of the surrounding class. The normal access and visibility
+rules in classes apply to nested classes. If a class is nested in the
+<code>public</code> section of a class, it is visible outside the surrounding class. If
+it is nested in the <code>protected</code> section it is visible in subclasses, derived
+from the surrounding class (see chapter <a href="cplusplus15.html#Inheritance">15</a>), if it is nested in
+the <code>private</code> section, it is only visible for the members of the surrounding
+class. 
+</p><p>The surrounding class has no privileges with respect to the nested class. So,
+the nested class still has full control over the accessibility of its members
+by the surrounding class. 
+</p><p>For example, consider the following class definition:
+    <pre>
+
+class Surround
+{
+    public:
+        class FirstWithin
+        {
+            public:
+                FirstWithin();
+                int getVar() const
+                {
+                    return (variable);
+                }
+            private:
+                int
+                    variable;
+        };
+    private:
+        class SecondWithin
+        {
+            public:
+                SecondWithin();
+                int getVar() const
+                {
+                    return (variable);
+                }
+            private:
+                int
+                    variable;
+        };
+        // other private members of Surround
+};
+    
+</pre>
+
+    In this definition access to the members is defined as follows:
+    <ul>
+        <li > The class <code>FirstWithin</code> is visible both outside and inside
+<code>Surround</code>. The class <code>FirstWithin</code> has therefore global scope.
+        <li > The constructor <code>FirstWithin()</code> and the member function <code>getVar()</code>
+of the class <code>FirstWithin</code> are also globally visible.
+        <li > The <code>int variable</code> datamember is only visible for the members
+of the class <code>FirstWithin</code>. Neither the members of <code>Surround</code> nor the members
+of <code>SecondWithin</code> can access the <code>variable</code> of the class <code>FirstWithin</code> directly.
+        <li > The class <code>SecondWithin</code> is visible only inside
+<code>Surround</code>. The public members of the class <code>SecondWithin</code> can also be used by
+the members of the class <code>FirstWithin</code>, as nested classes can be considered
+members of their surrounding class.
+        <li > The constructor <code>SecondWithin()</code> and the member function <code>getVar()</code>
+of the class <code>SecondWithin</code> can also only be reached by the members of
+<code>Surround</code> (and by the members of its nested classes).
+        <li > The <code>int variable</code> datamember of the class <code>SecondWithin</code> is only
+visible for the members of the class <code>SecondWithin</code>. Neither the members of
+<code>Surround</code> nor the members of <code>FirstWithin</code> can access the <code>variable</code> of the
+class <code>SecondWithin</code> directly.
+    </ul>
+    If the surrounding class should have access rights to the private members
+of its nested classes or if nested classes should have access rights to the
+private members of the surrounding class, the classes can be defined as
+<code>friend</code> classes (see section <a href="cplusplus05.html#NESTEDFRIENDS">5.8.3</a>).
+</p><p>The nested classes can be considered members of the surrounding class, but
+the members of nested classes are <em>not</em> members of the surrounding
+class. So, a member of the class <code>Surround</code> may not access
+<code>FirstWithin::getVar()</code> directly. This is understandable considering the
+fact that a <code>Surround</code> object is not also a <code>FirstWithin</code> or
+<code>SecondWithin</code> object. The nested classes are only available as
+typenames. They do not imply containment as objects by the surrounding
+class. If a member of the surrounding class should use a (non-static) member
+of a nested class then a pointer to a nested class object or a nested class
+datamember must be defined in the surrounding class, which can thereupon be
+used by the members of the surrounding class to access members of the nested
+class.
+</p><p>For example, in the following class definition there is a surrounding class
+<code>Outer</code> and a nested class <code>Inner</code>. The class <code>Outer</code> contains a
+member function <code>caller()</code> which uses the <code>inner</code> object that is composed
+in <code>Outer</code> to call the <code>infunction()</code> member function of <code>Inner</code>:
+    <pre>
+
+    class Outer
+    {
+        public:
+            void caller()
+            {
+                inner.infunction();
+            }
+        private:
+            class Inner
+            {
+                public:
+                    void infunction();
+            };
+            Inner
+                inner;
+    };
+    
+</pre>
+
+    Also note that the function <code>Inner::infunction()</code> can be called as part
+of the inline definition of <code>Outer::caller()</code>, even though the definition of
+the class <code>Inner</code> is yet to be seen by the compiler. 
+</p><p>Inline functions can be defined as if they were functions that were defined
+outside of the class definition: if the function <code>Outer::caller()</code> would
+have been defined outside of the class <code>Outer</code>, the full class definition
+(including the definition of the class <code>Inner</code> would have been available to
+the compiler. In that situation the function is perfectly compilable. Inline
+functions can be compiled accordingly and there is, e.g., no need to define a
+special private section in <code>Outer</code> in which the class <code>Inner</code> is defined
+before defining the inline function <code>caller()</code>.
+</p><p>
+</p><p><a name="l79"></a>
+<h3>5.8.1: Defining nested class members</h3>
+        <a name="classes/defining"></a>
+    Member functions of nested classes may be defined as inline functions. However,
+they can also be defined outside of their surrounding class. Consider the
+constructor of the class <code>FirstWithin</code> in the example of the <a href="cplusplus05.html#NESTING">previous
+section</a>. The constructor <code>FirstWithin()</code> is defined in the class
+<code>FirstWithin</code>, which is, in turn, defined within the class
+<code>Surround</code>. Consequently, the class scopes of the two classes must be used
+to define the constructor. E.g.,
+    <pre>
+
+    Surround::FirstWithin::FirstWithin()
+    {
+        variable = 0;
+    }
+    
+</pre>
+
+</p><p>Static (data) members can be defined accordingly. If the class <code>FirstWithin</code>
+would have a <code>static unsigned</code> datamember <code>epoch</code>, it could be initialized
+as follows:
+    <pre>
+
+    Surround::FirstWithin::epoch = 1970;
+    
+</pre>
+
+</p><p>Furthermore, both class scopes  are needed to refer to public static
+members in code outside of the surrounding class:
+    <pre>
+
+    void showEpoch()
+    {
+        cout &lt;&lt; Surround::FirstWithin::epoch = 1970;
+    }
+    
+</pre>
+
+    Of course, inside the members of the class <code>Surround</code> only the <code>FirstWithin::</code> scope
+needs to be mentioned, and inside the members of the class <code>FirstWithin</code> there
+is no need to refer explicitly to the scope. 
+</p><p>What about the members of the class <code>SecondWithin</code>? The classes <code>FirstWithin</code>
+and <code>SecondWithin</code> are both nested within <code>Surround</code>, and can be considered
+members of the surrounding class. Since members of a class may directy refer
+to each other, members of the class <code>SecondWithin</code> can refer to (public) members
+of the class <code>FirstWithin</code>. Consequently, members of the class <code>SecondWithin</code> could
+refer to the <code>epoch</code> member of <code>FirstWithin</code> as
+</p><p><center><code>FirstWithin::epoch</code> </center>
+</p><p>
+</p><p><a name="l80"></a>
+<h3>5.8.2: Declaring nested classes</h3>
+        <a name="classes/declaring"></a>
+    Nested classes may be declared before they are actually defined in a
+surrounding class. Such forward declarations are required if a class contains
+multiple nested classes, and the nested classes contain pointers to objects of
+the other nested classes. 
+</p><p>For example, the following class <code>Outer</code> contains two nested classes
+<code>Inner1</code> and <code>Inner2</code>. The class <code>Inner1</code> contains a pointer to
+<code>Inner2</code> objects, and <code>Inner2</code> contains a pointer to <code>Inner1</code>
+objects. Such cross references require forward declarations:
+    <pre>
+
+    class Outer
+    {
+        ...
+        private:
+            class Inner2;       // forward declaration
+
+            class Inner1
+            {
+                ...
+                private:
+                    Inner2
+                        *pi2;   // points to Inner2 objects
+            };
+            class Inner2
+            {
+                ...
+                private:
+                    Inner1
+                        *pi1;   // points to Inner1 objects
+            };
+            ...
+    };
+    
+</pre>
+    
+
+</p><p>
+    <a name="NESTEDFRIENDS"></a><a name="l81"></a>
+<h3>5.8.3: Access to private members in nested classes</h3>
+        <a name="classes/nestedfriends"></a>
+    In order to allow nested classes to access the private members of the
+surrounding class or to access the private members of other nested classes or
+to allow the surrounding class to access the private members of nested
+classes, the <code>friend</code> keyword must be used. Consider the following
+situation, in which a class <code>Surround</code> has two nested classes <code>FirstWithin</code>
+and <code>SecondWithin</code>, while each class has a static data member <code>int variable</code>:
+    <pre>
+
+    class Surround
+    {
+        public:
+            class FirstWithin
+            {
+                public:
+                    int getValue();
+                private:
+                    static int 
+                        variable;
+            };
+            int getValue();
+        private:
+            class SecondWithin
+            {
+                public:
+                    int getValue();
+                private:
+                    static int 
+                        variable;
+            };
+            static int 
+                variable;
+    };
+    
+</pre>
+
+    If the class <code>Surround</code> should be able to access the private members of
+<code>FirstWithin</code> and <code>SecondWithin</code>, these latter two classes must declare
+<code>Surround</code> to be their friend. The function <code>Surround::getValue()</code> can
+thereupon access the private members of the nested classes. For example (note
+the <code>friend</code> declarations in the two nested classes):
+    <pre>
+
+    class Surround
+    {
+        public:
+            class FirstWithin
+            {
+                friend class Surround;
+                public:
+                    int getValue();
+                private:
+                    static int 
+                        variable;
+            };
+            int getValue()
+            {
+                FirstWithin::variable = SecondWithin::variable;
+                return (variable);
+            }
+        private:
+            class SecondWithin
+            {
+                friend class Surround;
+                public:
+                    int getValue();
+                private:
+                    static int 
+                        variable;
+            };
+            static int 
+                variable;
+    };
+    
+</pre>
+
+    Now, in order to allow the nested classes to access the private members of
+the surrounding class, the class <code>Surround</code> must declare the nested classes
+as friends. The <code>friend</code> keyword may only be used when the class that is to
+become a friend is already known as a class by the compiler, so either a
+<em>forward</em> declaration of the nested classes is required, which is followed
+by the friend declaration, or the friend declaration follows the definition of
+the nested classes. The forward declaration followed by the friend declaration
+looks like this:
+    <pre>
+
+    class Surround
+    {
+        class FirstWithin;
+        class SecondWithin;
+        friend class FirstWithin;
+        friend class SecondWithin;
+
+        public:
+            class FirstWithin
+
+            ... (etc)
+    
+</pre>
+
+    Alternatively, the friend declaration may follow the definition of the
+classes. Note that a class can be declared a friend following its definition,
+while the inline code in the definition already uses the fact that it will be
+declared a friend of the outer class. Also note that the inline code of
+the nested class uses members of the surrounding class which have not yet been
+seen by the compiler. Finally note that the variable <code>variable</code> that is
+defined in the class <code>Surround</code> is accessed in the nested classes as
+<code>Surround::variable</code>: 
+    <pre>
+
+    class Surround
+    {
+        public:
+            class FirstWithin
+            {
+                friend class Surround;
+                public:
+                    int getValue()
+                    {
+                        Surround::variable = 4;
+                        return (variable);
+                    }
+                private:
+                    static int 
+                        variable;
+            };
+            friend class FirstWithin;
+
+            int getValue()
+            {
+                FirstWithin::variable = SecondWithin::variable;
+                return (variable);
+            }
+        private:
+            class SecondWithin
+            {
+                friend class Surround;
+                public:
+                    int getValue()
+                    {
+                        Surround::variable = 40;
+                        return (variable);
+                    }
+                private:
+                    static int 
+                        variable;
+            };
+            friend class SecondWithin;
+    
+            static int 
+                variable;
+    };
+    
+</pre>
+
+    Finally, we want to allow the nested classes to access each other's
+private members. Again this requires some friend declarations. In order to
+allow <code>FirstWithin</code> to access <code>SecondWithin</code>'s private members nothing but a friend
+declaration in <code>SecondWithin</code> is required. However, to allow <code>SecondWithin</code> to
+access the private members of <code>FirstWithin</code> the <code>friend class SecondWithin</code>
+declaration cannot be plainly given in the class <code>FirstWithin</code>, as the
+definition of <code>SecondWithin</code> has not yet been given. A forward declaration of
+<code>SecondWithin</code> is required, and this forward declaration must be given in the
+class <code>Surround</code>, rather than in the class <code>FirstWithin</code>. Clearly, the forward
+declaration <code>class SecondWithin</code> in the class <code>FirstWithin</code> itself makes no sense,
+as this would refer to an external (global) class <code>FirstWithin</code>. But the attempt
+to provide the forward declaration of the nested class <code>SecondWithin</code> inside
+<code>FirstWithin</code> as <code>class Surround::SecondWithin</code> also fails miserably, with the
+compiler issuing a message like
+    <center><code>`Surround' does not have a nested type named `SecondWithin'</code> </center>
+    The right procedure to follow here is to declare the class <code>SecondWithin</code> in
+the class <code>Surround</code>, before the class <code>FirstWithin</code> is defined. Using this
+procedure, the friend declaration of <code>SecondWithin</code> is accepted inside the
+definition of <code>FirstWithin</code>. The following class definition allows full access
+of the private members of all classes by all other classes:
+    <pre>
+
+    class Surround
+    {
+        class SecondWithin;
+        public:
+            class FirstWithin
+            {
+                friend class Surround;
+                friend class SecondWithin;
+                public:
+                    int getValue()
+                    {
+                        Surround::variable = SecondWithin::variable;
+                        return (variable);
+                    }
+                private:
+                    static int 
+                        variable;
+            };
+            friend class FirstWithin;
+    
+            int getValue()
+            {
+                FirstWithin::variable = SecondWithin::variable;
+                return (variable);
+            }
+        private:
+            class SecondWithin
+            {
+                friend class Surround;
+                friend class FirstWithin;
+                public:
+                    int getValue()
+                    {
+                        Surround::variable = FirstWithin::variable;
+                        return (variable);
+                    }
+                private:
+                    static int 
+                        variable;
+            };
+            friend class SecondWithin;
+    
+            static int 
+                variable;
+    };
+    
+</pre>
+
+</p><p>
+</p><p><a name="l82"></a>
+<h3>5.8.4: Nesting enumerations</h3>
+        <a name="classes/enumerations"></a>
+    Enumerations may also be nested in classes. For example, a class
+<code>DataStructure</code> may be traversed in a forward or backward direction. Such a
+class can define an enumerator <code>Traversal</code> having the values <code>forward</code> and
+<code>backward</code>. Furthermore, a member function <code>setTraversal()</code> can be defined
+requiring either of the two enumeration values. The class can be defined as
+follows:
+    <pre>
+
+    class DataStructure
+    {
+        public:
+            enum Traversal
+            {
+                forward,
+                backward
+            };
+            setTraversal(Traversal mode);
+            ...
+        private:
+            Traversal
+                mode;
+            ...
+    };
+    
+</pre>
+        
+    Within the class <code>DataStructure</code> the values of the
+<code>Traversal</code> enumeration can be used directly. For example:
+    <pre>
+
+    void DataStructure::setTraversal(Traversal modeArg)
+    {
+        mode = modeArg;
+        switch (mode)
+        {
+            forward:
+                ....
+            break;
+
+            backward:
+                ....
+            break;
+        }
+    }
+    
+</pre>
+
+    Ouside of the class <code>DataStructure</code> the name of the enumeration type is
+not used to refer to  the values of the enumeration. Here the classname is
+enough. Only if a variable of the enumeration type is required the name of the
+enumeration type is needed, as illustrated by the following piece of code:
+    <pre>
+
+    void fun()
+    {
+        DataStructure::Traversal                // enum typename required
+            localMode = DataStructure::forward; // enum typename not required
+
+        DataStructure
+            ds;
+                                                // enum typename not required
+        ds.setTraversal(DataStructure::backward);
+    }
+    
+</pre>
+
+    Again, if <code>DataStructure</code> would define a nested class <code>Nested</code> in
+which the enumeration <code>Traversal</code> would have been defined, the two class
+scopes would have been required. In that case the former example would have to
+be coded as follows:
+    <pre>
+
+    void fun()
+    {
+        DataStructure::Nested::Traversal
+            localMode = DataStructure::Nested::forward;
+
+        DataStructure
+            ds;
+
+        ds.setTraversal(DataStructure::Nested::backward);
+    }
+    
+</pre>
+
+
+</p><p>
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus06.html">Next chapter</a>
+    <li> <a href="cplusplus04.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

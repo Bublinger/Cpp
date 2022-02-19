@@ -1,0 +1,465 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus15.html">Next chapter</a>
+    <li> <a href="cplusplus13.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="Friends"></a><a name="l250"></a>
+<h1>Chapter 14: More about friends</h1>
+<a name="friends"></a>
+    
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="friends/intro"></a>
+    Let's return to <code>friend</code>s once more. In section <a href="cplusplus05.html#ClassFriend">5.6</a> the 
+possibility of declaring a function or class as a <em>friend</em> of a class was 
+discussed. At the end of that section, we mentioned 
+</p><p><ul>
+</p><p><li > Friendship, when applied to program design, is an 
+    <em>escape mechanism</em>
+    which circumvents the principle of data hiding. Using friend classes
+    should therefore be <em>minimized</em> to those cases where it is absolutely
+    essential. 
+</p><p><li > If friends are used, realize that the implementation of 
+    classes or functions that are friends to other classes become 
+    implementation dependent on these classes. In the above example: once the
+    internal organization of the data of the class <code>A</code> changes, all its
+    friends must be recompiled (and possibly modified) as well. 
+</p><p><li > As a rule of thumb: <em>don't</em> use friend functions or classes.
+</p><p></ul> 
+</p><p>In our opinion, there are indeed very few reasons for using the <code>friend</code>
+keyword. It violates the principle of data hiding, and makes the maintenance
+of a class dependent on another class.
+</p><p>Nonetheless, it might be worthwhile to look at some examples in which the 
+<code>friend</code> keyword can be used profitably. Having seen such examples, 
+the decision about whether or not to use <code>friend</code>s might be based on a 
+somewhat more solid foundation than on a plain rule of thumb.
+</p><p>At the onset, we remark that in our programming projects we <em>never</em> found
+any convincing reason to resort to <code>friend</code>s. Having thus made our position 
+clear, let's consider a situation where  it would be nice 
+for an existing class to have access to another class. 
+</p><p>Such a situation might occur when we would like to give an old class
+access to a class  developed <em>later</em> in history. 
+</p><p>However, while developing the older class, it was not yet known that the newer 
+class would be developed later in time. E.g., the older class is distributed
+in the runtime-library of a compiler, and the newer class is a class developed 
+by us. 
+</p><p>Consequently, no provisions were offered in the older class to access the 
+information in the newer class. 
+</p><p>Consider the following situation. Within the <code>C++</code> I/O-library the 
+extraction <code>&gt;&gt;</code> and insertion <code>&lt;&lt;</code> operators 
+may be used to extract from and to insert into a stream. 
+</p><p>These operators can be given data of several 
+types: <code>int, double, char *</code>, etc.. Now assume that we develop a class 
+<code>String</code>. Objects of the <code>class String</code> can be 
+given a string, and <code>String</code> objects can also <em>produce</em> other
+<code>String</code> objects. 
+</p><p>While it is possible to use the insertion operator to write the string that is 
+stored in the object to a stream, it is not possible to use the <em>extraction</em>
+operator, as illustrated by the following piece of code:
+</p><p><pre>
+
+    #include &lt;iostream&gt;
+
+    class String
+    {
+        public:
+            // ...
+            void set(char const *s);
+            char const *get() const;
+        private:
+            char
+                *str;
+    };
+        
+    void f()
+    {
+        String
+            str;
+            
+        str.set("hello world");
+            // Assign a value. Can't use 
+            // cin &gt;&gt; str.set() or 
+            // a similar construction
+            
+        cout &lt;&lt; str.get() &lt;&lt; endl;
+            // this is ok.
+    }
+
+</pre>
+
+Actually, the use of the insertion operator in combination with the 
+<code>String</code> class is also a bit of a kludge: it isn't the <code>String</code> 
+object that is inserted into the stream, but rather a string produced by
+one of its members.
+</p><p>Below we'll discuss a method to allow the insertion and extraction of 
+<code>String</code> objects, based on the use of the  <code>friend</code> keyword.
+</p><p>
+</p><p><a name="l251"></a>
+<h2>14.1: Inserting String objects into streams</h2>
+    <a name="friends/insertion"></a>
+    
+Assume that we would like to be able to insert <code>String</code> objects into 
+streams, rather than derivatives of <code>String</code> objects, like 
+<code>char const *</code>'s. If we would be able to write <code>String</code> objects into
+streams, we could be using code comparable to
+<pre>
+
+    int main()
+    {
+        String
+            str("Hello world");
+            
+        cout &lt;&lt; "The string is: '" &lt;&lt; str &lt;&lt; "'" &lt;&lt; endl;
+        return (0);
+    }
+
+</pre>
+
+</p><p>Analogously, with the extraction operator, we would like to be able to write 
+code comparable to the next example:
+<pre>
+
+    int main()
+    {
+        String
+            str;
+                   
+        cout &lt;&lt; "Enter your string: ";
+
+        cin &gt;&gt; str;
+            
+        cout &lt;&lt; "Got: '" &lt;&lt; str &lt;&lt; "'" &lt;&lt; endl;
+
+        return (0);
+    }
+
+</pre>
+
+</p><p>In this situation we would not have to rely on the availability of a 
+particular member (like <code>char const *String::get()</code>), and we would be able to
+fill a <code>String</code> object directly via the extraction operator, rather than
+via an intermediate variable of a type understood by the <code>cin</code> stream.
+</p><p>Even more central to the concept of object oriented programming: we would be
+able to <em>ignore</em> the functionality of the <code>String</code> class in combination 
+with <code>iostream</code> objects: our objective is, after all, to insert the 
+information in the <code>String</code> <em>object</em> into the <code>cout</code> stream, and not 
+to call a particular function to do so. 
+</p><p>Once we're able to focus our attention on the object, rather than on its 
+member functions, the above piece of code remains valid, no matter what 
+internal organization the <code>String</code> object has. 
+</p><p>
+</p><p><a name="l252"></a>
+<h2>14.2: An initial solution</h2>
+    <a name="friends/initial"></a>
+    Consider the following overloaded operator <code>&gt;&gt;</code>, to be used as an extraction
+operator with a <code>String</code> object:
+<pre>
+
+    istream &amp;String::operator&gt;&gt;(istream &amp;is)
+    {      
+        char
+            buffer[500];    
+            // assume this buffer to be 
+            // large enough. 
+
+        is &gt;&gt; buffer;      // extraction
+
+        delete str;     // free this-&gt;str 
+                        // memory
+                    
+                        // assign new value
+        str = strdupnew(buffer);
+        
+        return (is);    // return is-reference
+    }
+
+</pre>
+
+The extraction operator can now be used with <code>String</code> 
+objects. Unfortunately, this implementation produces awkward code. 
+The extraction operator is 
+part of the <code>String</code> class, so its <em>left</em> operand must be a 
+<code>String</code> object. 
+</p><p>As the <em>left</em> operand must be a <code>String</code> object, we're now forced to
+use weird-looking code like the following, which can only partially be 
+compiled. The numbered statements are annotated next.
+<pre>
+
+    void fun()
+    {
+        String
+            s;
+            
+        s &gt;&gt; cin;           // (1)
+            
+        int x;
+        
+        s &gt;&gt; (cin &gt;&gt; x);    // (2)
+            
+        cin &gt;&gt; x &gt;&gt; s;      // (3)
+    }
+
+</pre>
+
+</p><p><ol>
+    <li>   In this statement <code>s</code> is the <em>left-hand</em> operator, and <code>cin</code>
+      the <em>right-hand</em>, consequently, this statement represents 
+      <em>extraction from a <code>cin</code> object into a <code>String</code> object</em>.
+</p><p><li> In this statement parentheses are needed to indicate the proper
+        ordering of the sub-expressions: first <code>cin &gt;&gt; x</code> is executed,
+        producing an <code>istream &amp;</code>, which is then used as a right-hand operand
+        with the <code>extraction</code> to <code>s</code>.
+</p><p><li> This statement is what we want, but it doesn't compile: the 
+    <code>istream</code>'s overloaded operator <code>&gt;&gt;</code> doesn't know how to extract 
+    information into <code>String</code> objects.
+</p><p></ol>
+</p><p>
+</p><p><a name="FriendsFriendfun"></a><a name="l253"></a>
+<h2>14.3: Friend-functions</h2>
+    <a name="friends/friendfun"></a>
+    
+The last statement of the previous example is in fact what we want. 
+How can we accomplish the syntactical (and semantical) correctness 
+of that last statement?
+</p><p>A solution is to overload the <em>global</em> <code>&gt;&gt;</code> operator to accept a 
+left-operand of the <code>istream &amp;</code> type, and a right operand of the 
+<code>String &amp;</code> type, returning an <code>istream &amp;</code>. Its 
+prototype is, therefore:
+    <center><code>istream &amp;operator&gt;&gt;(istream &amp;is, String &amp;destination);</code> </center>
+</p><p>To implement this function, the implementation given for the overloaded 
+extraction operator of the <code>String</code> class can't simply be copied, since 
+the private datamember <code>str</code> is accessed there. A small (and perfectly legal)
+modification would be to access the <code>String</code>'s information via a
+<code>char const *String::get() const</code> member, but this would again generate
+a dependency on the <code>String::get()</code> function, which we would like to 
+avoid.
+</p><p>However, the need for overloading the extraction operator arose strictly in 
+the context of the <code>String</code> class, and is in fact depending on the 
+existence of that class. In this situation the overloading of the operator
+could be considered an extension to the <code>String</code> class, rather than to
+the <code>iostream</code> class.
+</p><p>Next, since we consider the overloading of the <code>&gt;&gt;</code> operator in the context
+of the <code>String</code> class an <em>extension of</em> the <code>String</code> class, we feel safe
+to allow that function access to the private members of a <code>String</code> object,
+instead of forcing the <code>operator&gt;&gt;()</code> function to assign the data members 
+of the <code>String</code> object through the <code>String</code>'s member functions. 
+</p><p>Access to the private data members of the <code>String</code> object is granted by 
+declaring the <code>operator&gt;&gt;()</code> function to be a <code>friend</code> of the <code>String</code>
+class:
+<pre>
+
+    #include &lt;iostream&gt;
+
+    class String
+    {
+        friend istream &amp;operator&gt;&gt;(istream &amp;is, 
+                                   String &amp;destination);
+        public:
+            // ...
+        private:
+            char
+                *str;
+    };
+
+    istream &amp;operator&gt;&gt;(istream &amp;is, String &amp;destination)
+    {      
+        char
+            buffer[500];    
+
+        is &gt;&gt; buffer;                  // extraction
+
+        delete destination.str;     // free old 'str' memory
+
+        destination.str = strdupnew(buffer);
+                                    // assign new value
+        
+        return (is);                // return istream-reference
+    }
+    
+    void fun()
+    {
+        String
+            s;
+            
+        cin &gt;&gt; s;   // application
+        
+        int
+            x;
+            
+        cin &gt;&gt; x &gt;&gt; s;
+                    // extraction order is now 
+                    // as expected
+    }
+
+</pre>
+
+</p><p>Note that nothing in the implementation of the <code>operator&gt;&gt;()</code> function
+suggests that it's a friend of the <code>String</code> class. The compiler detects
+this only from the <code>String</code> interface, where the <code>operator&gt;&gt;()</code> function
+is declared as a friend.
+
+</p><p>
+    <a name="FriendsPrevent"></a><a name="l254"></a>
+<h3>14.3.1: Preventing the friend-keyword</h3>
+        <a name="friends/prevent"></a>
+    Now that we've seen that it's possible to define an overloaded <code>operator&gt;&gt;()</code>
+function for the <code>String</code> class, it's hopefully clear that there is only 
+very little reason to declare it as a friend of the <code>class String</code>, assuming
+that the proper member functions of the class are available. 
+</p><p>On the other hand, declaring the <code>operator&gt;&gt;()</code> as a friend function isn't 
+that much of a problem, as the <code>operator&gt;&gt;()</code> function can very well be 
+interpreted as a true member function of the <code>class String</code>, although, due 
+to a syntactical peculiarity, it cannot be defined as such. 
+</p><p>To illustrate the possibility of overloading the <code>&gt;&gt;</code> operator for the 
+<code>istream</code> and <code>String</code> combination, we present here the version which does 
+not have to be declared as a <code>friend</code> in the <code>String</code> class interface. 
+This implementation assumes that the class <code>String</code> has 
+an overloaded operator <code>=</code>, accepting as r-value a <code>char const *</code>:
+<pre>
+
+    istream &amp;operator&gt;&gt;(istream &amp;lvalue, String &amp;rvalue)
+    {      
+        char
+            buffer[500];    
+
+        lvalue &gt;&gt; buffer;      // extraction
+
+        rvalue = buffer;       // assignment
+        
+        return (lvalue);    // return istream-reference
+    }
+
+</pre>
+
+No big deal, isn't it? After all, whether or not to use <code>friend</code> 
+functions might purely be a matter of taste. As yet, we haven't come across a 
+situation where <code>friend</code> functions are truly needed.
+</p><p>
+</p><p><a name="l255"></a>
+<h2>14.4: Friend classes</h2>
+    <a name="friends/classes"></a>
+    
+Situations may arise in which two classes doing closely related tasks are 
+developed together. 
+</p><p>For example, a window application can define a class <code>Window</code> 
+to contain the information of a particular window, and a class <code>Screen</code>
+shadowing the <code>Window</code> objects for those windows that are actually 
+visible on the screen. 
+</p><p>Assuming that the window-contents of a <code>Window</code> 
+or <code>Screen</code> object are accessible through a <code>char *win</code> 
+pointer, of <code>unsigned size</code> characters, an overloaded operator 
+<code>!=</code> can be defined in one (or both) classes to compare the contents of 
+a <code>Screen</code> and <code>Window</code> object immediately. Objects of the two
+classes may then be compared directly, as in the following code fragment:
+</p><p><pre>
+
+    void fun()
+    {
+        Screen
+            s;
+        Window 
+            w;
+            
+        // ... actions on s and w ...
+        
+        if (w != s)         // refresh the screen
+            w.refresh(s);   // if w != s
+    }
+
+</pre>
+
+</p><p>It is likely that the overloaded operator <code>!=</code> and other member 
+functions of <code>w</code> (like <code>refresh()</code>) will benefit from direct access to 
+the data of a <code>Screen</code> object. In this case the class <code>Screen</code>
+may declare the class <code>Window</code> as a friend class, thus allowing 
+<code>Window</code>'s member functions to access the private members of its objects.
+</p><p>A (partial) implementation of this situation is:
+<pre>
+
+    class Window;       // forward declaration
+    class Screen
+    { 
+        friend class Window;    // Window's object may
+                                // access Screen's 
+                                // private members
+        public:
+            // ...
+        private:
+            // ...
+            char
+                *win;
+            unsigned
+                size;
+    };
+
+    // =============================================
+    // now in Window's context:
+    
+    int Window::operator!=(Screen const &amp;s)
+    {
+        return 
+        (
+            s.size != size      // accessing Screen's
+            ||                  // private members
+            !memcmp(win, s.win, size)
+        );
+    };
+
+</pre>
+
+</p><p>It is also possible to declare classes to be each other's friends, or
+to declare a global function to be a friend in multiple classes. While there
+may be situations where this is a useful thing to do, it is important to 
+realize that these multiple friendships actually violate the principle of
+encapsulation. 
+</p><p>In the example we've been giving earlier for single <code>friend</code> functions, 
+the implementation of such functions
+can be placed in the same directory as the actual member 
+functions of the class declaring the function to be its friend. Such functions
+can very well be considered part of the class implementation, being
+somewhat `eccentric` member functions.
+Those functions will normally be inspected automatically
+when the implementation of the data of the class is changed. 
+</p><p>However, when a class itself is declared as a 
+friend of another class, things become a little more complex. If the sources 
+of classes are kept and maintained in different directories, it is not clear 
+where the code of <code>Window::operator!=()</code> should be stored, as this 
+function accesses private members of  both the class <code>Window</code> and 
+<code>Screen</code>. Consequently caution should be  exercized when these 
+situations arise. 
+</p><p>In our opinion it's probably best to avoid friend classes, as they 
+violate of the central principle of encapsulation.
+
+</p><p>
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus15.html">Next chapter</a>
+    <li> <a href="cplusplus13.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

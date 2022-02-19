@@ -1,0 +1,1235 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus13.html">Next chapter</a>
+    <li> <a href="cplusplus11.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="IOStreams"></a><a name="l221"></a>
+<h1>Chapter 12: The IO-stream Library</h1>
+<a name="iostreams"></a>
+    
+
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="iostreams/intro"></a>
+    As an extension to the standard stream (<code>FILE</code>) approach well known from
+the <strong>C</strong> programming language, <strong>C++</strong> offers an <em>I/O library</em> based on 
+<code>class</code> concepts. 
+</p><p>Earlier (in chapter <a href="cplusplus03.html#FirstImpression">3</a>) we've already 
+seen examples of the use of the <strong>C++</strong> <em>I/O library</em>. In this chapter
+we'll cover the library to a larger extent.
+</p><p>Apart from defining the <em>insertion (&lt;&lt;)</em> and <em>extraction(&gt;&gt;)</em> operators,
+the use of the <strong>C++</strong> <em>I/O library</em> offers the additional advantage 
+of <em>type safety</em> in all kinds of standard situations. Objects (or plain
+values) are inserted into the <em>iostreams</em>. Compare this to the situation
+commonly encountered in <strong>C</strong> where the <code>fprintf()</code> function is used to
+indicate by a format string what kind of value to expect where. Compared to
+this latter situation <strong>C++</strong>'s <em>iostream</em> approach uses the objects where
+their values should appear, as in
+</p><p><center><code>cout &lt;&lt; "There were " &lt;&lt; nMaidens &lt;&lt; " virgins present\n";</code> </center>
+</p><p>The compiler notices the type of the <code>nMaidens</code> variable, inserting 
+its proper value at the appropriate place in the sentence inserted into
+the <code>cout</code> iostream. 
+</p><p>Compare this to the situation encountered in <strong>C</strong>. Although <strong>C</strong> compilers 
+are getting smarter and smarter over the years, and although a well-designed 
+<strong>C</strong> compiler may warn you for a mismatch between a format specifier and the 
+type of a variable encountered in the corresponding position of the argument 
+list of a <code>printf()</code> statement, it can't do much more than <em>warn</em> you. 
+The <em>type safety</em> seen in <strong>C++</strong> <em>prevents</em> you from making type 
+mismatches, as there are no types to match.
+</p><p>Apart from this, the <em>iostreams</em> offer more or less the same set of
+possibilities as the standard streams of <strong>C</strong>: files can be
+opened, closed, positioned, read, written, etc.. The remainder of this
+chapter presents an overview.
+</p><p>In general, input is managed by <code>istream</code> objects, having the derived 
+classes <code>ifstream</code> for files, and <code>istrstream</code> for strings (character
+arrays), whereas
+output is managed by <code>ostream</code> objects, having the derived classes 
+<code>ofstream</code> for files and <code>ostrstream</code> for strings.
+</p><p>If a file should allow both reading from and writing to, a <code>fstream</code> object 
+(c.q. <code>strstream</code> object) should be used.
+</p><p>Finally, in order to use the <code>iostream</code> facilities, the header file
+<code>iostream</code> must be included in source files using these facilities.  When
+<code>ifstream, ofstream</code> or <code>fstream</code> objects are to be used, the <code>fstream</code>
+header file, which in turn includes <code>iostream</code>, must be included. 
+An analogous situation holds true for string streams. Here the header file
+<code>strstream</code> is required.
+</p><p> 
+</p><p><a name="l222"></a>
+<h2>12.1: Streams: insertion (&lt;&lt;) and extraction (&gt;&gt;)</h2>
+    <a name="iostreams/operators"></a>
+    
+The insertion and extraction operators are used to write information to or
+read information from, respectively, <em>ostream</em> and <em>istream</em> objects (and
+to all classes derived from these classes). By default, <em>white space</em> is
+skipped when the insertion and extraction operators are used.
+</p><p> 
+</p><p><a name="l223"></a>
+<h3>12.1.1: The insertion operator &lt;&lt;</h3>
+        <a name="iostreams/insertion"></a>
+    The <em>insertion</em> operator (<code>&lt;&lt;</code>) points to the <code>ostream </code>object wherein 
+the  information is inserted. The <em>extraction</em> operator points to the
+object receiving the information obtained from the <code>istream</code> object.
+</p><p>As an example, the <code>&lt;&lt;</code> operator as defined with the <code>class ostream</code> 
+is an overloaded operator having as prototype, e.g.,
+    <center><code>ostream &amp;ostream::operator &lt;&lt;(char const *text)</code> </center>
+</p><p>The normal associativity of the <code>&lt;&lt;</code>-operator remains unaltered, so
+when a statement like
+    <center>(cout &lt;&lt; "hello " &lt;&lt; "world") </center>
+is encountered, the leftmost two operands are evaluated first 
+(<code>cout &lt;&lt; "hello "</code>), and a <code>ostream &amp;</code> object, which is actually the 
+same <code>cout</code> object. From here, the statement is reduced to
+    <center>(cout &lt;&lt; "world") </center>
+and the second string is inserted into <code>cout</code>. 
+</p><p>Since the <code>&lt;&lt;</code> operator has a lot of (overloaded) variants, many types of
+variables can be inserted into <code>ostream</code> objects. There is an overloaded
+<code>&lt;&lt;</code>-operator expecting an <code>int</code>, a <code>double</code>, a pointer, etc. etc..
+For every part of the information that is inserted into the stream the operator
+returns the <code>ostream</code> object into which the information so far was inserted,
+and the next part of the information to be inserted is devoured.
+</p><p>As we have seen in the discussion of <em>friends</em>, even new classes can
+contain an overloaded <code>&lt;&lt;</code> operator to be used with <code>ostream</code> objects
+(see sections <a href="cplusplus14.html#FriendsFriendfun">14.3</a> and <a href="cplusplus14.html#FriendsPrevent">14.3.1</a>).  
+</p><p>
+
+</p><p><a name="l224"></a>
+<h3>12.1.2: The extraction operator &gt;&gt;</h3>
+        <a name="iostreams/extraction"></a>
+    With the <em>extraction</em> operator, a similar situation holds true as with the
+insertion operator, the extraction operator operating comparably to the
+<code>scanf()</code> function. I.e., white space characters are skipped. Also, the
+operator doesn't expect <em>pointers</em> to variables that should be given new
+values, but <em>references</em> (with the exception of the <code>char *</code>, but
+<code>string</code> variables are used as references).
+</p><p>Consider the following code:
+</p><p><pre>
+
+    int
+        i1,
+        i2;
+    char
+        c;
+        
+    cin &gt;&gt; i1 &gt;&gt; i2;                // see (1)
+    
+    while (cin &gt;&gt; c &amp;&amp; c != '.')    // see (2)
+        process(c);
+                             
+    char                            // see (3)
+        buffer[80];
+                                    // see (3)
+    while (cin &gt;&gt; buffer)
+        process(buffer);
+
+</pre>
+
+</p><p>This example shows several characteristics of the extraction operator worth
+noting. Assume the input consists of the following lines:
+</p><p><pre>
+
+    125
+    22
+    h e l l o 
+    w o r l d .
+    this example shows
+    that we're not yet done 
+    with C++
+
+</pre>
+
+</p><p><ol>
+    <li> In the first part of the example two int values are extracted
+        from the input:
+        these values are assigned, respectively, to <code>i1</code>  and <code>i2</code>.
+        White-space (newlines, spaces, tabs) is skipped, and the values
+        125 and 22 are assigned to <code>i1</code> and <code>i2</code>.
+</p><p>If the assignment <em>fails</em>, e.g., when there are no numbers to be
+        converted, the result of the extraction operator evaluates to a zero
+        result, which can be used for testing purposes, as in:
+</p><p><center><code>if (!(cin &gt;&gt; i1))</code> </center>
+    <li> In the second part, characters are read. However, white space is
+        skipped, so the characters of the words <code>hello</code> and <code>world</code> are
+        produced by <code>cin</code>, but the blanks that appear in between are not.
+</p><p>Furthermore, the final <code>'.'</code> is not processed, since that one's
+        used as a sentinel: the delimiter to end the <code>while</code>-loop, when the
+        extraction is still successful.
+    <li> In the third part, the argument of the extraction operator is yet 
+        another type of variable: when a <code>char *</code> is passed, white-space
+        delimited strings are extracted. So, here the words <code>this, example,
+        shows, that, we're, not, yet, done, with</code> and <code>C++</code> are returned.
+</p><p>Then, the end of the information is reached. This has two consequences:
+        First, the <code>while</code>-loop terminates. Second, an empty string is
+        copied into the <code>buffer</code> variable.
+</ol>
+
+</p><p><a name="l225"></a>
+<h2>12.2: Four standard iostreams</h2>
+    <a name="iostreams/standard"></a>
+    In <strong>C</strong> three standard files are available: <code>stdin</code>, the standard input
+stream, normally connected to the keyboard, <code>stdout</code>, the (buffered) standard
+output stream, normally connected to the screen, and <code>stderr</code>, the 
+(unbuffered) standard error stream, normally not redirected, and also connected
+to the screen.
+</p><p>In <strong>C++</strong> comparable iostreams are 
+<ul>
+    <li > <code>cin</code>, an <code>istream</code> object from which information can be 
+        extracted. This stream is normally connected to the keyboard.
+    <li > <code>cout</code>, an <code>ostream</code> object, into which information can be 
+        inserted. This stream is normally connected to the screen.
+    <li > <code>cerr</code>, an <code>ostream</code> object, into which information can be 
+        inserted. This stream is normally connected to the screen. Insertions
+        into that stream are unbuffered.
+    <li > <code>clog</code>, an <code>ostream</code> object, comparable to <code>cerr</code>, but using
+        buffered insertions. Again, this stream is normally connected to the 
+        screen.
+</ul>
+</p><p>
+</p><p><a name="l226"></a>
+<h2>12.3: Files and Strings in general</h2>
+    <a name="iostreams/files"></a>
+    In order to be able to create <code>fstream</code> objects, the header file
+<code>fstream</code> must be included. Files to read are accessed through
+<code>ifstream</code> objects, files to write are accessed through <code>ofstream</code> objects.
+Files may be accessed for reading and writing as well. The general <code>fstream</code>
+object is used for that purpose.
+</p><p>String stream objects can be used to read or write objects to streams in
+memory, allowing the use of, e.g., the insertion and extraction operators on
+these objects. To use the string stream objects <code>istrstream, ostrstream</code> or
+<code>strstream</code> the header file <code>strstream</code> must be included. Note that a
+<code>strstream</code> object is not a <code>string</code> object. A <code>strstream</code> object should
+be approached like a <code>fstream</code> object, not as a <code>char *</code> object having
+special characteristics.
+
+</p><p>
+    <a name="STRINGSTREAMS"></a><a name="l227"></a>
+<h3>12.3.1: String stream objects: a summary</h3>
+        <a name="iostreams/strings"></a>
+    Strings can be processed similarly to <code>iostream</code> objects, if objects of the
+class <code>istrstream, ostrstream</code> or <code>strstream</code> are constructed. Objects of
+these classes can be used to, respectively, read information from memory,
+write information to memory, or both.
+</p><p>These objects can be created by constructors expecting the address
+of a block of memory (and its size) as its argument. It is also possible to
+let the objects to the memory management themselves. 
+</p><p>Let's go through some examples. To write something into a block of memory
+using a <code>ostrstream</code> object, the following code could be used:
+        <pre>
+
+    char
+        buffer[100];
+    ostrstream
+        os(buffer, 100);    // construct the ostrstream object
+
+                            // fill 'buffer' with a well-known text
+    os &lt;&lt; "Hello world " &lt;&lt; endl &lt;&lt; ends;
+
+    cout &lt;&lt; os.str(); // display the string 
+        
+</pre>
+ 
+    Note the final <code>ends</code> that is appended: When an ascii-z string is
+inserted into an <code>ostrstream</code> object it will not automatically write a
+trailing ascii-z sentinel (comparable to the way <code>ostream</code> objects
+behave). In order to append a terminating ascii-z, the symbolic value <code>ends</code>
+can be used. After inserting an <code>ends</code> further insertions into the
+<code>ostrstream</code> object will succeed, but they will not normally be visible:
+        <pre>
+
+    char
+        buffer[100];
+    ostrstream
+        os(buffer, 100);    // construct the ostrstream object
+
+    os &lt;&lt; "Hello world " &lt;&lt; ends;
+
+    os &lt;&lt; " More text " &lt;&lt; ends;
+
+    cout &lt;&lt; os.str() &lt;&lt; endl; // this only shows 'Hello world' 
+        
+</pre>
+ 
+    The information, however, <em>is</em> stored in the string, as shown by the
+following example:
+        <pre>
+
+    void bytes(ostrstream &amp;str)
+    {
+        char
+            *cp = str.str();
+    
+        cout &lt;&lt; str.pcount() &lt;&lt; ": "; 
+    
+        for (int idx = 0; idx &lt; 10; ++idx)
+            cout &lt;&lt; setw(3) &lt;&lt; static_cast&lt;int&gt;(cp[idx]) &lt;&lt; " ";
+        cout &lt;&lt; endl;
+    }
+    
+    int main()
+    {
+        char buffer[10];
+    
+        memset(buffer, 10, 10);
+    
+        ostrstream
+            str(buffer, 100);
+        
+        bytes(str);
+    
+        str &lt;&lt; "A";
+    
+        bytes(str);
+    
+        str &lt;&lt; "B" &lt;&lt; ends;
+    
+        bytes(str);
+    
+        str &lt;&lt; "C";
+    
+        bytes(str);
+    
+        return (0);
+    }
+        
+</pre>
+
+    This little program produces the following output:
+        <pre>
+
+    0:  10  10  10  10  10  10  10  10  10  10 
+    1:  65  10  10  10  10  10  10  10  10  10 
+    3:  65  66   0  10  10  10  10  10  10  10 
+    4:  65  66   0  67  10  10  10  10  10  10 
+        
+</pre>
+
+    This output shows that all insertions succeed, but the <code>ends</code> writes an
+ascii-z character. This effectively creating an ascii-z string, preventing the
+display of the information beyond when the contents of the <code>ostrstream</code>
+object are inserted into <code>cout</code>.
+</p><p>Furthermore, note the use of the member function <code>str()</code>, returning the
+string the <code>ostrstream</code> object operates on. Using <code>str()</code> the existence of
+<code>buffer</code> can be hidden from the users of the <code>ostrstream</code> object. 
+</p><p>When an <code>ostrstream</code> object is created without an external memory buffer
+(e.g., `<code>ostrstream str;</code>' is defined), the <code>ostrstream</code> object allocates
+the required memory itself. In that case using the <code>str()</code> member function
+will result in the <em>freezing</em> of the <code>ostrstream</code> object: it will no
+longer create room for new characters when additional text is inserted into
+the object, and, most important, it will <em>not delete allocated memory</em> when
+the object itself is deleted.
+</p><p>To prevent memory leakage here, the program using the <code>str()</code> member function
+can take two actions:
+    <ul>
+        <li > First, as <code>str()</code> returns a <code>char *</code> rather than a <code>char
+const *</code> the caller of <code>str()</code> may consider the returned string its own.
+Consequently, the caller of <code>str()</code> is responsible for deleting 
+the string returned by <code>str()</code>. E.g.,
+        <pre>
+
+    ostrstream
+        ostr;
+    
+    ostr &lt;&lt; "Hello world" &lt;&lt; ends;
+
+    char
+        *cp = ostr.gets();  // freezes ostr
+
+    cout &lt;&lt; cp;             // use ostr's string
+    delete cp;              // caller deletes ostr's string
+        
+</pre>
+
+        <li > Alternatively, the string can be <em>unfrozen</em>, after which
+insertions are again possible. Now, when the <code>ostrstream</code> object is
+destroyed the <code>ostrstream</code>'s internally stored string is destroyed
+too. E.g.,
+        <pre>
+
+    ostrstream
+        ostr;
+    
+    ostr &lt;&lt; "Hello world" &lt;&lt; ends;
+
+    char
+        *cp = ostr.gets();  // freezes ostr
+
+    cout &lt;&lt; cp;             // use ostr's string
+
+    ostr.freeze(0);         // ostr will now delete its own string, cp 
+                            // should leave the memory it points to alone.
+        
+</pre>
+
+     </ul>
+</p><p>The following member functions are available for <code>strstream</code> objects:
+    <ul>
+    <li ><code>istrstream::istrstream(const char *str [, int size])</code>: This
+constructor creates an input string class <code>istrstream</code> object, associating
+it with an existing buffer starting at <code>str</code>, of size <code>size</code>.  
+If <code>size</code> is not specified, the buffer is treated as a null-terminated 
+string.  
+    <li ><code>ostrstream::ostrstream()</code>: This constructor creates a new stream for
+output to a dynamically managed string, which will grow as needed.  
+    <li ><code>ostrstream::ostrstream(char *str, int size [, int mode])</code>: This
+constructor creates a new stream for output to a statically defined string of
+length <code>size</code>, starting at <code>str</code>.  The <code>mode</code> parameter may 
+optionally be specified as one of the iostream modes. By default <code>ios::out</code>
+is used.
+    <li ><code>int ostrstream::pcount()</code>: returns the current length of the string
+associated with this <code>ostrstream</code> object.
+    <li ><code>char *ostrstream::str()</code>: The member function returns a pointer to the
+string managed by this <code>ostrstream</code> object. This function implies
+<code>freeze()</code>, see below:
+    <li ><code>void ostrstream::freeze ([int n])</code>: If <code>n</code> is nonzero (the default),
+the string associated with this <code>ostrstream</code> object must not change
+dynamically anymore.  While frozen, it will not be reallocated if it needs
+more space, and it will not be deallocated when the <code>ostrstream</code> object is
+destroyed.  <code>freeze(1)</code> can be used to refer to the string as a pointer
+after creating it via <code>ostrstream</code> facilities. <code>freeze(0)</code> can be used to 
+unfreeze (thaw ?) the object again. Following <code>freeze(0)</code> the <code>ostrstream</code>
+object will delete memory it allocated when the object itself is deleted.
+    <li ><code>int ostrstream::frozen()</code>: This member can be used to 
+test whether <code>freeze(1)</code> is in effect for this string.
+     </ul>
+    In order to use the <code>strstream</code> classes, the header file <code>strstream</code>
+must be included.
+</p><p>
+</p><p><a name="l228"></a>
+<h3>12.3.2: Writing streams</h3>
+        <a name="iostreams/write"></a>
+    In order to be able to write to a file an <code>ofstream</code> object must be created,
+in order to be able to write to a string stream an <code>ostrstream</code> object must
+be created. 
+</p><p>To open a file to write to, the <code>ofstream</code> constructor receives
+the name of the file to be opened:
+</p><p><center><code>ofstream out("outfile");</code> </center>
+</p><p>By default this will result in the creation of the file, and information 
+inserted into it will be written from the beginning of the file. Actually,
+this corresponds to the creation of the <code>ofstream</code> object in standard output
+mode, for which the enumeration value <code>ios::out</code> could have been provided as 
+well:
+</p><p><center><code>ofstream out("outfile", ios::out);</code> </center>
+</p><p>Alternatively, instead of (re)writing the file, the <code>ofstream</code> object could
+be created in the append mode, using the <code>ios::app</code> mode indicator:
+</p><p><center><code>ofstream out("outfile", ios::app);</code> </center>
+</p><p>Normally, information will be inserted into the <code>ofstream</code> object using the 
+insertion operator <code>&lt;&lt;</code>, in the way it is used with the standard streams 
+like <code>cout</code>, e.g.:
+</p><p><center><code>out &lt;&lt; "Information inserted into the 'out' stream\n";</code> </center>
+</p><p>Just like the <code>fopen()</code> function of <strong>C</strong> may fail, the construction of the
+<code>ofstream</code> object might not succeed. When an attempt is made to 
+create an <code>ofstream</code> object, it is a good idea to test the successful 
+construction. The <code>ofstream</code> object returns 0 if its construction failed. 
+This value can be used in tests, and the code can throw an exception (see 
+chapter <a href="cplusplus13.html#Exceptions">13</a>) or it can handle the failure itself, as in the 
+following code:
+</p><p><pre>
+
+    #include &lt;iostream&gt;
+    #include &lt;fstream&gt;
+    
+    int main()
+    {
+        ofstream
+            out("/");   // creating 'out' fails
+            
+        if (!out)
+        {
+            cerr &lt;&lt; "creating ofstream object failed\n";
+            exit(1);
+        }
+    }
+
+</pre>
+
+</p><p>Alternatively, a <code>ofstream</code> object may be constructed first, and opened
+later:  
+        <pre>
+
+    ofstream
+        out;
+
+    out.open("outfile");
+        
+</pre>
+
+    Here, the return value of <code>open()</code> may be inspected to see whether the
+stream has been successfully opened or not.
+</p><p>Analogous to an <code>ofstream</code> object, an <code>ostrstream</code> object can be
+created. Here no filename is required. E.g.,
+        <center><code>ostrstream text;</code> </center>
+    opens an empty <code>ostrstream</code> object. There is no <code>open()</code> member
+function for <code>ostrstream</code> objects. 
+</p><p>An <code>ostrstream</code> object may be initialized by an ascii-z string. E.g., 
+        <center><code>ostrstream text("hello world");</code> </center>
+    These strings expand dynamically when more information is inserted into
+them. However, the inserted information is not automatically ascii-z
+terminated. In order to append an ascii-z to the information inserted into an
+<code>ostrstream</code> object an <code>ends</code> can be inserted:
+        <center><code>text &lt;&lt; ", and there is more." &lt;&lt; ends;</code> </center>
+    The information that is stored in a <code>ostrstream</code> object can be retrieved
+from its <code>str()</code> member, which returns a <code>char const *</code>, but realize that
+this will `freeze' the object, see section <a href="cplusplus12.html#STRINGSTREAMS">12.3.1</a>. The number of
+characters returned by <code>str()</code> is obtained from the <code>pcount()</code> member,
+returning an <code>int</code>. 
+
+</p><p><a name="l229"></a>
+<h3>12.3.3: Reading streams</h3>
+        <a name="iostreams/read"></a>
+    In order to be able to read from a file an <code>ifstream</code> object must be
+created, in order to be able to read from a string stream an <code>istrstream</code>
+object must be created.
+</p><p>To open a file to read from, the <code>ifstream</code> constructor receives
+the name of the file to be opened:
+</p><p><center><code>ifstream in("infile");</code> </center>
+</p><p>By default this will result in the opening of the file for reading. The file
+must exist for the <code>ifstream</code> object construction to succeed.
+Instead of the shorthand form to open a file for reading, and explicit <code>ios</code>
+flag may be used as well:
+</p><p><center><code>ifstream in("infile", ios::in);</code> </center>
+</p><p>As with the <code>ofstream</code> objects, <code>ifstream</code> objects may be constructed
+first, and opened later: 
+        <pre>
+
+    ifstream
+        ifstr;
+
+    ifstr.open("infile");
+        
+</pre>
+
+    Normally, information will be extracted from the <code>ifstream</code> object using
+the extraction operator <code>&gt;&gt;</code>, in the way it is used with the standard stream
+<code>cin</code>, e.g.:
+</p><p><center><code>in &gt;&gt; x &gt;&gt; y;</code> </center>
+</p><p>By default, the extraction operator skips blanks: between words, between
+characters, between numbers, etc.. Consequently, if the input consists of the
+following information: <pre>
+
+    12 
+    13
+    a b 
+    hello world
+
+</pre>
+
+then the next code fragment will read <code>12</code> and <code>13</code> into <code>x</code> and <code>y</code>,
+will then return the characters <code>a</code> and <code>b</code>, and will finally read 
+<code>hello</code> and <code>world</code> into the character array <code>buffer</code>:
+<pre>
+
+    int
+        x,
+        y;
+    char
+        c,
+        buffer[10];
+        
+    in &gt;&gt; x &gt;&gt; y &gt;&gt; c &gt;&gt; c &gt;&gt; buffer &gt;&gt; buffer;
+
+</pre>
+
+Notice that no format specifiers are necessary. The type of the variables 
+receiving the extracted information determines the nature of the extraction:
+integer values for <code>int</code>s, white space delimited strings for <code>char []</code>s,
+etc..
+</p><p>Just like the <code>fopen()</code> function of <strong>C</strong> may fail, the construction of the
+<code>ifstream</code> object might not succeed. When an attempt is made to 
+create an <code>ifstream</code> object, it is a good idea to test the successful 
+construction. The <code>ifstream</code> object returns 0 if its construction failed. 
+This value can be used in tests, and the code can throw an exception (see 
+section <a href="cplusplus13.html#Exceptions">13</a>) or it can handle the failure itself, as in the 
+following code:
+</p><p><pre>
+
+    #include &lt;iostream&gt;
+    #include &lt;fstream&gt;
+    
+    int main()
+    {
+        ifstream
+            in("");         // creating 'in' fails
+            
+        if (!in)
+        {
+            cerr &lt;&lt; "creating ifstream object failed\n";
+            exit(1);
+        }
+    }
+
+</pre>
+
+</p><p>Analogous to an <code>ifstream</code> object, an <code>istrstream</code> object can be
+created. Here no filename is required. E.g.,
+        <center><code>istrstream text("hello world");</code> </center>
+    opens an <code>istrstream</code> object that is initialized by an ascii-z string.
+ 
+</p><p><a name="l230"></a>
+<h3>12.3.4: Reading and writing streams</h3>
+        <a name="iostreams/readwrite"></a>
+    In order to be able to read and write to a file a <code>fstream</code> object must be
+created. To read and write to a <code>strstream</code> a <code>strstream</code> object must be
+created. Again, the constructor receives the name of the file to be opened:
+</p><p><center><code>fstream inout("infile", ios::in | ios::out);</code> </center>
+</p><p>Note the use of the <code>ios</code> constants <code>ios::in</code> and <code>ios::out</code>, indicating
+that the file must be opened both for reading and writing. Multiple mode 
+indicators may be used, concatenated by the binary or operator <code>'|'</code>.
+Alternatively, instead of <code>ios::out</code>,
+<code>ios::app</code> might have been used, in which case writing will always be done
+at the end of the file. 
+</p><p>Under <strong>DOS</strong>-like operating systems, which use the multiple character
+<code>\r\n</code> sentinels to separate lines in textfiles the flag <code>ios::binary</code> 
+(or <code>ios::bin</code>) is
+required for processing binary files to ensure that <code>\r\n</code> combinations are
+processed as two characters.
+</p><p>With <code>fstream</code> objects, the <code>ios::out</code> will result in the creation
+of the file, if the file doesn't exist, and if <code>ios::out</code> is the only
+mode specification of the file. If the mode <code>ios::in</code> is given as well,
+then the file is created only if it doesn't exist. So, we have the following
+possibilities:
+<pre>
+                       
+    -------------------------------------------------------------
+                                 Specified Filemode            
+                    ---------------------------------------------
+     File:                ios::out            ios::in | ios::out
+    -------------------------------------------------------------
+     exists           File is rewritten     File is used as found
+    
+    doesn't exist      File is created         File is created
+    -------------------------------------------------------------
+
+</pre>
+
+</p><p>Once a file has been opened in read and write mode, the <code>&lt;&lt;</code> operator
+may be used to write to the file, while the <code>&gt;&gt;</code> operator may be used
+to read from the file. These operations may be performed in random order.
+The following fragment will read a blank-delimited word from the file,
+will write a string to the file, just beyond the point where the string 
+just read terminated, and will read another string: just beyond the location
+where the string just written ended:
+<pre>
+
+    ...
+    fstream
+        f("filename", ios::in | ios::out);
+    char
+        buffer[80]; // for now assume this 
+                    // is long enough
+        
+    f &gt;&gt; buffer;    // read the first word    
+
+                    // write a well known text 
+    f &lt;&lt; "hello world";
+    
+    f &gt;&gt; buffer;    // and read again
+
+</pre>
+
+Since the operators <code>&lt;&lt;</code> and <code>&gt;&gt;</code> can apparently be used with <code>fstream</code>
+objects, you might wonder whether a series of <code>&lt;&lt;</code> and <code>&gt;&gt;</code> operators
+in one statement might be possible. After all, <code>f &gt;&gt; buffer</code> should produce
+a <code>fstream &amp;</code>, shouldn't it? 
+</p><p>The answer is: it doesn't. The compiler casts the <code>fstream</code> object into
+an <code>ifstream</code> object in combination with the extraction operator, and into an
+<code>ofstream</code> object in combination with the insertion operator. Consequently,
+a statement like
+    <center><code>f &gt;&gt; buffer &lt;&lt; "grandpa" &gt;&gt; buffer;</code> </center>
+results in a compiler error like
+    <center><code>no match for `operator &lt;&lt;(class istream, char[8])'</code> </center>
+Since the compiler complains about the <code>istream</code> class, the <code>fstream</code>
+object is apparently considered an <code>ifstream</code> object in combination with
+the extraction operator.
+</p><p>Of course, random insertions and extractions are hardly used. Generally, 
+insertions and extractions take place at specific locations in the file.
+In those cases, the position where the insertion or extraction must take
+place can be controlled and monitored by the <code>seekg()</code> and <code>tellg()</code> 
+member functions.
+</p><p>The member function <code>tellg()</code> returns the current offsetposition of the
+stream for which it is called.
+</p><p>The member function <code>seekg()</code> expects two arguments, the second one having a
+default value:
+    <center><code>seekg(long offset, seek_dir position = ios::beg);</code> </center>
+The first argument is a <code>long</code> offset with respect to a <code>seek_dir</code> postion.
+The <code>seek_dir</code> position may be one of:
+<ul>
+    <li ><code>ios::beg</code>: add <code>offset</code> to the begin of file position. Negative
+        offsets result in an error condition, which must be cleared before
+        any further operations on the file will succeed.
+    <li ><code>ios::end</code>: add <code>offset</code> to the end of file position. Positive
+        offsets result in the insertion of as many padding <code>(char)0</code> 
+        characters as necessary to reach the intended offset.
+    <li ><code>ios::cur</code>: add <code>offset</code> to the current file position. If adding
+        the <code>offset</code> to the current position would result in a position 
+        before <code>ios::beg</code>, then, again, an error condition results. If the
+        position would be beyond <code>ios::end</code>, then extra <code>(char)0</code> 
+        characters are supplied.
+</ul>                                                      
+</p><p>Error conditions (see also section <a href="cplusplus12.html#IOStreamConditionStates">12.3.6</a>) occurring
+due to, e.g., reading beyond end of file, reaching end of file, or positioning
+before begin of file, can be cleared using the <code>clear()</code> member function.
+Following <code>clear()</code> processing continues. E.g.,
+<pre>
+
+    ...
+    fstream
+        f("filename", ios::in | ios::out);
+    char
+        buffer[80]; // for now assume this 
+                    // is long enough
+
+    f.seekg(-10);   // this fails, but...
+    f.clear();      // processing f continues
+
+    f &gt;&gt; buffer;    // read the first word    
+
+</pre>
+
+</p><p><code>Strstream</code> objects can be given flags as well. The <code>ostrstream</code> object
+may be constructed by the following constructor:
+        <center><code>ostrstream text(initext, size, flags);</code> </center>
+    where <code>initext</code> is an ascii-z terminated initialization text, <code>size</code>
+is the size of the internal buffer of the <code>strstream</code> object, and <code>flags</code>
+is a set of <code>ios</code> flags. The last and last two arguments are
+optional. If <code>size</code> is specified, the internal buffer will not grow
+dynamically, but will be given a static size of <code>size</code> bytes.
+    
+</p><p>
+    <a name="SPECIALFUN"></a><a name="l231"></a>
+<h3>12.3.5: Special functions</h3>
+        <a name="iostreams/special"></a>
+    Special functions are available for unformated (also called <em>binary</em>)
+reading and writing of files.
+</p><p>For <em>reading</em> the following member functions, that can be used with
+<code>istream</code> objects (which includes <code>ifstream</code> and <code>fstream</code> objects)
+are available:
+    <ul>
+        <li ><code>int istream::get()</code>: this function returns <code>EOF</code> or the next
+available single character as an <code>int</code> value.
+        <li ><code>istream &amp;istream::get(char &amp;c)</code>: this function reads the next 
+single character from the input stream into <code>c</code>.
+        <li ><code>int istream::peek()</code>: this function returns the next available
+input character, but does not actually remove the character from the input
+stream. 
+        <li ><code>istream&amp; istream::get(char *buffer, int len [, char delimiter])</code>:
+    This function reads a string from the input stream into the array starting
+at <code>buffer</code>, which should be at least <code>len</code> bytes long. At most <code>len -
+1</code> characters are read into the buffer. The delimiter is a newline (<code>'\n'</code>)
+character by default.<br>
+    Note that the <strong>delimiter is not read</strong> by <code>get()</code> if the delimiter is 
+encountered in the input stream.<br>
+    After reading the string into <code>buffer</code>, an <code>ascii-Z</code> character is appended
+to the string in <code>buffer</code> delimiter. <br>
+    Note that the functions <code>eof()</code> and <code>fail()</code> (see section
+<a href="cplusplus12.html#IOStreamConditionStates">12.3.6</a>) do <em>not</em> return <code>true</code> if the delimiter was
+not encountered on input. Furthermore, an <code>ascii-Z</code> character can be used for the
+delimiter: this way strings terminating in <code>ascii-Z</code> characters may be read from
+a (binary) file. Of course, the program reading the string should know in
+advance the number of characters that are going to be read by the function.
+    A small example illustrating the use of <code>get()</code> in combination with
+<code>ascii-Z</code> delimiters is:
+        <pre>
+
+    #include &lt;fstream&gt;
+    
+    void main(int argc, char **argv)
+    {
+        fstream
+            f(argv[1], ios::in | ios::out); // r/w the file, assume this 
+                                            // succeeds
+        f.write("hello", 6);
+        f.write("hello", 6);
+    
+        f.seekg(0, ios::beg);               // reset to begin of file
+    
+        char 
+            buffer[20],
+            c;
+                                            // read the first `hello'
+        cout &lt;&lt; f.get(buffer, 100, 0).tellg() &lt;&lt; endl;;
+        f &gt;&gt; c;                             // read the ascii-z delim
+
+                                            // and read the second `hello'
+        cout &lt;&lt; f.get(buffer + 6, 100, 0).tellg() &lt;&lt; endl;;
+    }
+        
+</pre>
+
+        <li ><code>istream&amp; istream::getline (char *buffer, int len [, char 
+            delimiter])</code>
+        This function operates analogously to <code>get()</code>, but <code>delimiter</code> is
+removed from the input if it is actually encountered. At most <code>len - 1</code>
+bytes are written into the <code>buffer</code>, and a trailing <code>ascii-Z</code> character is
+appended to the string that was read. The delimiter itself is <em>not</em> stored
+in the <code>buffer</code>. If <code>delimiter</code> was <em>not</em> found (before reading <code>len</code>
+characters or <code>EOF</code>, <code>getline()</code> the <code>fail()</code> member function, and
+possibly also <code>eof()</code> will return true.<br>
+        <li ><code>istream&amp; istream::read(void *buffer, int len)</code>: this function
+reads at most <code>len</code> bytes from the input stream into the buffer. If
+<code>EOF</code> is encountered first, fewer bytes are read, and the
+member function <code>eof()</code> will return <code>true</code>. This function will normally be
+used for writing <em>binary</em> files. In the following example, an object of the
+class <code>Date</code> is written in its binary form to a file:
+        <pre>
+
+    #include &lt;fstream&gt;
+
+    class Date
+    {
+        public:
+            unsigned
+                year,
+                month,
+                day;
+    };
+        
+    void main(int argc, char **argv)
+    {
+        ofstream
+            f(argv[1], ios::out);
+        Date
+            d;
+        f.read(&amp;d, sizeof(Date));  // reads object in binary form.
+    }
+        
+</pre>
+
+        <li ><code>int istream::gcount()</code>: this function does not actually read from
+the input stream, but returns the number of characters that were read from the
+input stream during the last unformated input operation.
+        <li ><code>istream&amp; istream::ignore ([int n [, int delimiter]])</code>: called
+without arguments, one character is skipped from the input stream. Called with
+one argument, <code>n</code> characters are skipped. The optional second argument
+specifies a delimiter: after skipping <code>n</code> or the <code>delimiter</code> character
+(whichever comes first) the function returns.
+        <li ><code>istream&amp; istream::putback (char c)</code>: the character <code>c</code> is
+`pushed back' into the input stream, to be read as the next
+character. <code>EOF</code> is returned if this is not allowed. One character may
+always be put back.
+        <li ><code>istream&amp; istream::unget()</code>: an attempt is made to push back the
+last character that was read.
+    </ul>
+</p><p>For <em>writing</em> binary files the following member functions are
+available. These functions can be used with <code>ostream</code> objects (including
+<code>ofstream</code> and <code>fstream</code> objects):
+    <ul>
+        <li ><code>ostream&amp; ostream::put(char c)</code>: this function writes a single
+character to the output stream.
+        <li ><code>ostream&amp; ostream::write (void *buffer, int length)</code>: this function
+writes at most <code>len</code> bytes to the output stream. This function will normally
+be used for writing <em>binary</em> files.  
+        <li ><code>ostream&amp; ostream::flush()</code>: any pending output on the output
+stream is written.
+    </ul>
+
+</p><p>
+    <a name="IOStreamConditionStates"></a><a name="l232"></a>
+<h3>12.3.6: Good, bad, and ...: IOStream Condition States</h3>
+        <a name="iostreams/conditions"></a>
+    Operations on streams may succeed and they may fail for several reasons.
+Whenever an operation fails, further read and write operations on the stream 
+are suspended. Furtunately, it is possible to clear these error condition, so
+that a program can repair the problem, instead of having to abort.
+</p><p>Several condition member functions of the <code>fstreams</code> exist to manipulate
+or determine the states of the stream:
+<ul>
+    <li ><code>bad()</code>: this member function returns a non-zero value when an invalid
+        operation has been requested, like seeking before the begin of file
+        position.
+    <li ><code>eof()</code>: this member function returns a non-zero value when the stream
+        has reached end of file (<code>EOF</code>).
+    <li ><code>fail()</code>: this member function returns a non-zero value when 
+        <code>eof()</code> or <code>bad()</code> returns a non-zero value.
+</ul>
+Note that once one of these error conditions are raised, further processing of 
+the stream is suspended. The member function <code>good()</code>, on the other hand,
+returns a non-zero value when there are <em>no</em> error conditions. Alternatively,
+the operator <code>'!'</code> could be used for that in combination with <code>fail()</code>. So
+<code>good()</code> and <code>!fail()</code> return identical logical values.
+</p><p>A subtlety is the following: Assume a stream is constructed, but not attached
+to an actual file. E.g., the statement <code>ifstream instream</code> creates the
+stream object, but doesn't assign it to a file. However, if we next
+check it's status through <code>good()</code> this member will return a non-zero value.
+The `good' status here indicates that the stream object has been cleanly 
+constructed. It doesn't mean the file is also open. A direct test for that 
+can be performed by inspecting <code>instream.rdbuf()-&gt;is_open</code>. If non-zero,
+the stream is open.
+</p><p>When an error condition has occurred (i.e., <code>fail()</code> returns a non-zero
+value), and can be repaired, then the member
+function <code>clear()</code> should be called to clear the error status of the file.
+</p><p>
+</p><p><a name="l233"></a>
+<h3>12.3.7: Formating</h3>
+        <a name="iostreams/formatting"></a>
+    While the insertion and extraction operators provide elegant ways to
+read information from and write information to <code>iostreams</code>, there
+are situations in which special formating is required. Formating may
+involve the control of the width of an output field or an input buffer
+or the form (e.g., the radix) in which a value is displayed. The
+functions <code>(v)form()</code> and <code>(v)scan()</code> can be used for special formating.
+Although these latter functions are not available in all implementations, they
+<em>are</em> available with the <code>GNU g++</code> run-time system.
+</p><p>Apart from these member functions, member functions are available for defining
+the precision and the way numbers are displayed. Apart from using members,
+<em>manipulators</em> exist for controlling the display form and the width of
+output and input elements. Different from member functions, manipulators are
+part of insertion or extraction statements. 
+
+</p><p>
+<a name="l234"></a>
+
+             
+<strong>12.3.7.1: The (v)form() and (v)scan() members</strong></p><p>
+            <a name="iostreams/form"></a>
+    To format information to be inserted  into a stream the member <code>form()</code> is
+available: 
+    <center><code>ostream&amp; form(const char *format, ...);</code> </center>
+Note that this is a <em>member-function</em>, returning a reference to an
+<code>ostream</code> object. Therefore, it can be used in combination with, e.g., the
+insertion operator:
+    <center><code>cout.form("Hello %s", "world") &lt;&lt; endl;</code> </center>
+produces a well known sentence.
+</p><p>The member function <code>form()</code> is the analogue of <strong>C</strong>'s <code>fprintf()</code>
+function. When variadic functions are constructed in which information must be
+inserted into a stream, the member function <code>vform()</code> can be used, being the
+analogue of <code>vfprintf()</code>.
+</p><p>To scan information from a stream, the member function <code>scan()</code> can be
+used, which is the analogue of <strong>C</strong>'s <code>fscanf()</code> function. Similarly to
+<code>vfscanf()</code>, the member function <code>vscan()</code> can be used in variadic
+functions. 
+
+</p><p>
+<a name="l235"></a>
+
+             
+<strong>12.3.7.2: Manipulators: dec, hex, oct and other manipulators</strong></p><p>
+            <a name="iostreams/manipulators"></a>
+    The <code>iostream</code> objects maintain <em>format states</em> controlling the default
+formating of values.  The format states can be controlled by member functions
+and by manipulators. Manipulators are inserted into the stream, the
+member functions are used by themselves. 
+</p><p>
+</p><p>The following manipulators are available:
+    <ul>
+        <li ><code>dec, hex, oct</code>: These manipulators enforce the display of integral
+numbers in, respectively, decimal, hexadecimal and octal format.  The default
+conversion is decimal. The conversion takes effect on information inserted
+into the stream after processing the manipulators. So, a statement like:
+    <center><code>cout &lt;&lt; 16 &lt;&lt; ", " &lt;&lt; hex &lt;&lt; 16 &lt;&lt; ", " &lt;&lt; oct &lt;&lt; 16;</code> </center>
+will produce the output
+    <center><code>16, 10, 20</code> </center>
+</p><p><li ><code>setbase(int b)</code>: This manipulator can be used to display integral
+values using the base 8, 10 or 16. It can be used instead of <code>oct, dec,
+hex</code> in situations where the base of integral values is parameterized.
+</p><p><li ><code>setfill(int ch)</code>: This manipulator defines the filling character
+in situations where the values of numbers are too small to fill the width that
+is used to display these values. By default the blank space is used.
+</p><p><li ><code>setprecision(int width)</code>: This manipulator can be used to set the
+precision in which a <code>float</code> or <code>double</code> is displayed. In order to use 
+manipulators requiring arguments the header file <code>iomanip</code> must be included.
+</p><p><li ><code>setw(int width)</code>: This manipulator expects as its argument the
+width of the field that is inserted or extracted next. It can be used as
+manipulator for insertion, where it defines the maximum number of characters
+that are displayed for the field, and it can be used with extraction, where it
+defines the maximum number of characters that are inserted into an array.
+</p><p>For example, to insert 20 characters into <code>cout</code>, use:
+    <center><code>cout &lt;&lt; setw(20) &lt;&lt; 8 &lt;&lt; endl;</code> </center>
+</p><p>To prevent array-bounds overflow when extracting from <code>cin</code>, <code>setw()</code> can
+be used as well:
+    <center><code>cin &gt;&gt; setw(sizeof(array)) &gt;&gt; array;</code> </center>
+    A nice feature here is that a long string appearing at <code>cin</code> is split
+into substrings of at most <code>sizeof(array) - 1</code> characters, and an ascii-z is
+appended.
+    Notes:
+    <ul>
+        <li ><code>setw()</code> is valid <em>only</em> for the next field. It does <em>not</em> act
+like e.g., <code>hex</code> which changes the general state of the output stream for
+displaying numbers.
+        <li > When <code>setw(sizeof(someArray))</code> is used, make sure that
+<code>someArray</code> really is an array, and not a pointer to an array: the size of a
+pointer, being 2 or 4 bytes, is usually not the size of the array that it
+points to....
+        <li > In order to use <code>setw()</code> the header file <code>iomanip</code> must be
+included.  
+    </ul>
+</p><p></ul>
+</p><p>
+</p><p>
+<a name="l236"></a>
+
+             
+<strong>12.3.7.3: Setting the precision: the member precision()</strong></p><p>
+            <a name="iostreams/precision"></a>
+    The function <code>precision()</code> is used to define the precision of the display of
+floating point numbers. The function expects the number of digits (<em>not</em>
+counting the decimal point or the minus sign) that are to be displayed as its
+argument. For example, 
+<pre>
+
+    cout.precision(4);
+    cout &lt;&lt; sqrt(2) &lt;&lt; endl;
+    cout.precision(6);
+    cout &lt;&lt; -sqrt(2) &lt;&lt; endl;
+
+</pre>
+
+results in the following output:
+<pre>
+
+    1.414
+    -1.41421
+
+</pre>
+
+</p><p>When used without argument, <code>precision()</code> returns the actual precision
+value:
+<pre>
+
+    cout.precision(4);
+    cout &lt;&lt; cout.precision() &lt;&lt; ", " &lt;&lt; sqrt(2) &lt;&lt; endl;
+
+</pre>
+
+    Note that <code>precision()</code> is not a manipulator, but a
+member function. Therefore, <code>cout.precision()</code> rather than <code>precision()</code> is
+inserted into the stream.
+</p><p>
+</p><p>
+<a name="l237"></a>
+
+             
+<strong>12.3.7.4: (Un)Setting display flags: the member (un)setf()</strong></p><p>
+            <a name="iostreams/setf"></a>
+    The member function <code>setf()</code> is used to define the way numbers are
+displayed. It expects one or two arguments, all <em>flags</em> of the <code>iostream</code>
+class. In the following examples, <code>cout</code> is used, but other <code>ostream</code>
+objects might have been used as well:
+</p><p><ul>
+    <li > To display the numeric base of integral values, use 
+            <center><code>cout.setf(ios::showbase)</code> </center>
+This results in <em>no</em> prefix for decimal values, <code>0x</code> for hexadecimal
+values, <code>0</code> for octal values. For example:
+<pre>
+
+    cout.setf(ios::showbase);
+    cout &lt;&lt; 16 &lt;&lt; ", " &lt;&lt; hex &lt;&lt; 16 &lt;&lt; ", " &lt;&lt; oct &lt;&lt; 16 &lt;&lt; endl;
+
+</pre>
+
+results in:
+        <center><code>16, 0x10, 020</code> </center>
+    <li > To display a trailing decimal point and trailing decimal zeros when
+real numbers are displayed, use
+            <center><code>cout.setf(ios::showpoint)</code> </center>
+For example:
+<pre>
+
+    cout.setf(ios::showpoint);
+    cout &lt;&lt; 16.0 &lt;&lt; ", " &lt;&lt; 16.1 &lt;&lt; ", " &lt;&lt; 16 &lt;&lt; endl;
+
+</pre>
+
+results in:
+    <center><code>16.0000, 16.1000, 16</code> </center>
+Note that the last <code>16</code> is an integral rather than a real number, and is not
+given a decimal point.
+</p><p>If <code>ios::showpoint</code> is not used, then trailing zeros are discarded. If the
+decimal part is zero, then the decimal point is discarded as well.
+    <li > Comparable to the <code>dec, hex</code> and <code>oct</code> manipulators 
+<pre>
+
+    cout.setf(ios::dec, ios::basefield);
+    cout.setf(ios::hex, ios::basefield);
+
+</pre>
+
+or
+<pre>
+
+    cout.setf(ios::oct, ios::basefield);
+
+</pre>
+
+can be used.
+    <li > To control the way real numbers are displayed <code>cout.setf(ios::fixed,
+ios::floatfield)</code> or <code>cout.setf(ios::scientific, ios::floatfield)</code> can be
+used. These settings result in, respectively, a fixed value display or a
+scientific (power of 10) display of numbers. For example,
+<pre>
+
+    cout.setf(ios::fixed, ios::floatfield);
+    cout &lt;&lt; sqrt(200) &lt;&lt; endl;
+    cout.setf(ios::scientific, ios::floatfield);
+    cout &lt;&lt; sqrt(200) &lt;&lt; endl;
+
+</pre>
+
+results in 
+<pre>
+
+    14.142136
+    1.414214e+01
+
+</pre>
+    
+        <li ><code>ios::left</code>: This format state is used to left-adjust the display
+of values for which the <code>setw()</code> manipulator (see below) is used. The format
+state can be set using the <code>setf()</code> member function, and it can be unset
+using the <code>unsetf()</code> member function. By default values are right-adjusted. 
+</p><p><li ><code>ios::internal</code>: This format state will add the fill-characters
+(blanks by default) between the minus sign of negative numbers and the value
+itself. 
+</p><p></ul>
+</p><p>With <code>istream</code> objects the flag <code>ios::skipws</code> can be used to control the
+handling of whitespace characters when characters are extracted. Leading white
+space characters of numerical values are skipped when
+<code>istreamObject.unsetf(ios::skipws)</code> has been specified, but otherwise they
+must be read explicitly. Reading a <code>char *</code> or <code>string</code> variable in this
+situation will only succeed if the first character to be read isn't a
+white-space character. The following small program can be used to illustrate
+the effects of unsetting <code>ios::skipws</code>:
+    <pre>
+
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+int main()
+{
+    string
+        buffer;
+    int
+        i;
+    char
+        c;
+
+    cin.unsetf(ios::skipws);
+
+    cin &gt;&gt; i;           // skips leading ws
+    cin &gt;&gt; buffer;      // doesn't skip leading ws.
+
+    cout &lt;&lt; "got " &lt;&lt; i &lt;&lt; " and " &lt;&lt; buffer &lt;&lt; endl;
+
+    while (cin &gt;&gt; c)    // reads individual chars, if the previous        
+        cout &lt;&lt; "got '" &lt;&lt; c &lt;&lt; "'\n";    // extraction succeeded.
+
+    return (0);    
+}
+    
+</pre>
+
+</p><p>Summarizing:
+    <ul>
+    <li ><code>setf(ios::showbase)</code> is used to display the numeric base of integral
+values, 
+    <li ><code>setf(ios::showpoint)</code> is used to display the trailing decimal point
+and trailing zeros of real numbers
+    <li ><code>setf(ios::dec, ios::basefield), setf(ios::hex, ios::basefield)</code> and
+<code>setf(ios::oct, ios::basefield)</code> can be used instead of the <code>dec, hex</code> and
+<code>oct</code> manipulators.
+    <li ><code>cout.setf(ios::scientific, ios::floatfield)</code> and
+<code>cout.setf(ios::fixed, ios::floatfield)</code> can be used to obtain a fixed or
+scientific (power of 10) display of real values.
+    <li ><code>setf(ios::left)</code> is used to left-adjust values in the width of
+their fields
+    <li ><code>setf(ios::internal)</code> is used to left-adjust the minus sign of negative
+values (while the values themselves are right adjusted).
+    <li ><code>ios::skipws</code> is used to control the handling of white space characters
+by the extraction operator.
+    </ul>
+</p><p>To <em>unset</em> flags, the function <code>unsetf()</code> can be used.
+</p><p>
+</p><p>
+    <a name="CONSMANIP"></a><a name="l238"></a>
+<h3>12.3.8: Constructing manipulators</h3>
+        <a name="iostreams/manipulatorconstruction"></a>
+    Using a construction like <code>cout &lt;&lt; hex &lt;&lt; 13 &lt;&lt; endl</code> the value 13 is
+displayed in hexadecimal format. One may wonder by what magic the <code>hex</code>
+manipulator accomplishes this. In this section the construction of
+manipulators like <code>hex</code> is covered.
+</p><p>Actually the construction of a manipulator is rather simple. To start, a
+definition of the manipulator is needed. Let's assume we want to create a
+manipulator <code>w10</code> which will set the field width of the next field to be
+written to the <code>ostream</code> object to 10. This manipulator is constructed as a
+function. The <code>w10</code> function will have to know about the <code>ostream</code> object
+in which the width must be set. By providing the function with a <code>ostream &amp;</code>
+parameter, it obtains this knowledge. Now that the function knows about the
+<code>ostream</code> object we're referring to, it can set the width in that object. 
+</p><p>Furthermore, it must be possible to use the manipulator in a
+<code>&lt;&lt;</code>-sequence. This implies that the return value of the manipulator must be
+a reference to an <code>ostream</code> object also. 
+</p><p>From the above considerations we're now able to construct our <code>w10</code>
+function:
+        <pre>
+
+    #include &lt;iostream&gt;
+    #include &lt;iomanip&gt;
+
+    ostream &amp;w10(ostream &amp;str)
+    {
+        return (str &lt;&lt; setw(10));
+    }
+        
+</pre>
+
+</p><p>The <code>w10</code> function can of course be used in a `stand alone' mode, but it can
+also be used as a manipulator. E.g.,
+    <pre>
+
+        #include &lt;iostream&gt;
+        #include &lt;iomanip&gt;
+    
+        extern ostream &amp;w10(ostream &amp;str);
+    
+        int main()
+        {
+            w10(cout) &lt;&lt; 3 &lt;&lt; " ships sailed to America" &lt;&lt; endl;
+            cout &lt;&lt; "And " &lt;&lt; w10 &lt;&lt; 3 &lt;&lt; " other ships sailed too." &lt;&lt; endl;
+        }
+    
+</pre>
+
+</p><p>The <code>w10</code> function can be used as manipulator because the <code>class ostream</code>
+has an overloaded <code>operator&lt;&lt;</code> accepting a pointer to a function that takes
+an <code>ostream &amp;</code> and returns an <code>ostream &amp;</code>. Its definition is:
+        <pre>
+
+    ostream&amp; operator&lt;&lt;(ostream &amp; (*func)(ostream &amp;str)) 
+    {
+        return ((*func)(*this)); 
+    }
+        
+</pre>
+    
+</p><p>
+
+
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus13.html">Next chapter</a>
+    <li> <a href="cplusplus11.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

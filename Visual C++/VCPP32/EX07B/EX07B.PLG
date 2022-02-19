@@ -1,0 +1,32 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: ex07b - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Creating command line "rc.exe /l 0x407 /fo"Debug/ex07b.res" /d "_DEBUG" /d "_AFXDLL" "C:\vcpp32\ex07b\ex07b.rc"" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP1371.TMP" mit Inhalten
+[
+/nologo /subsystem:windows /incremental:yes /pdb:"Debug/ex07b.pdb" /debug /machine:I386 /out:"Debug/ex07b.exe" /pdbtype:sept 
+.\Debug\ex07b.obj
+.\Debug\ex07bDoc.obj
+.\Debug\ex07bView.obj
+.\Debug\MainFrm.obj
+.\Debug\SpecFileDlg.obj
+.\Debug\StdAfx.obj
+.\Debug\ex07b.res
+]
+Erstellen der Befehlzeile "link.exe @C:\WINDOWS\TEMP\RSP1371.TMP"
+<h3>Ausgabefenster</h3>
+Ressourcen werden kompiliert...
+Linker-Vorgang läuft...
+
+
+
+<h3>Ergebnisse</h3>
+ex07b.exe - 0 Fehler, 0 Warnung(en)
+</pre>
+</body>
+</html>

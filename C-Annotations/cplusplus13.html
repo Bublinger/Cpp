@@ -1,0 +1,1044 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus14.html">Next chapter</a>
+    <li> <a href="cplusplus12.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="Exceptions"></a><a name="l239"></a>
+<h1>Chapter 13: Exceptions</h1>
+<a name="exceptions"></a>
+    
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="exceptions/intro"></a>
+    In <strong>C</strong> there are several ways to have a program react to situations which
+break the normal unhampered flow of the program: 
+<ul>
+    <li > The function may notice the abnormality and issue a message. This is
+probably the least disastrous reaction a program may show.
+    <li > The function in which the abnormality is observed may decide to stop
+its intended task, returning an errorcode to its caller. This is a great
+example of postponing decisions: now the calling function is faced with a
+problem. Of course the calling function may act similarly, by passing the
+error-code up to <em>its</em> caller.
+    <li > The function may decide that things are going out of hand, and may
+call <code>exit()</code> to terminate the program completely. A tough way to handle a
+problem. 
+    <li > The function may use a combination of the functions <code>setjmp()</code> and
+longjmp()) to enforce non-local exits. This mechanism implements a kind of
+<code>goto</code> jump, allowing the program to proceed at an outer section, skipping
+the intermediate levels which would have to be visited if a series of
+returns from nested functions would have been used.
+</ul>
+</p><p>In <strong>C++</strong> all the above ways to handle flow-breaking situations are still
+available. However, the last way, using <code>setjmp()</code> and <code>longjmp()</code> isn't
+often seen in <strong>C++</strong> (or even in <strong>C</strong>) programs, due to the fact that the
+program flow is completely disrupted.
+</p><p>In <strong>C++</strong> the alternative to using <code>setjmp()</code> and <code>longjmp()</code> are
+<em>exceptions</em>. Exceptions are a mechanism by which a controlled non-local
+exit is realized within the context of a <strong>C++</strong> program, without the
+disadvantages of <code>longjmp()</code> and <code>setjmp()</code>.
+</p><p>Exceptions are the proper way to bail out of a situation which cannot be
+handled easily by a function itself, but which are not disastrous enough for
+the program to terminate completely. Also, exceptions provide a flexible layer
+of flow control between the short-range <code>return</code> and the crude <code>exit()</code>.
+</p><p>In this chapter the use of exceptions and their syntax will be
+discussed. First an example of the different impacts exceptions and
+<code>setjmp()</code> and <code>longjmp()</code> have on the  program will be given. Then
+the discussion will dig into the formalities of the use of exceptions.
+</p><p>
+</p><p><a name="l240"></a>
+<h2>13.1: Using exceptions: an outline</h2>
+    <a name="exceptions/outline"></a>
+    Using exceptions, it involves the following syntactical elements:
+<ul>
+    <li ><code>try</code>. The <code>try</code>-block surrounds statements in which exceptions may
+be generated (the parlance is for exceptions to be  thrown). Example:
+<pre>
+
+    try
+    {
+        // statements in which
+        // exceptions may be thrown
+    }
+
+</pre>
+
+    <li ><code>throw</code>: followed by an expression of a certain type, throws the
+expressionvalue as an exception. The <code>throw</code> statement should be executed
+somewhere within the <code>try</code>-block: either directly or from within a function
+called directly or indirectly from the <code>try</code>-block. Example:
+<pre>
+
+    throw "This generates a char * exception";
+
+</pre>
+
+    <li ><code>catch</code>: Immediately following the <code>try</code>-block, the <code>catch</code>-block
+receives the thrown exceptions. Example of a <code>catch</code>-block receiving 
+<code>char *</code> exceptions:
+<pre>
+
+    catch (char *message)
+    {
+        // statements in which
+        // the thrown char * exceptions 
+        // are processed
+    }
+
+</pre>
+
+</ul>
+</p><p>
+</p><p><a name="ExceptionExample"></a><a name="l241"></a>
+<h2>13.2: An example using exceptions</h2>
+    <a name="exceptions/example"></a>
+    In the next two sections the same basic program will be used. The program uses
+two classes, <code>Outer</code> and <code>Inner</code>. An <code>Outer</code> object is created in the
+<code>main()</code> function, and the function <code>Outer::fun()</code> is called. 
+Then, in the <code>Outer::fun()</code> function an <code>Inner</code> object is 
+allocated. After allocating the <code>Inner</code> object, its member function <code>fun()</code>
+is called.
+</p><p>That's about it. The function <code>Outer::fun()</code> terminates, and the destructor
+of the <code>Inner</code> object is called. Then the program terminates and the 
+destructor of the <code>Outer</code> object is called.
+</p><p>Here is the basic program:
+</p><p><pre>
+#include &lt;iostream.h&gt;
+
+class Inner
+{
+    public:
+        Inner();
+        ~Inner();
+        void fun();    
+};
+
+class Outer
+{
+    public:
+        Outer();
+        ~Outer();
+        void fun();
+    private:
+};
+
+Inner::Inner()
+{
+    cout &lt;&lt; "Inner constructor\n";
+}    
+
+Inner::~Inner()
+{
+    cout &lt;&lt; "Inner destructor\n";
+}    
+
+void Inner::fun()
+{
+    cout &lt;&lt; "Inner fun\n";
+}    
+
+Outer::Outer()
+{
+    cout &lt;&lt; "Outer constructor\n";
+}    
+
+Outer::~Outer()
+{
+    cout &lt;&lt; "Outer destructor\n";
+}    
+
+void Outer::fun()
+{
+    Inner
+        in;
+
+    cout &lt;&lt; "Outer fun\n";
+    in.fun();
+}    
+
+int main()
+{
+    Outer
+        out;
+
+    out.fun();
+}
+
+
+
+
+
+</pre>
+
+</p><p>This program can be compiled and run, producing the following output:
+<pre>
+
+    Outer constructor
+    Inner constructor
+    Outer fun
+    Inner fun
+    Inner destructor
+    Outer destructor
+
+</pre>
+
+This output is completely as expected, and it is exactly what we want: the
+destructors are called in their correct order, reversing the calling sequence
+of the constructors.
+</p><p>Now let's focus our attention on two variants, in which we simulate a
+non-fatal disastrous event to take place in the <code>Inner::fun()</code> function,
+which is supposedly handled somewhere at the end of the function <code>main()</code>.
+We'll consider two variants. The first variant will try to handle this
+situation using <code>setjmp()</code> and <code>longjmp()</code>, the second variant will try to
+handle this situation using <strong>C++</strong>'s exception mechanism.
+</p><p>
+</p><p>
+    <a name="ExceptionJmp"></a><a name="l242"></a>
+<h3>13.2.1: No exceptions: the setjmp() and longjmp() approach</h3>
+        <a name="exceptions/jmp"></a>
+    In order to use <code>setjmp()</code> and <code>longjmp()</code> the basic program from section
+<a href="cplusplus13.html#ExceptionExample">13.2</a> is slightly modified to contain a variable <code>jmp_buf
+jmpBuf</code>. The function <code>Inner::fun()</code> now calls <code>longjmp</code>, simulating a
+disastrous event, to be handled at the end of the function <code>main()</code>. In
+<code>main()</code> we see the standard code defining the target location of the long
+jump, using the function <code>setjmp()</code>. A zero returnvalue indicates the
+initialization of the <code>jmp_buf</code> variable, upon which the <code>Outer::fun()</code>
+function is called. This situation represents the `normal flow'. 
+</p><p>To complete the simulation, the returnvalue of the program is zero <em>if only</em>
+we would have been able to return from the function <code>Outer::fun()</code>
+normally. However, as we know, this won't happen. <code>Inner:fun()</code> calls
+<code>longjmp()</code>, returning to the <code>setjmp()</code> function, which (at this time) 
+will <em>not</em> return a zero returnvalue. Hence, after calling <code>Inner::fun()</code>
+from <code>Outer::fun()</code> the program proceeds beyond the <code>if</code>-statement in the
+<code>main()</code> function, and the program terminates with the returnvalue 1.
+</p><p>Now try to follow these steps by studying the next program source, modified
+after the basic program given in section <a href="cplusplus13.html#ExceptionExample">13.2</a>:
+</p><p><pre>
+#include &lt;iostream.h&gt;
+#include &lt;setjmp.h&gt;
+#include &lt;stdlib.h&gt;
+
+class Inner
+{
+    public:
+        Inner();
+        ~Inner();
+        void fun();
+};
+
+class Outer
+{
+    public:
+        Outer();
+        ~Outer();
+        void fun();
+};
+
+jmp_buf
+    jmpBuf;
+
+Inner::Inner()
+{
+    cout &lt;&lt; "Inner constructor\n";
+}    
+
+void Inner::fun()
+{
+    cout &lt;&lt; "Inner fun()\n";
+    longjmp(jmpBuf, 0);
+}    
+
+Inner::~Inner()
+{
+    cout &lt;&lt; "Inner destructor\n";
+}    
+
+Outer::Outer()
+{
+    cout &lt;&lt; "Outer constructor\n";
+}    
+
+Outer::~Outer()
+{
+    cout &lt;&lt; "Outer destructor\n";
+}    
+
+void Outer::fun()
+{
+    Inner
+        in;
+    cout &lt;&lt; "Outer fun\n";
+    in.fun();
+}    
+
+int main()
+{
+    Outer
+        out;
+
+    if (!setjmp(jmpBuf))
+    {
+        out.fun();
+        return (0);
+    }
+
+    return (1);
+}
+
+
+
+
+
+
+
+</pre>
+
+</p><p>Running the above program produces the following output:
+</p><p><pre>
+
+    Outer constructor
+    Inner constructor
+    Outer fun
+    Inner fun()
+    Outer destructor
+
+</pre>
+
+As will be clear from this output, the destructor of the class <code>Inner</code> is
+not executed. This is a direct result of the non-local characteristic of the
+call to <code>longjmp()</code>: from the function <code>Inner::fun()</code> processing continues
+immediately in the function <code>setjmp()</code> in <code>main()</code>: the call to
+<code>Inner::~Inner()</code>, hiddenly placed at the end of <code>Outer::fun()</code> is never
+executed. 
+</p><p>Since the destructors of objects can easily be skipped when <code>longjmp()</code> and
+<code>setjmp()</code> are used, it's probably best to skip these function completely in
+<strong>C++</strong> program.
+</p><p>
+</p><p>
+    <a name="ExceptionException"></a><a name="l243"></a>
+<h3>13.2.2: Exceptions: the preferred alternative</h3>
+        <a name="exceptions/exception"></a>
+    In <strong>C++</strong> <em>exceptions</em> are the best alternative to using 
+<code>setjmp()</code> and <code>longjmp()</code>. In this section an example using exceptions is
+presented. Again, the program is derived from the basic program, given in
+section <a href="cplusplus13.html#ExceptionExample">13.2</a>. The syntax of exceptions will be covered
+shortly, so please skip over the syntactical peculiarities like <code>throw, try</code>
+and <code>catch</code>. Here comes the sourcetext:
+</p><p><pre>
+#include &lt;iostream.h&gt;
+
+class Inner
+{
+    public:
+        Inner();
+        ~Inner();
+        void fun();
+};
+
+class Outer
+{
+    public:
+        Outer();
+        ~Outer();
+        void fun();
+};
+
+Inner::Inner()
+{
+    cout &lt;&lt; "Inner constructor\n";
+}    
+
+Inner::~Inner()
+{
+    cout &lt;&lt; "Inner destructor\n";
+}    
+
+void Inner::fun()
+{
+    cout &lt;&lt; "Inner fun\n";
+    throw 1;
+    cout &lt;&lt; "This statement is not executed\n";
+}    
+
+Outer::Outer()
+{
+    cout &lt;&lt; "Outer constructor\n";
+}    
+
+Outer::~Outer()
+{
+    cout &lt;&lt; "Outer destructor\n";
+}    
+
+void Outer::fun()
+{
+    Inner
+        in;
+    cout &lt;&lt; "Outer fun\n";
+    in.fun();
+}    
+
+
+int main()
+{
+    Outer
+        out;
+    try
+    {
+        out.fun();
+    }
+    catch (...)
+    {}
+}
+
+
+
+
+
+</pre>
+
+</p><p>In this program an <em>exception</em> is thrown, where a <code>longjmp()</code> was used in
+the program in section <a href="cplusplus13.html#ExceptionJmp">13.2.1</a>. The comparable construct for the
+<code>setjmp()</code> call in that program is represented here by the <code>try</code> and
+<code>catch</code> blocks. The <code>try</code> block surrounds statements (including function
+calls) in which exceptions are thrown, the <code>catch</code> block may contain
+statements to be executed just after throwing an exception.
+</p><p>So, like section <a href="cplusplus13.html#ExceptionJmp">13.2.1</a>, the execution of function <code>Inner::fun()</code>
+terminates, albeit with an exception, rather than a <code>longjmp()</code>. The
+exception is caught in <code>main()</code>, and the program terminates. 
+</p><p>Now look at the output generated by <em>this</em> program:
+</p><p><pre>
+
+    Outer constructor
+    Inner constructor
+    Outer fun
+    Inner fun
+    Inner destructor
+    Outer destructor
+
+</pre>
+
+</p><p>Note that the destructor of the <code>Inner</code> object, created in <code>Outer::fun()</code>
+is now called again. On the other hand, execution of the function
+<code>Inner::fun()</code> really terminates at the <code>throw</code> statement: the insertion
+of the text into <code>cout</code>, just beyond the <code>throw</code> statement, isn't
+performed. 
+</p><p>So, with our illustrations we hope to have raised your appetite for
+exceptions by showing that
+<ul>
+    <li > Exceptions provide a means to break out of the normal flow control
+without having to use a cascade of <code>return</code>-statements, and without having
+to terminate the program.
+    <li > Exceptions do not disrupt the activation of destructors, and are
+therefore strongly preferred over the use of <code>setjmp()</code> and <code>longjmp()</code>.
+</ul>
+</p><p>
+</p><p><a name="ExceptionThrow"></a><a name="l244"></a>
+<h2>13.3: Throwing exceptions</h2>
+    <a name="exceptions/throw"></a>
+    Exceptions may be generated in a <code>throw</code> statement. The <code>throw</code> keyword is
+followed by an expression, which results in a value of a certain type. For
+example: 
+        <pre>
+
+    throw "Hello world";        // throws a char *
+    throw 18;                   // throws an int
+    throw string("hello");      // throws a string
+        
+</pre>
+
+    Objects defined locally in functions are automatically destroyed once
+exceptions are thrown within these functions. However, if the object itself is
+thrown, the exception catcher receives a copy of the thrown object. This copy
+is constructed just before the local object is destroyed.
+</p><p>The next source illustrates this point. Within the function <code>Object::fun()</code>
+a local <code>Object toThrow</code> is created, which is thereupon thrown as an
+exception. The exception is caught outside of <code>Object::fun()</code>, in
+<code>main()</code>. At this point the thrown object doesn't actually exist anymore,
+</p><p>Let's first take a look at the sourcetext:
+    <pre>
+#include &lt;iostream.h&gt;
+#include &lt;string&gt;
+
+class Object
+{
+    public:
+        Object(string name)
+        :
+            name(name)
+        {
+            cout &lt;&lt; "Object constructor of " &lt;&lt; name &lt;&lt; "\n";
+        }    
+        Object(Object const &amp;other)
+        :
+            name(other.name + " (copy)")
+        {
+            cout &lt;&lt; "Copy constructor for " &lt;&lt; name &lt;&lt; "\n";
+        }    
+        ~Object()
+        {
+            cout &lt;&lt; "Object destructor of " &lt;&lt; name &lt;&lt; "\n";
+        }    
+        void fun()
+        {
+            Object 
+                toThrow("'local object'");
+        
+            cout &lt;&lt; "Object fun() of " &lt;&lt; name &lt;&lt; "\n";
+            throw toThrow;
+        }    
+        void hello()
+        {
+            cout &lt;&lt; "Hello by " &lt;&lt; name &lt;&lt; "\n";
+        }        
+    private:
+        string
+            name;
+};
+
+int main()
+{
+    Object
+        out("'main object'");
+
+    try
+    {
+        out.fun();
+    }
+    catch (Object o)
+    {
+        cout &lt;&lt; "Caught exception\n";
+        o.hello();
+    }
+}
+
+
+
+
+
+</pre>
+
+    The class <code>Object</code> defines some simple constructors and members. The
+copy constructor is special in that it adds the text <code>" (copy)"</code> to the
+received name, to allow us to monitor the construction and destruction of
+objects somewhat more closely. The member function <code>fun()</code> generates the
+exception, and throws its locally defined object. Just before the exception 
+the following output is generated by the program:
+        <pre>
+
+Object constructor of 'main object'
+Object constructor of 'local object'
+Object fun() of 'main object'
+        
+</pre>
+
+    Then the exception is generated, resulting in the next line of output:
+        <pre>
+
+Copy constructor for 'local object' (copy)
+        
+</pre>
+
+    The <code>throw</code> clause receives the local object, and treats it as a value
+argument: it creates a copy of the local object. Next, the exception is
+processed. The local object is destroyed, and the catcher catches an
+<code>Object</code>, which again is a value parameter. Hence, another copy is
+created. We see the following lines:
+        <pre>
+
+Object destructor of 'local object'
+Copy constructor for 'local object' (copy) (copy)
+        
+</pre>
+
+    Now the message inside the catcher is displayed, and the hello member of
+the object received by the catcher is called, showing us once again that we
+received a copy of the copy of the local object of the <code>fun()</code>
+member function: 
+        <pre>
+
+Caught exception
+Hello by 'local object' (copy) (copy)
+        
+</pre>
+
+    Now the program terminates, and the still living objects are destroyed in
+their reversed order of creation:
+        <pre>
+
+Object destructor of 'local object' (copy) (copy)
+Object destructor of 'local object' (copy)
+Object destructor of 'main object'
+        
+</pre>
+
+</p><p>If the catcher would have implemented so as to receive a reference to an
+object (<code>catch (Object &amp;o)</code>), the double copy would have been avoided. In
+that case the output of the program would have been:
+        <pre>
+
+Object constructor of 'main object'
+Object constructor of 'local object'
+Object fun() of 'main object'
+Copy constructor for 'local object' (copy)
+Object destructor of 'local object'
+Caught exception
+Hello by 'local object' (copy)
+Object destructor of 'local object' (copy)
+Object destructor of 'main object'
+        
+</pre>
+
+    showing that only a single copy of the local object is used.
+</p><p>Of course it's a bad idea to throw a <em>pointer</em> to a locally defined object:
+the pointer is thrown, but the object to which the pointer refers dies once
+the exception is thrown, and the catcher receives a wild pointer. Bad news.
+</p><p>Summarizing, local objects are thrown as copied objects, pointers to local
+objects should not be thrown. However, it is possible to throw pointers or
+references to <em>dynamically</em> generated objects, taking care that the
+generated object is properly deleted when the generated exception is
+caught. 
+</p><p>Exceptions are thrown in situations where a function can't continue its normal
+task anymore, although the program is still able to continue. Imagine a
+program which is an interactive calculator. The program continuously requests
+expressions, which are then evaluated. In this case the parsing of the
+expression may show syntax errors, and the evaluation of the expression may
+result in expressions which can't be evaluated, e.g., because of the
+expression resulting in a division by zero. A bit more sophistication would
+allow the use of variables, and non-existing variables may be referred to.
+</p><p>Each of these situations are enough reason to terminate the processing of the
+expression at hand, but there's no need to terminate the program. Each
+component of the processing of the expression may therefore throw an
+exception. E.g.,
+<pre>
+
+    ...
+    if (parse(expressionBuffer)) // parsing failed ?
+        throw "Syntax error in expression";
+    ...
+    if (lookup(variableName))
+        throw "Variable not defined";
+    ...
+    if (illegalDivision())
+        throw "Division by zero is not defined";
+
+</pre>
+
+The location of these <code>throw</code> statements is immaterial: they may be
+placed deeply nested within the program, or at a more superficial level.
+Furthermore, <em>functions</em> may be used to generate the expression which is
+thrown. A function
+    <center><code>char const *formatMessage(char const *fmt, ...);</code> </center>
+would allow us to throw more specific messages, like
+<pre>
+
+    if (lookup(variableName))
+        throw formatMessage("Variable '%s' not defined", variableName);
+
+</pre>
+
+</p><p>
+</p><p>
+    <a name="ExceptionEmptyThrow"></a><a name="l245"></a>
+<h3>13.3.1: The empty throw statement</h3>
+        <a name="exceptions/emptythrow"></a>
+    Situations may arise in which it is required to inspect a thrown
+exception. Depending on the nature of the received exception, the program may
+continue its normal operation, or a serious event took place, requiring a more
+drastic reaction by the program. In a server-client situation the client may
+enter requests to the server in a queue. Every request placed in the queue is
+normally answered by the server, telling the client that the request was
+successfully completed, or that some sort of error has occurred. Actually, the
+server may have died, and the client should be able to discover this calamity,
+by not waiting indefinitely for the server to reply.
+</p><p>In this situation an intermediate exception handler is called for. A thrown
+exception is first inspected at the middle level. If possible it's processed
+there. If it's not possible to process the exception at the middle level, 
+it's passed on unaltered to a more superficial level, where the really tough
+exceptions are handled.
+</p><p>By placing an <em>empty</em> <code>throw</code> statement in the code handling an exception
+the received exception is passed on to the next level able to process that
+particular type of exception. 
+</p><p>In our server-client situation a function 
+    <center><code>initialExceptionHandler(char *exception)</code> </center>
+could be designed to do so. The received message is inspected. If it's a
+simple message it's processed, otherwise the exception is passed on to an
+outer level. The implementation of <code>initialExceptionHandler()</code> shows the
+empty <code>throw</code> statement:
+<pre>
+
+    void initialExceptionHandler(char *exception)
+    {
+        if (plainMessage(exception))
+            handleTheMessage(exception);
+        else
+            throw;
+    }
+
+</pre>
+
+As we will see below (section <a href="cplusplus13.html#ExceptionCatch">13.5</a>), the empty <code>throw</code>
+statement passes on the exception received in a <code>catch</code>-block. Therefore, a
+function like <code>initialExceptionHandler()</code> can be used for a variety of
+thrown exceptions, as long as the argument used with
+<code>initialExceptionHandler()</code> is compatible with the nature of the received
+exception. 
+</p><p>Does this sound intriguing? Suppose we have a class <code>Exception</code>,
+containing a member function <code>Exception::Type Exception::severity()</code>.
+This member function tells us (little wonder!) the severity of a thrown
+exception. It might be <code>Message, Warning, Mistake, Error</code> or <code>Fatal</code>.
+Furthermore, depending on the severity, a thrown exception may contain less or
+more information, somehow processed by a function <code>process()</code>. In addition
+to this, all exceptions have a plain-text producing member function
+<code>toString()</code>, telling us a bit more about the nature of the generated
+exception. This smells a lot like polymorphism, showing <code>process()</code> 
+as a virtual function for the derived classes <code>Message, Warning, Mistake,
+Error</code> and <code>Fatal</code>. 
+</p><p>Now the program may throw all these five types of exceptions Let's assume that
+the <code>Message</code> and <code>Warning</code> exceptions are processable by our
+<code>initialExceptionHandler()</code>. Then its code would become:
+<pre>
+
+    void initialExceptionHandler(Exception *e)
+    {
+                    // show the plain-text information
+        cout &lt;&lt; e-&gt;toString() &lt;&lt; endl;  
+
+                            // Can we process it ?
+        if (e-&gt;severity &lt;= Exception::Warning)
+            e-&gt;process();   // It's either a message
+                            // or a warning
+        else
+            throw;          // No, pass it on
+    }
+
+</pre>
+
+Due to polymorphism, <code>e-&gt;process()</code> will either process a <code>Message</code> or a
+<code>Warning</code>. Thrown exceptions are generated as follows:
+<pre>
+
+    throw new Message(&lt;arguments&gt;);
+    throw new Warning(&lt;arguments&gt;);
+    throw new Mistake(&lt;arguments&gt;);
+    throw new Error(&lt;arguments&gt;);
+    throw new Fatal(&lt;arguments&gt;); 
+
+</pre>
+ 
+All of these exceptions are processable by our <code>initialExceptionHandler()</code>,
+which may decide to pass exceptions upward for further processing or to
+process exceptions itself.
+
+</p><p><a name="l246"></a>
+<h2>13.4: The try block</h2>
+    <a name="exceptions/try"></a>
+    The <code>try</code>-block surrounds statements in which exceptions may be thrown. As
+we have seen, the actual <code>throw</code> statement doesn't have to be placed within
+the <code>try</code>-block, but may be placed in a function which is called from the
+<code>try</code>-block, either directly or indirectly. 
+</p><p>The keyword <code>try</code> is followed by a set of curly braces, which acts like a
+standard <strong>C++</strong> compound statement: multiple statements and variable
+definitions may be placed here. 
+</p><p>It is possible (and very common) to create <em>levels</em> in which exceptions may
+be thrown. For example, code within the <code>main()</code> function is surrounded by a
+<code>try</code>-block, forming an outer level in which exceptions can be handled.
+Within <code>main()</code>'s <code>try</code>-block, functions are called which may also contain
+<code>try</code>-blocks, forming the next level in which exceptions may be placed. As
+we have seen (in section <a href="cplusplus13.html#ExceptionEmptyThrow">13.3.1</a>) exceptions thrown in inner
+level <code>try</code>-blocks may or may not be processed at that level. By placing an
+empty <code>throw</code> in an exception handler, the thrown exception is passed on to
+the next (outer) level.
+</p><p>If an exception is thrown outside of any <code>try</code>-block, then the default way
+to process (uncaught) exceptions is used, which is usually to abort the
+program. Try to compile and run the following tiny program, and see what
+happens: 
+<pre>
+
+    int main()
+    {
+        throw "hello";
+    }
+
+</pre>
+
+
+</p><p><a name="ExceptionCatch"></a><a name="l247"></a>
+<h2>13.5: Catching exceptions</h2>
+    <a name="exceptions/catch"></a>
+    The <code>catch</code>-block contains code that is executed when an exception is
+thrown. Since <em>expressions</em> are thrown, the <code>catch</code>-block should know what
+kind of exceptions it should handle. Therefore, the keyword <code>catch</code> is
+followed by a parameter list having one parameter, which is of the type of the
+expression of the thrown exception.
+</p><p>So, an exception handler for <code>char *</code> exceptions will have the following
+form:
+<pre>
+
+    catch (char const *message)
+    {
+        // code to handle the message
+    }
+
+</pre>
+
+Earlier (section <a href="cplusplus13.html#ExceptionThrow">13.3</a>) we've seen that such a message doesn't
+have to be thrown as static string. It's also possible for a function to
+return a string, which is then thrown as an exception. However, if such a
+function creates the string to be thrown as an exception <em>dynamically</em>, the
+exception handler will normally have to delete the allocated memory lest
+memory leaks away. 
+</p><p>Generally close attention must be paid to the nature of the parameter of the
+exception handler, to make sure that dynamically generated exceptions are
+deleted once the handler has processed them. Of course, when an exception is
+passed on upwards to an outer level exception handler, the received exception
+should <em>not</em> be deleted by the inner level handler.
+</p><p>Different exception types may be thrown: <code>char *\</code>s, <code>int</code>s, pointers or
+references to objects, etc.: all these different types may be used in throwing
+and catching exceptions. So, the exceptions appearing at the end of a
+<code>try</code>-block may be of different types. In order to catch all the types that
+may appear at the end of a <code>try</code>-block, multiple exception handlers (i.e.,
+<code>catch</code>-blocks) may follow the <code>try</code>-block. 
+</p><p>The <em>order</em> in which the exception handlers are placed is important. When an
+exception is thrown, the first exception handler matching the type of the
+thrown exception is selected, remaining exception handlers are skipped. So
+only one exception handler following a <code>try</code>-block will be
+executed. Consequently, exception handlers should be placed from the ones
+having the most specific parameters to the ones having more general
+parameters. For example, if exception handlers are defined for 
+<code>char *</code>s and <code>void *\</code>s (i.e., any old pointer) then the exception
+handler for the former exception type should be placed before the exception
+handler for the latter type:
+<pre>
+
+    try
+    {
+        // code may throw char pointers
+        // and other pointers
+    }
+    catch (char *message)
+    {
+        // code processing the char pointers
+        // thrown as exceptions
+    }
+    catch (void *whatever)
+    {
+        // code processing all other pointers
+        // thrown as exceptions
+    }
+
+</pre>
+
+An alternative to construct different types of exception handlers for
+different types of situations, it is of course also possible to design 
+a specific class whose objects contain information about the reason for the
+exception. Such an approach was discussed earlier, in section
+<a href="cplusplus13.html#ExceptionEmptyThrow">13.3.1</a>. Using this approach, there's only one handler
+required, since we <em>know</em> we won't throw other types of exceptions:
+<pre>
+
+    try
+    {
+        // code may throw only
+        // Exception pointers
+    }
+    catch (Exception *e)
+    {
+        // code processing the Exception pointer
+        delete e;    
+    }
+
+</pre>
+
+The use of the <code>delete e</code> statement in the above code indicates that the
+<code>Exception</code> object which could be thrown as an exception in the
+<code>try</code>-block was created dynamically.
+</p><p>When the code of an exception handler that is placed beyond a <code>try</code>-block
+has been processed, the execution of the program continues beyond the last
+exception handler following that <code>try</code>-block (unless the handler uses
+<code>return, throw</code> or <code>exit()</code> to leave the function prematurely). So we have
+the following cases:
+<ul>
+    <li > If <em>no</em> exception was thrown within the <code>try</code>-block no exception
+handler is activated, and the execution continues from the last statement in
+the <code>try</code>-block to the first statement beyond the last <code>catch</code>-block.
+    <li > If an exception <em>was</em> thrown within the <code>try</code>-block but neither
+the current level nor an other level contains an appropriate exception
+handler, the program's default exception handler is called, usually aborting
+the program.
+    <li > If an exception was thrown within the <code>try</code>-block and an
+appropriate  exception handler is available, then that the code of that
+exception handler is exectuted. Following the execution of the code of the
+exception handler, the execution of the program continues at 
+the first statement beyond the last <code>catch</code>-block.
+</ul>
+In all cases a <code>throw</code>-statement will result in skipping all remaining
+statements of the <code>try</code>-block in which the exception was thrown. However,
+destructors of objects defined locally in the <code>try</code>-block <em>are</em> called,
+and they are called before any exception handler's code is executed. 
+</p><p>The actual construction of the <code>Exception</code> object may be performed in
+various degrees of sophistication. Possibilities are using a plain
+<code>new</code> operator, using static member functions of the class <code>Exception</code>
+dedicated to a particular kind of exception, returning a pointer to an
+<code>Exception</code> object, or using objects of classes derived from the <code>class
+Exception</code>, possibly involving polymorphism.
+</p><p>
+</p><p><a name="l248"></a>
+<h3>13.5.1: The default catcher</h3>
+        <a name="exceptions/defaultcatch"></a>
+    In cases where different types of exceptions can be thrown, only a limited set
+of handlers may be required at a certain level of the program. Exceptions
+whose types belong to that limited set are to be processed, all other
+exceptions are treated differently, e.g., they are passed on to an outer level
+of exception handling. 
+</p><p>This situation is implemented using the default exception handler, which will
+(because of the reason given in the previous section <a href="cplusplus13.html#ExceptionCatch">13.5</a>) be
+placed beyond all other, more specific exception handlers. Often the default
+exception handler will be used in combination with the empty throw statement,
+discused in section <a href="cplusplus13.html#ExceptionEmptyThrow">13.3.1</a>. 
+</p><p>Here is an example showing the use of a default exception handler:
+<pre>
+
+    try
+    {
+        // this code may throw
+        // different types of 
+        // exceptions
+    }
+    catch (char *message)
+    {
+        // code to process
+        // char pointers
+    }
+    catch (int value)
+    {
+        // code to process
+        // ints
+    }
+    catch (...)
+    {
+        // code to process other exceptions,
+        // often passing the exception on
+        // to outer level exception handlers:
+            
+        throw;
+    } 
+
+</pre>
+ 
+The reason for passing unspecified exceptions on to outer level
+exception handlers is simply the fact that they are unspecified: how would you
+process an exception if you don't know its type? In these situations the outer
+level exception handlers should of course know what exceptions other than
+<code>char *</code>s and <code>int</code>s to expect....
+
+</p><p><a name="l249"></a>
+<h2>13.6: Declaring exception throwers</h2>
+    <a name="exceptions/declaring"></a>
+    Functions that are defined elsewhere may be linked to code using those
+functions. These functions are normally declared in header files, either as
+stand-alone functions or as member-functions of a class. 
+</p><p>These external function may of course throw exceptions. The declaration of
+such functions may contain a <em>function throw list</em>, in which the types of
+the exceptions that can be thrown by the function are specified. For example,
+a function that may throw <code>char *</code> and <code>int</code> exceptions can be declared as
+    <center><code>void exceptionThrower() throw(char *, int);</code> </center>
+</p><p>A function for which a function throw list was specified is not allowed to
+throw other types of exceptions. A <em>run-time</em> error occurs if it does throw
+other types of exceptions than mentioned in the function throw list.
+</p><p>If a function throw list is specified in the declaration, it must also be
+given in the definition of the function. For example, using declaration
+<em>and</em> definition in the same example:
+<pre>
+
+    #include &lt;iostream&gt;
+    
+    void intThrower() throw(int);
+    void charP_IntThrower() throw (char *, int);
+    
+    void intThrower(int x) throw (int)
+    {
+        if (x)
+            throw x;
+    }
+    
+    void charP_IntThrower() throw (char *, int)
+    {
+        int
+            x;
+        cout &lt;&lt; "Enter an int: ";
+        cout.flush();
+        cin &gt;&gt; x;
+    
+        intThrower(x);
+        throw "from charP_IntThrower() with love";
+        
+    }
+        
+    int main()
+    {
+        try
+        {
+             charP_IntThrower();
+        }    
+        catch (char *message)
+        {
+            cout &lt;&lt; "Text exception: " &lt;&lt; message &lt;&lt; endl;
+        }
+        catch (int value)
+        {
+            cout &lt;&lt; "Int exception: " &lt;&lt; value &lt;&lt; endl;
+        }
+        return (0);
+    }
+
+</pre>
+       
+In the function <code>charP_IntThrower()</code> the <code>throw</code> statement clearly throws
+a <code>char *</code>. However, since <code>IntThrower()</code> may throw an <code>int</code> exception,
+the function throw list of <code>charP_IntThrower()</code> must <em>also</em> contain
+<code>int</code>. Try this: remove the <code>int</code> from the (two!) function throw lists,
+compile and link the program and see what happens if you enter the value 5.
+</p><p>If a function <em>doesn't</em> throw exceptions an empty function throw list may be
+used. E.g.,
+    <center><code>void noExceptions() throw ();</code> </center>
+Again, the function definition must also contain the empty function throw list
+in this case.
+</p><p>If the function throw list is not used, the function may either throw
+exceptions (of any kind) or not throw exceptions at all. Without a function
+throw list all responsibilities of providing the correct handlers is in the
+hands of the designer of the program....
+
+</p><p>
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus14.html">Next chapter</a>
+    <li> <a href="cplusplus12.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

@@ -1,0 +1,700 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus11.html">Next chapter</a>
+    <li> <a href="cplusplus09.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="PointMembers"></a><a name="l129"></a>
+<h1>Chapter 10: Classes having pointers to members</h1>
+<a name="ptrmembers"></a>
+    
+
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="ptrmembers/intro"></a>
+    
+Pointers in classes have been discussed in detail in chapter <a href="cplusplus06.html#Person">6.1</a>.
+As we have seen, when pointer data-members occur in classes, such  classes 
+deserve some special treatment.
+</p><p>By now it is well known how to treat pointer data members: constructors are
+used to initialize pointers, destructors are needed to free the memory
+pointed to by the pointer data members. 
+</p><p>Furthermore, in classes having pointer data members
+copy constructors and overloaded assignment operators are normally needed as 
+well. 
+</p><p>However, in some situations we do not need a pointer to an object, 
+but rather a pointer to members of an object. The realization of pointers to
+<em>members</em> of an object is the subject of this part of the <strong>C++</strong> 
+annotations. 
+</p><p> 
+</p><p><a name="l130"></a>
+<h2>10.1: Pointers to members: an example</h2>
+    <a name="ptrmembers/example"></a>
+    
+Knowing how pointers to variables and objects are to be used does not
+intuitively lead to the concept of pointer to <em>members</em>. Even if the 
+returntype and parametertypes of a member function are taken 
+into account, surprises are encountered. 
+For example, consider the following class:
+</p><p><pre>
+
+    class String
+    { 
+        public:
+            ...
+            char const *get() const;
+        private:
+            ...
+            char const *(*sp)() const;
+    };
+
+</pre>
+
+Within this class, it is not possible to define a <code>char const *(*sp)() const</code>
+pointing to the <code>get()</code> member function of the <code>String</code> 
+class. 
+</p><p>One of the reasons why this doesn't work is that the variable <code>sp</code>
+has a global scope, while the member function <code>get()</code> is defined
+within the <code>String</code> class. The fact that the variable <code>sp</code> is part of
+the <code>String</code> class is of no relevance. According to <code>sp</code>'s definition,
+it points to a function outside of the class.
+</p><p>Consequently, in order to define a 
+pointer to a member (either data or function, but usually a function) of a 
+class, the scope of the pointer must be within the class' scope. 
+Doing so, a pointer to a member of the class <code>String</code> can be defined as
+<pre>
+
+    char const
+        *(String::*sp)() const;
+
+</pre>
+
+So, due to the <code>String::</code> prefix, <code>sp</code> is defined to be active 
+only in the context of the class <code>String</code>. In this context, it is 
+defined as a pointer to a const function, not expecting arguments, and 
+returning a pointer to const chars.
+</p><p>
+</p><p><a name="l131"></a>
+<h2>10.2: Initializing pointers to members</h2>
+    <a name="ptrmembers/initialize"></a>
+    
+Pointers to members can be initialized to point to intended members. Such a 
+pointer can be defined either inside or outside a member function. 
+</p><p>Initializing or assigning an address to such a pointer does nothing but 
+indicating which member the pointer will point to. However, member functions 
+(except for the static member functions) can only be used when associated with 
+an object of the member function's class. The same holds true for pointers to
+data members. 
+</p><p>While it is allowed to <em>initialize</em> such a pointer outside of the class,
+it is not possible to <em>access</em> such a function 
+without an associated object. 
+</p><p>In the following example these characteristics 
+are illustrated. First, a pointer is initialized to point to
+the function <code>String::get()</code>. In this case <em>no</em> <code>String</code> object is 
+required.
+</p><p>Next, a <code>String</code> object is defined, and the string that is stored within the 
+object is retrieved through the pointer, and not directly by the function
+<code>String::get()</code>. Note that the pointer is a 
+variable existing outside of the class' context. 
+This presents no problem, as the actual 
+object to be used is identified by the statement in which object and 
+pointervariable are combined. Consider the following piece of code:
+<pre>
+
+    void fun()
+    {
+        char const
+            *(String::*sp)() const;
+            
+        sp = String::get;   // assign the address
+                            // of String's get()
+                            // function
+                   
+        String              // define a String object
+            s("Hello world");
+
+        cout &lt;&lt; (s.*sp)()   // show the string
+             &lt;&lt; endl;
+
+        String
+            *ps;            // pointer to a String object
+
+        ps = &amp;s;            // initialize ps to point at s
+
+        cout &lt;&lt; (ps-&gt;*sp)() // show the string again
+             &lt;&lt; endl;
+    }
+
+</pre>
+
+Note in this example the statement <code>(s.*sp)()</code>. The <code>.*</code> construction 
+indicates that <code>sp</code> is a pointer to a member function. Since the 
+pointer variable <code>sp</code> points to the <code>String::get()</code> function,
+this function is now called, producing the string ``<code>Hello world</code>''.
+</p><p>Furthermore, note the parentheses around <code>(s.*sp)</code>. These parentheses are
+required. If they were omitted, then the default interpretation (now 
+parenthesized for further emphasis) would be <code>s.* (sp())</code>. 
+This latter construction means
+<ul>  
+    <li > Call function <code>sp()</code>, which should return a pointer to a 
+        member. E.g., <code>sp()</code> has the prototype 
+        <center><code>char const * (String::*)() sp();</code> </center>
+            So, <code>sp()</code> is a 
+        function returning a pointer to a member function of the class 
+        <code>String</code>, while such a member function must return a pointer to 
+        <code>const char</code>s.
+    <li > Apply this pointer with regard to object s.
+</ul>
+Not an impossible or unlikely construction, but wrong as far as the current 
+definition of <code>sp</code> is concerned.
+</p><p>When a pointer to a member function is associated with an object, the pointer
+to member selector operator <code>.*</code> is used. When a pointer to an object 
+is used (instead of  the object itself) the ``pointer to member through a 
+pointer to a class object'' operator <code>-&gt;*</code> operator is required. The 
+use of this operator is also illustrated in the above example.
+</p><p>
+</p><p><a name="l132"></a>
+<h2>10.3: Pointers to static members</h2>
+    <a name="ptrmembers/static"></a>
+    
+Static members of a class exist without an object of their class. In other 
+words, they can exist <em>outside of</em> any object of their class.
+</p><p>When these static members are public, they can be accessed in a `stand-alone' 
+fashion.
+</p><p>Assume that the <code>String</code> class also has a public static member function
+<code>int n_strings()</code>, returning the number of string objects created so 
+far. Then, without using any <code>String</code> object the function 
+<code>String::n_strings()</code> may be called:
+<pre>
+
+    void fun()
+    {
+        cout &lt;&lt; String::n_strings() &lt;&lt; endl;
+    }
+
+</pre>
+
+Since pointers to members are always associated with an object, the use 
+of a pointer to a member function would normally produce an error. 
+However, <em>static</em> members are
+actually <em>global variables or functions</em>, bound to their class. 
+</p><p>Public 
+static members can be treated as globally accessible functions and data. 
+Private static members, on the other hand, can be accessed only from within 
+the context of their class: they can only be accessed from inside the member 
+functions of their class.
+</p><p>Since static members have no particular link with objects of their 
+class, but look a lot like global functions, a pointer variable that is <em>not</em>
+part of the class of the member function  must be used.
+</p><p>Consequently, a variable <code>int (*pfi)()</code> can be used to point to the 
+static member function <code>int String::n_strings()</code>, even though <code>int (*pfi)()</code>
+has <em>nothing</em> in common with the <code>class String</code>. This is illustrated in 
+the next example:
+<pre>
+
+    void fun()
+    {
+        int 
+            (*pfi)();
+            
+        pfi = String::n_strings;    
+                    // address of the  static member function
+
+        cout &lt;&lt; pfi() &lt;&lt; endl;
+                    // print the value produced by
+                    // String::n_strings()
+    }
+
+</pre>
+
+
+</p><p><a name="l133"></a>
+<h2>10.4: Using pointers to members for real</h2>
+    <a name="ptrmembers/real"></a>
+    
+Let's assume that a database is created in which information about  persons 
+is stored. Name, street names, city names, house numbers, birthdays, etc. are 
+collected in objects of the class <code>Person</code>, which are, in turn, stored 
+in a class <code>Person_dbase</code>. Partial interfaces of these classes could be 
+designed as follows:
+<pre>
+
+    class Date;
+
+    class Person()
+    {
+        public:
+            ...
+            char const *get_name() const;   
+            Date const &amp;birthdate() const;
+        private:
+            ...
+    };
+
+    class Person_dbase
+    {
+        public:  
+            enum Listtype
+            {
+                list_by_name,
+                list_by_birthday,
+            };
+            void list(Listtype type);
+        private:
+            Person
+                *pp;    // pointer to the info
+            unsigned
+                n;      // number of persons stored.
+    };
+
+</pre>
+
+The organization of <code>Person</code> and <code>Person_dbase</code> is pictured in 
+figure <a href="cplusplus10.html#PersonFig">10</a>: Within a <code>Person_dbase</code> object the <code>Person</code> objects
+are stored. They can be reached via the pointer variable <code>Person *pp</code>.
+    <a name="PersonFig"></a></p><p><center><img src="ptrmembers/fig/personfig.gif" align="bottom" alt="figure 10 is shown here."><br> 
+figure 10: Person_dbase objects: Persons reached via Person *pp 
+</center></p><p>
+    
+</p><p>We would like to develop the function <code>Person_dbase::list()</code> in such a 
+way that it lists the contents of the database sorted according to a selected
+field of a <code>Person</code> object. 
+</p><p>So, when <code>list()</code> is called to list the 
+database sorted by <em>names</em>, the database of <code>Person</code> objects is first 
+sorted by names, and is then listed.
+</p><p>Alternatively, when <code>list()</code> is called to list the 
+database sorted by <em>birthdates</em>, the database of <code>Person</code> objects 
+is first sorted by birthdates, and is then listed.
+</p><p>In this situation, the function <code>qsort()</code> is most likely called to do 
+the actual sorting of the <code>Person</code> objects (
+In the current implementation <code>pp</code> points to an array of <code>Person</code>
+objects. In this implementation, the function <code>qsort()</code> will have to 
+copy the actual <code>Person</code> objects again and again, which may be rather
+inefficient when the <code>Person</code> objects become large. Under an alternative
+implementation, in which the <code>Person</code> objects are reached through 
+pointers, the efficiency of the <code>qsort()</code> function will be improved. In that 
+case, the datamember <code>pp</code> will have to be declared as 
+<code>Person **pp</code>.).
+This function requires a pointer to a compare function, comparing
+two elements of the array to be sorted. The prototype of this compare function 
+is 
+    <center><code>int (*)(void const *, void const *)</code> </center>
+However, when used with 
+<code>Person</code> objects, the prototype of the <code>compare()</code> function should be
+    <center><code>int (*)(Person const *, Person const *)</code> </center>
+Somewhere a typecast
+will be required: either when calling <code>qsort()</code>, or within the <code>
+compare()</code> functions themselves. We will use the typecast when calling
+<code>qsort()</code>, using the following typedef to reduce the verbosity of the 
+typecasts
+(a <em>pointer to an integer function requiring two void pointers</em>):
+    <center><code>typedef int (*pif2vp)(void const *, void const *)</code> </center>
+</p><p>Next, the function <code>list()</code> could be developed according to the following 
+setup: 
+<pre>
+
+    void Person_dbase::list(Listtype type)
+    {
+        switch (type)
+        {
+            case list_by_name:
+                qsort(pp, n, sizeof(Person), (pif2vp)cmpname);
+            break;
+
+            case list_by_birthday:
+                qsort(pp, n, sizeof(Person), (pif2vp)cmpdate);
+            break;
+        }
+        // list the sorted Person-database
+    }
+
+</pre>
+
+There are several reasons why this setup is not particularly desirable:
+</p><p><ul>  
+    <li > Although the example only shows two list-alternatives (sort by name 
+        and sort by birthday), a real-life implementation will have many more
+        ways to list the information. This will soon result in a very long
+        function <code>list()</code> which will be hard to maintain and will
+        look inaccessible due to its length. 
+    <li > Every time a new way to list the data in the database, the function
+        <code>list()</code> will have to be expanded, by offering an extra 
+        <code>case</code> label for every new way to list the data.
+    <li > Much of the code in the function <code>list()</code> will be repeated 
+        within the function, showing only some small differences.
+</ul>
+</p><p>Much of the complexity of <code>list()</code> function could be reduced by 
+defining <em>pointers</em> to the compare-functions, storing these pointers in an 
+array. Since this array will be common to all <code>Person_dbase</code> objects, 
+it should be defined as a static array, containing the pointers to the 
+compare-functions.
+</p><p>Before actually constructing this array, note that this approach requires the
+definition of as many compare functions as there are elements in the 
+<code>Listtype</code> enum. So, to list the information sorted by name a function
+<code>cmpname()</code> is used, comparing the names stored in two 
+<code>Person</code> objects, while a function <code>cmpcity()</code>, is used to compare
+cities. Somehow this seems to be redundant as well: we would like to use
+one function to compare strings, whatever their meanings. Comparable 
+considerations hold true for other fields of information.
+</p><p>The compare functions, however, receive pointers to <code>Person</code>
+objects. Therefore, the data-members of the <code>Person</code> objects to which
+these pointers point can be accessed using the access-member functions
+of the <code>Person</code> class. So, the compare functions can access these
+data-members as well, using the pointers to the <code>Person</code> objects.
+</p><p>Now note that the access member functions that are used within a particular
+compare function can be <em>hard-coded</em>, by plainly mentioning the accessors
+to be used, and they can be selected indirectly, by using <em>pointers</em>
+to the accessors to be used. 
+</p><p>This latter solution allows us to <em>merge</em> compare functions that 
+use the same implementations, but use different accessors: By setting a pointer
+to the appropriate accessor function just before the compare function is
+called, one single compare function can be used to compare many different
+kinds of data stored inside <code>Person</code> objects.
+</p><p>The compare functions themselves are used within the context of the 
+<code>Person_dbase</code> class, where they are passed to the <code>qsort()</code> function. The 
+<code>qsort()</code> function, however, is a global function. Consequently, the compare 
+functions can't be ordinary member functions of the class <code>Person_dbase</code>, 
+but they must be static members of that class, so they  can be passed to the 
+<code>qsort()</code> function.
+</p><p>Summarizing what we've got so far, we see that the problem has been
+broken down as follows:
+<ul>  
+    <li > The <code>switch</code> construction in the <code>list()</code> function
+        should be replaced by a call to a function using a pointer to 
+        a function. 
+    <li > The actual function to be used is determined by the 
+        value of the selector, which is given to <code>list()</code> when it's
+        called.
+    <li > The <code>compare()</code> functions may be further 
+        abstracted by combining those comparing the same types. 
+    <li > When <code>compare()</code> functions are combined, the access
+        member function of the <code>Person</code> objects to be used will also
+        be found via an array containing pointers to the access member 
+        functions of <code>Person</code> objects.
+    <li > The <code>compare()</code> functions are part of the <code>
+        Person_dbase</code> class, but it must also be possible to 
+        give their addresses as arguments to <code>qsort()</code>. Hence, these
+        functions must be defined as static functions of the class 
+        <code>Person_dbase</code>.
+</ul>
+</p><p>From this analysis the essential characteristics of the proposed implementation
+emerge. 
+</p><p>For every type of listing, as produced by the function <code>list()</code>, the 
+following is required:
+</p><p><ul>  
+    <li > The access member function of the <code>Person</code> class to be
+        used.
+    <li > The <code>compare()</code> function to be used. The <code>compare()</code> functions
+        will be <em>static functions</em> of the class <code>Person_dbase</code>, so that
+        they can be passed over to <code>qsort()</code>
+</ul>
+</p><p>This information does not depend on a particular <code>Person_dbase</code> object, 
+but is common to all of these objects. Hence it will be stored compile-time
+in a <code>static Person_dbase</code> kind of array. 
+</p><p>How will the <code>compare()</code> functions know which element of this array to
+use? The requested index is passed to the <code>list()</code> member function
+as a <code>Listtype</code> value. The <code>list()</code> function can then save this
+information in a <code>static Person_dbase::Listtype</code> variable for the
+<code>compare()</code> functions to use.
+</p><p>We've analyzed enough. Let's build it this way.
+</p><p>
+</p><p><a name="l134"></a>
+<h3>10.4.1: Pointers to members: an implementation</h3>
+        <a name="ptrmembers/implement"></a>
+    <ul>  
+</p><p><li > First, the necessary class interfaces are defined. The existence
+        of a class <code>Date</code> is assumed, containing overloaded operators
+        like <code>&lt;</code> and <code>&gt;</code> to compare dates. 
+        To start with, we present the interface of the class
+        <code>Person</code>, omitting all the standard stuff like overloaded assignment 
+        operator, (copy) constructors, etc.:
+<pre>
+
+    #include &lt;stdlib.h&gt;     // for qsort()
+
+    class Date;
+
+    class Person()
+    {
+        public:
+            unsigned length() const;
+            unsigned weight() const;
+            char const *name() const;   
+            char const *city() const;
+            Date const &amp;birthdate() const;
+
+        private:
+            // all necessary data members
+    };
+
+</pre>
+
+</p><p><li > Next, the class <code>Person_dbase</code>.
+        Within this class a <code>struct CmpPerson</code> is defined, containing
+        two fields:
+        <ul>  
+</p><p><li > A pointer to a union of compare functions. 
+</p><p>As the compare functions
+                are static functions of the class <code>Person_dbase</code>,
+                pointers to these functions are indiscernible from pointers to
+                functions at the global (<code>::</code>) level. The compare functions
+                return <code>int</code>s (for <code>qsort()</code>), and expect two
+                pointers to <code>Person const</code> objects. The field
+                <code>persons</code> expects the two pointers to 
+                <code>Person const</code> objects. The field <code>voids</code>
+                is the alternate interpretation, to be used with 
+                <code>qsort()</code>, instead of the typecast <code>(pif2vp)</code>.
+</p><p><li > A field <code>pf</code> (pointer to access function) of
+                the nested <code>union Person_accessor</code>. 
+</p><p>The types of as many different
+                access functions of the <code>Person</code> class as are used in 
+                the class are declared in this union. 
+</p><p>Access functions returning <code>int</code>s, <code>char const *</code>s and
+                <code>Date &amp;</code>s will be needed. Consequently, the 
+                <code>Person_accessor</code> union contains these (three) types.
+</p><p></ul>
+</p><p>From this <code>CmpPerson</code> struct a static array 
+        <code>cmpPerson[]</code> is constructed. It is a 
+        <code>static Person_dbase</code> array, making it possible for the 
+        compare functions to inspect its elements (
+        The number of elements of the <code>cmpPerson[]</code> array is not specified
+        in the interface: that number is determined compile-time by the 
+        compiler, when the static variable <code>cmpPerson[]</code> is initialized.).
+</p><p>Also note the <code>static Listtype selector</code>. This variable
+        will be used later in the compare functions to find the actual
+        <code>Person</code> access function to be used.
+        Here, then, is the interface of the class <code>Person_dbase</code>:
+<pre>
+
+    class Person_dbase
+    {
+        public:  
+            enum Listtype
+            {
+                list_by_length,
+                list_by_weight,
+                list_by_name,            
+                list_by_city,
+                list_by_birthday,
+            };
+
+            // ... constructors etc.
+
+            void list(Listtype type);
+                        // list the information
+        private:
+            struct CmpPerson
+            {                                                     
+                union Compare_function
+                {
+                    int (*persons)// comparing two Persons
+                        (Person const *p1, Person const *p2);
+                    int (*voids)// for qsort()
+                        (void const *p1, void const *p2);
+                }
+                    cmp;
+
+                union Person_accessor
+                {
+                    char const 
+                        *(Person::*cp)() const;
+                    int
+                        (Person::*i)() const;
+                    Date const
+                        &amp;(Person::*d)() const;
+                }
+                    pf;     // to Person's access functions
+            };
+            
+            static CmpPerson
+                cmpPerson[];
+            static Listtype
+                selector;
+                
+            static int cmpstr(Person const *p1,
+                              Person const *p2);
+        
+            static int cmpint(Person const *p1,
+                              Person const *p2);
+        
+            static int cmpdate(Person const *p1,
+                              Person const *p2);
+        
+            Person
+                *pp;    // pointer to the info
+            unsigned
+                n;      // number of persons stored.
+    };
+
+</pre>
+
+</p><p>Next, we define each of the members of the <code>Person_dbase</code> class
+    (as far as necessary).
+</p><p><li > The <code>list()</code> function now only has to do three things:
+        <ul>  
+            <li > The <code>Listtype</code> parameter is copied to
+                <code>selector</code>,
+            <li > The function <code>qsort()</code> is called. Note the
+                use of the <code>cmpPerson</code> array to determine which compare
+                function to use.
+            <li > The information of the <code>Person</code>objects is
+                displayed. This part is left for the reader to implement.
+        </ul>
+</p><p><pre>
+
+    void Person_dbase::list(Listtype type)
+    {
+        selector = type;
+        qsort(pp, n, sizeof(Person), cmpPerson[type].cmp.voids);
+        // list the sorted Person-database (to be implemented)
+    }
+
+</pre>
+
+</p><p><li > The array <code>cmpPerson[]</code> is a static array of <code>CmpPerson</code>
+        elements. In this example there are five different ways to sort
+        the data. Consequently, there are five elements in the array
+        <code>cmpPerson[]</code>. All these elements can be defined and initialized
+        by the compiler. No run-time execution time is needed for this.
+</p><p>However, note the form of the declaration: the array is defined in
+        the scope of the <code>Person_dbase</code> class. Its elements are 
+        <code>CmpPerson</code>s, also defined in the scope of the <code>Person_dbase</code>
+        class. Hence the double mentioning of <code>Person_dbase</code>.
+<pre>
+
+    Person_dbase::CmpPerson
+        Person_dbase::cmpPerson[] = 
+        {
+            {       // compare- and access
+                    // function to compare length
+                cmpint,
+                Person::length,
+            },
+
+            {       // same for weight
+                cmpint,
+                Person::weight,
+            },
+
+            {       // same for name
+                cmpstr,
+                Person::name,
+            },
+
+            {       // same for city
+                cmpstr,
+                Person::city,
+            },
+
+            {       // same for Date
+                cmpdate,
+                Person::birthdate,
+            },
+        };
+
+</pre>
+
+</p><p><li > Now only the compare functions remain to be implemented. Although
+        five accessors can be used, only three compare functions are needed.
+</p><p>The compare functions, being static functions, have access to the 
+        <code>cmpPerson[]</code> array and to the <code>Listtype selector</code> variable. This 
+        information is used by the compare functions to call the relevant 
+        access member function 
+        of the two <code>Person</code> objects, pointed to by the parameters of the
+        compare functions. 
+</p><p>For this, the <code>pointer to member</code> operator
+        <code>-&gt;*</code> is used. The element <code>cmpPerson[selector]</code>
+        contains the function pointers to the functions to be used: 
+        they are the fields
+        <code>pf</code>, variant <code>cp, i</code> or <code>d</code>. These fields
+        return a pointer to a particular access function of a <code>Person</code>
+        object. 
+</p><p>Through these pointers the functions can be associated to a 
+        particular <code>Person</code>
+        object using the pointer to member operator. This results in 
+        expressions like:
+        <center><code>p1-&gt;*cmpPerson[selector].pf.cp</code> </center> 
+</p><p>By this time we have
+        the name (i.e., address) of an access function for a particular 
+        <code>Person</code> object. To call this function, parentheses are needed,
+        one set of parentheses to protect this expression from 
+        desintegrating due to the 
+        high priority of the second set of parentheses, which are 
+        needed for the actual call of the function. Hence, we get:
+        <center><code>(p1-&gt;*cmpPerson[selector].pf.cp)()</code> </center>
+</p><p>Finally, here are the three compare functions:
+<pre>
+
+    int Person_dbase::cmpstr(Person const *p1, Person const *p2)
+    {
+        return 
+        (
+            strcmp
+            (         
+                (p1-&gt;*cmpPerson[selector].pf.cp)(),
+                (p2-&gt;*cmpPerson[selector].pf.cp)()
+            )
+        );
+    }
+
+    int Person_dbase::cmpint(Person const *p1, Person const *p2)
+    {
+        return 
+        (
+            (p1-&gt;*cmpPerson[selector].pf.i)() 
+            - 
+            (p2-&gt;*cmpPerson[selector].pf.i)()
+        );
+    }
+
+    int Person_dbase::cmpdate(Person const *p1, Person const *p2)
+    {
+        return 
+        (
+            (p1-&gt;*cmpPerson[selector].pf.d)() 
+            &lt; 
+            (p2-&gt;*cmpPerson[selector].pf.d)() ?    
+                -1    
+            :    
+                (p1-&gt;*cmpPerson[selector].pf.d)() 
+                &gt; 
+                (p2-&gt;*cmpPerson[selector].pf.d)()     
+        );
+    }
+
+</pre>
+
+</p><p></ul>
+
+</p><p>
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus11.html">Next chapter</a>
+    <li> <a href="cplusplus09.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

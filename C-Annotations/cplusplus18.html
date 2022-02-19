@@ -1,0 +1,3280 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus17.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="ConcreteExamples"></a><a name="l315"></a>
+<h1>Chapter 18: Concrete examples of C++</h1>
+<a name="concrete"></a>
+    
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="concrete/intro"></a>
+    This chapter presents a number of concrete examples of programming in
+<strong>C++</strong>. Items from this document such as virtual functions, <code>static</code> members,
+etc. are rediscussed. Examples of container classes are shown.
+</p><p>Another example digs into the peculiarities of using a parser- and 
+scanner-generator with <strong>C++</strong>. Once the input for a program exceeds a certain
+level of complexity, it's advantageous to use a scanner- and parser-generator
+for creating the code which does the actual input recognition. The 
+<a href="cplusplus18.html#BisonAndFlex">example</a> describes the usage of these tool in a <strong>C++</strong>
+environment.
+</p><p>
+</p><p><a name="Storage"></a><a name="l316"></a>
+<h2>18.1: Storing objects: Storable and Storage</h2>
+<a name="concrete/storing"></a>
+    A reoccurring task of many programs is the storage of data, which are then
+sorted, selected, etc.. Storing data can be as simple as maintaining an array
+of <code>int</code>s, but can also be much more complex, such as maintaining file
+system information by the kernel of an operating system.
+</p><p>In this section we take a closer look at the storage of generic objects in
+memory (i.e., during the execution of a program). Conforming to the
+object-oriented recipe we shall develop two classes: a class <code>Storage</code>,
+which stores objects, and a class <code>Storable</code>, the prototype of objects
+which can be stored.
+
+</p><p><a name="l317"></a>
+<h3>18.1.1: The global setup</h3>
+    <a name="concrete/global"></a>
+    As far as the functionality of the class <code>Storage</code> is concerned, objects
+can be added to the storage and objects can be obtained from the storage. Also
+it must be possible to obtain the number of objects in the storage.
+</p><p>As far as the internal data organization of the storage is concerned, we
+opt for an approach in which <code>Storage</code> maintains an array which can be
+reallocated, consisting of pointers to the stored objects.
+</p><p>The internal organization of the class <code>Storage</code> is illustrated in 
+    figure <a href="cplusplus18.html#StorageFigure">17</a>.
+</p><p><a name="StorageFigure"></a></p><p><center><img src="concrete/storage.gif" align="bottom" alt="figure 17 is shown here."><br> 
+figure 17: Internal organization of the class <code>Storage</code>. 
+</center></p><p>
+    
+
+</p><p><a name="StorageInterface"></a>
+<a name="l318"></a>
+
+             
+<strong>18.1.1.1: Interface functions of the class Storage</strong></p><p>
+        <a name="concrete/interface"></a>
+    The usage (interface) of the class <code>Storage</code> is contained in three member
+functions. The following list describes these member functions and mentions
+the class <code>Storable</code>, more on this later.
+</p><p><ul>
+</p><p><li > The function <code>add(Storable const *newobj)</code> adds an object to the
+    storage. The function reallocates the array of pointers to accommodate one
+    more and inserts the address of the object to store.
+</p><p><li > The function <code>Storable const *get(int index)</code> returns a pointer
+    to the object which is stored at the index'th slot.
+</p><p><li > The function <code>int nstored()</code> returns the number of objects in
+    the storage.
+</p><p></ul>
+
+</p><p>
+<a name="l319"></a>
+
+             
+<strong>18.1.1.2: To copy or not to copy?</strong></p><p>
+        <a name="concrete/copies"></a>
+    There are two distinct design alternatives for the function <code>add()</code>. These
+considerations address the choice whether the stored objects (the squares on
+the right side of figure <a href="cplusplus18.html#StorageFigure">17</a>) should be <strong>copies</strong> of the
+original objects, or the objects <strong>themselves</strong>.
+</p><p>In other words, should the function <code>add()</code> of the class <code>Storage</code>:
+</p><p><ul>
+</p><p><li > just store the address of the object which it receives as its
+    argument in the array of pointers, or should it
+</p><p><li > make a copy of the object first, and store the address of the copy?
+</p><p></ul>
+</p><p>These considerations are not trivial. Consider the following example:
+</p><p><pre>
+
+    Storage
+        store;
+    Storable
+        something;
+
+    store.add(something);           // add to storage
+
+    // let's assume that Storable::modify() is defined
+    something.modify();     // modify original object,
+
+    Storable
+        *retrieved = store.get(0); // retrieve from storage
+
+    // NOW: is "*retrieved" equal to "something" ?!
+
+</pre>
+
+</p><p>If we choose to store (addresses of) the objects themselves, then at the end
+of the above code fragment, the object pointed to by <code>retrieved</code> will equal
+<code>something</code>. A manipulation of previously stored objects thereby alters the
+contents of the storage.
+</p><p>If we choose to store <strong>copies</strong> of objects, then obviously <code>*retrieved</code>
+will not equal <code>something</code> but will remain the original, unaltered, object.
+This approach has a great merit: objects can be placed into storage as a
+`safeguard', to be retrieved later when an original object was altered or even
+ceased to exist. In this implementation we therefore choose for this approach.
+
+</p><p>
+<a name="l320"></a>
+
+             
+<strong>18.1.1.3: Who makes the copy?</strong></p><p>
+        <a name="concrete/who"></a>
+    The fact that copies of objects should be stored presents a small problem. If
+we want to keep the class <code>Storage</code> as universal as possible, then the
+making of a copy of a <code>Storable</code> object cannot occur here. The reason for
+this is that the actual type of the objects to store is not known in advance.
+A simplistic approach, such as the following:
+</p><p><pre>
+
+    void Storage::add(Storable const *obj)
+    {
+        Storable
+            *to_store = new Storable(*obj);
+        // now add to_store instead of obj
+        .
+        .
+    }
+
+</pre>
+
+</p><p>shall not work. This code attempts to make a copy of <code>obj</code> by using the
+operator <code>new</code>, which in turn calls the copy constructor of <code>Storable</code>.
+However, if <code>Storable</code> is only a base class, and the class of the object to
+store is a derived class (say, a <code>Person</code>), how can the copy constructor of
+the class <code>Storable</code> create a copy of a <code>Person</code>?
+</p><p>The making of a copy therefore <strong>must</strong> lie with the actual class of the
+object to store, i.e., with the derived class. Such a class must have the
+functionality to create a <strong>duplicate</strong> of the object in question and to
+return a pointer to this duplicate. If we call this function <code>duplicate()</code>
+then the code of the adding function becomes:
+</p><p><pre>
+
+    void Storage::add(Storable const *obj)
+    {
+        Storable
+            *to_store = obj-&gt;duplicate();
+        // now add to_store instead of obj
+        .
+        .
+    }
+
+</pre>
+
+</p><p>The function <code>duplicate()</code> is called in this example by using a pointer to
+the original object (this is the pointer <code>obj</code>). The class <code>Storable</code> is
+in this example only a base class which defines a protocol, and not the class
+of the actual objects which will be stored. Ergo, the function
+<code>duplicate()</code> need not be defined in <code>Storable</code>, but <strong>must</strong> be
+concretely implemented in derived classes. In other words, <code>duplicate()</code> is
+a <strong>pure virtual</strong> function.
+
+</p><p><a name="l321"></a>
+<h3>18.1.2: The class Storable</h3>
+    <a name="concrete/storable"></a>
+    Using the above discussed approach we can now define the class <code>Storable</code>.
+The following questions are of importance:
+</p><p><ul>
+</p><p><li > Does the class <code>Storable</code> need a default constructor, or
+    possibly other constructors such as a copy constructor?
+</p><p>The answer is no. <code>Storable</code> will be a bare prototype, from which
+    other classes will be derived.
+</p><p><li > Does the class <code>Storable</code> need a destructor? Should this
+    destructor be (pure) <code>virtual</code>?
+</p><p>Yes. The destructor will be called when, e.g., a <code>Storage</code> object
+    ceases to exist. It is quite possible that classes which will be derived
+    from <code>Storable</code> will have their own destructors: we should therefore
+    define a <code>virtual</code> destructor, to ensure that when an object pointed to
+    by a <code>Storable*</code> is deleted, the actual destructor of the derived class
+    is called.
+</p><p>The destructor however should not be <strong>pure</strong> virtual. It is quite
+    possible that the classes which will be derived from <code>Storable</code> will
+    not need a destructor; in that case, an empty destructor function should
+    be supplied.
+</p><p></ul>
+</p><p>The class definition and its functions are given below:
+</p><p><pre>
+
+    class Storable
+    {
+        public:
+            virtual ~Storable();
+            virtual Storable *duplicate() const = 0;
+    };
+
+    Storable::~Storable()
+    {
+    }
+
+</pre>
+
+</p><p>
+</p><p>
+<a name="l322"></a>
+
+             
+<strong>18.1.2.1: Converting an existing class to a Storable</strong></p><p>
+        <a name="concrete/converting"></a>
+    To show how (existing) classes can be converted to derivation from a
+<code>Storable</code>, consider the below class <code>Person</code> from section
+<a href="cplusplus06.html#Person">6.1</a>. This class is re-created here, conforming to <code>Storable</code>'s
+protocol (only the relevant or new code is shown):
+ <pre>
+
+    class Person: public Storable
+    {
+        public:
+            // copy constructor
+            Person(Person const &amp;other);
+    
+            // assignment
+            Person const &amp;operator=(Person const &amp;other);
+    
+            // duplicator function
+            Storable *duplicate() const;
+
+        .
+        .
+    };
+ 
+</pre>
+ 
+    When implementing the function <code>Person::duplicate()</code> we can use either
+the copy constructor or the default constructor with the overloaded assignment
+operator. The implementation of <code>duplicate()</code> is quite simple:
+ <pre>
+
+    // first version: 
+    Storable *Person::duplicate() const
+    {
+        // uses default constructor in new Person
+        Person
+            *dup = new Person;
+
+        // uses overloaded assignment in *dup = *this
+        *dup = *this;
+
+        return (dup);
+    }
+
+    // second version:
+    Storable *Person::duplicate() const
+    {
+        // uses copy constructor in new Person(*this)
+        return (new Person(*this));
+    }
+ 
+</pre>
+
+    The above conversion from a class <code>Person</code> to the needs of a
+<code>Storable</code> supposes that the sources of <code>Person</code> are at hand and can be
+modified.  However, even if the definition of a <code>Person</code> class is not
+available, but is e.g., contained in a run-time library, the conversion to the
+<code>Storable</code> format poses no difficulties:
+ <pre>
+
+    class StorablePerson: public Person, public Storable
+    {
+        public:
+            // duplicator function
+            Storable *duplicate() const;
+    };
+
+    Storable *StorablePerson::duplicate() const
+    {
+        return (new StorablePerson(*this));
+    }
+
+</pre>
+
+</p><p>
+</p><p><a name="l323"></a>
+<h3>18.1.3: The class Storage</h3>
+    <a name="concrete/storage"></a>
+    We can now implement the class <code>Storage</code>. The class definition is given
+below:
+</p><p><pre>
+
+    class Storage: public Storable
+    {
+        public:
+            // destructors, constructor
+            ~Storage();
+            Storage();
+            Storage(Storage const &amp;other);
+
+            // overloaded assignment
+            Storage const &amp;operator=(Storage const &amp;other);
+
+            // functionality to duplicate storages
+            Storable *duplicate() const;
+
+            // interface
+            void add(Storable *newobj);
+            int nstored() const;
+            Storable *get(int index);
+
+        private:
+            // copy/destroy primitives
+            void destroy();
+            void copy(Storage const &amp;other);
+
+            // private data
+            int n;
+            Storable **storage;
+    };
+
+</pre>
+
+</p><p>Concerning the class definition we remark:
+</p><p><ul>
+</p><p><li >As its interface the class has the functions <code>add()</code>, <code>get()</code>
+    and <code>nstored()</code>. These functions were previously discussed (see section
+    <a href="cplusplus18.html#StorageInterface">18.1.1.1</a>).
+</p><p><li > The class has a copy constructor and an overloaded assignment
+    function. These functions are needed because <code>Storage</code> contains a
+    pointer, which addresses allocated memory.
+</p><p><li > <code>Storage</code> itself is derived from <code>Storable</code>, as can be seen
+    in the classname definition and in the presence of the function
+    <code>duplicate()</code>. This means that <code>Storage</code> objects can themselves be
+    placed in a <code>Storage</code>, thereby creating `super-storages': say, a list
+    of groups of <code>Person</code>s.
+</p><p><li > Internally, <code>Storage</code> defines two <code>private</code> functions
+    <code>copy()</code> and <code>destroy()</code>. The purpose of these primitive functions
+    is discussed in section <a href="cplusplus06.html#CopyDestroy">6.4.1</a>.
+</p><p></ul>
+</p><p>The destructor, constructors and the overloaded assignment function are listed
+below:
+</p><p><pre>
+
+    // default constructor
+    Storage::Storage()
+    {
+        n = 0;
+        storage = 0;
+    }
+
+    // copy constructor
+    Storage::Storage(Storage const &amp;other)
+    {
+        copy(other);
+    }
+
+    // destructor
+    Storage::~Storage()
+    {
+        destroy();
+    }
+
+    // overloaded assignment
+    Storage const &amp;Storage::operator=(Storage const &amp;other)
+    {
+        if (this != &amp;other)
+        {
+            destroy();
+            copy(other);
+        }
+        return (*this);
+    }
+
+</pre>
+
+</p><p>The primitive functions <code>copy()</code> and <code>destroy()</code> unconditionally copy
+another <code>Storage</code> object, or destroy the contents of the current one. Note
+that <code>copy()</code> calls <code>duplicate()</code> to duplicate the other's stored
+objects:
+</p><p><pre>
+
+    void Storage::copy(Storage const &amp;other)
+    {
+        n = other.n;
+        storage = new Storable* [n];
+        for (int i = 0; i &lt; n; i++)
+            storage [i] = other.storage [i]-&gt;duplicate();
+    }
+
+    void Storage::destroy()
+    {
+        for (register int i = 0; i &lt; n; i++)
+            delete storage [i];
+        delete storage;
+    }
+
+</pre>
+
+</p><p>The function <code>duplicate()</code>, which is required since <code>Storage</code> itself
+should be a <code>Storable</code>, uses the copy constructor to duplicate the current
+object:
+</p><p><pre>
+
+    Storable *Storage::duplicate() const
+    {
+        return (new Storage (*this));
+    }
+
+</pre>
+
+</p><p>Finally, here are the interface functions which add objects to the storage,
+return them, or determine the number of stored objects (
+Note: the function <code>realloc()</code> that is used in this section should actually
+not be used. A better procedure would be to create a <strong>C++</strong> variant for the
+<code>realloc()</code> function. A modification is in the pipeline....)
+</p><p><pre>
+
+    void Storage::add(Storable const *newobj)
+    {
+        // reallocate storage array
+        storage = (Storable **) realloc(storage,
+                    (n + 1) * sizeof(Storable *));
+        // put duplicate of newobj in storage
+        storage [n] = newobj-&gt;duplicate();
+        // increase number of obj in storage
+        n++;
+    }
+
+    Storable *Storage::get(int index)
+    {
+        // check if index within range
+        if (index &lt; 0 || index &gt;= n)
+            return (0);
+        // return address of stored object
+        return (storage [index]);
+    }
+
+    int Storage::nstored() const
+    {
+        return (n);
+    }
+
+</pre>
+
+</p><p>
+</p><p><a name="ConcreteTree"></a><a name="l324"></a>
+<h2>18.2: A binary tree</h2>
+<a name="concrete/btree"></a>
+    This section shows an implementation of a binary tree in <strong>C++</strong>. Analogously
+to the classes <code>Storage</code> and <code>Storable</code> (see section <a href="cplusplus18.html#Storage">18.1</a>)
+two separate classes are used: one to represent the tree itself, and one to
+represent the objects which are stored in the tree. The classes will be
+appropriately named <code>Tree</code> and <code>Node</code>.
+</p><p>
+</p><p><a name="l325"></a>
+<h3>18.2.1: The Node class</h3>
+    <a name="concrete/node"></a>
+    The class <code>Node</code> is an abstract (pure virtual) class, which defines the
+protocol for the usage of derived classes with a <code>Tree</code>. Concerning this
+protocol we remark the following:
+    <ul>
+        <li > When data are stored in a binary tree, the place of the data is
+determined by some <strong>order</strong>: it is necessary to determine how the objects
+should be sorted. This requires a comparison between objects. This comparison
+must inform the caller (i.e., the function which places objects in a tree)
+whether one object is `smaller' or `greater' than another object.
+</p><p>This comparison must lie with <code>Node</code>s: a <code>Tree</code> itself cannot
+know how objects should be compared. Part of the procotol which is
+required by <code>Node</code> is therefore:
+        <pre>
+
+    virtual int compare(Node const &amp;other) const = 0;
+        
+</pre>
+
+    The comparing function will have to be implemented in each derived class.
+        <li > Similar to the storage of objects in the class <code>Storage</code> (see
+section <a href="cplusplus18.html#Storage">18.1</a>), a binary tree will contain <strong>copies</strong> of objects. The
+responsibility to duplicate an object therefore also lies with <code>Node</code>, as
+enforced by a pure virtual function:
+        <pre>
+
+    virtual Node *clone() const = 0;
+        
+</pre>
+
+        <li > When processing a binary tree containing objects, the tree is
+recursively descended and a given operation is performed for each object.  The
+operation depends of course on the actual type of the stored object.  By
+declaring a pure virtual function
+        <pre>
+
+    virtual void process() = 0;
+        
+</pre>
+
+    in the class <code>Node</code>, the responsibility to process an object is placed
+with the derived class.
+        <li > When an object is to be stored in a binary tree, it may be that
+the object had already been stored previously. In that case the object will
+not be stored twice.
+</p><p>For these cases we define a virtual function <code>rejected()</code>, which is a
+virtual function called for the <code>Node</code> that was already stored, receiving
+the node requesting to be added as its argument. However, since
+it's a virtual function, it can be redefined in a derived class:
+        <pre>
+
+    virtual void rejected(Node const &amp;twice)
+    {
+    }
+        
+</pre>
+
+    </ul>
+    The complete definition and declaration of the class <code>Node</code> is given
+below:
+    <pre>
+    class Node
+    {
+        public:
+            virtual ~Node()                     // destructor
+            {}
+            virtual Node* clone() const = 0;    // duplicator
+            virtual void process() = 0;         // Node processor
+                                                // comparing 2 Nodes
+            virtual int compare(Node const &amp;other) const = 0;
+
+            virtual void rejected(Node const &amp;twice)  // called when the node
+            {                                   // was found in the tree
+            }
+    };
+</pre>
+
+</p><p>
+</p><p><a name="l326"></a>
+<h3>18.2.2: The Tree class</h3>
+    <a name="concrete/tree"></a>
+    The class <code>Tree</code> is responsible for the storage of objects which are
+derived from a <code>Node</code>. To implement the recursive tree structure, the class
+<code>Tree</code> has two <code>private</code> pointers as its data, pointing to subtrees: a
+<code>Tree *left</code> and <code>Tree *right</code>. The information which is contained in a
+node of the tree is represented as a <code>private</code> field <code>Node *info</code>.
+</p><p><code>Tree</code> objects may be constructed empty and they may be constructed storing 
+an initial <code>Node</code> object.
+</p><p>To scan a binary tree, the class <code>Tree</code> offers three methods: preorder,
+inorder and postorder. When scanning in preorder first the left subtree is
+scanned, then the leaf itself is processed and finally the right subtree is
+scanned. When scanning in inorder first a leaf in a node is processed, then
+the left subtree is scanned and finally the right subtree is scanned. When
+scanning in postorder first the left and right subtrees are scanned and then
+the leaf itself is processed.
+</p><p>The definition of the class <code>Tree</code> is given below:
+    <pre>
+    #include "node.h"
+
+    class Tree
+    {
+        public:
+            // destructor, constructors
+            ~Tree();
+            Tree();
+            Tree(Node const &amp;node);
+            Tree(Tree const &amp;other);
+
+            // assignment
+            Tree const &amp;operator=(Tree const &amp;other);
+
+            // addition of a Node
+            void add(Node const &amp;node);
+
+            // processing order in the tree
+            void preorder_walk();
+            void inorder_walk();
+            void postorder_walk();
+
+        private:
+            // primitives
+            void construct(Tree const &amp;other);
+            void destroy();
+
+            // called by add(Node const &amp;node)
+            void add(Tree *&amp;branch, Node const &amp;node);
+
+            // data
+            Tree 
+                *left, 
+                *right;
+            Node 
+                *node;
+    };
+</pre>
+
+
+</p><p>
+<a name="l327"></a>
+
+             
+<strong>18.2.2.1: Constructing a tree</strong></p><p>
+        <a name="concrete/construct"></a>
+        There are three constructors defined in the <code>Tree</code> class. The copy
+constructor is presented in the next section, the other two constructors are:
+    <pre>
+    #include "tree.h"
+
+    // default constructor: initializes to 0
+    Tree::Tree()
+    :
+        left(0),
+        right(0),
+        node(0)
+    {
+    }
+
+    // Node constructor: add a Node object
+    Tree::Tree(Node const &amp;node)
+    :
+        left(0),
+        right(0),
+        node(node.clone())
+    {
+    }
+</pre>
+
+
+</p><p>
+<a name="l328"></a>
+
+             
+<strong>18.2.2.2: The `standard' functions</strong></p><p>
+        <a name="concrete/standard"></a>
+    As can be seen from the class definition, <code>Tree</code> contains pointer fields.
+This means that the class will need a destructor, a copy constructor and an
+overloaded assignment function to ensure that no allocation problems occur.
+</p><p>The destructor, the copy constructor and the overloaded assignment function
+are implemented with two primitive operations <code>construct()</code> and <code>destroy()</code>
+(presented later):
+    <pre>
+    #include "tree.h"
+
+    // destructor: destroys the tree
+    Tree::~Tree()
+    {
+        destroy();
+    }
+
+    // copy constructor: initializes to contents of other object
+    Tree::Tree(Tree const &amp;other)
+    {
+        construct(other);
+    }
+</pre>
+
+
+</p><p>
+<a name="l329"></a>
+
+             
+<strong>18.2.2.3: Adding an object to the tree</strong></p><p>
+        <a name="concrete/add"></a>
+    Adding a new object to the tree is a recursive process. When the
+function <code>add()</code> is called to insert an object into the tree, there are
+only three possibilities:
+    <ul>
+        <li > The <code>node</code> field of the current node can be a 0-pointer. In that
+case, a clone of the <code>Node</code> object is inserted at the current node.
+        <li > When the tree is already partially filled, then it is necessary
+to determine whether the object to add should come `before' or `after' the
+object of the current node. This comparison is performed by <code>compare()</code>, a
+pure virtual function whose implementation is required by <code>Node</code>. Depending
+on the order the new object must be inserted in the <code>left</code> or in the
+<code>right</code> subtree. Adding a node to a subtree is done by an overloaded
+(private) <code>add()</code> function.
+        <li > When the comparison of the new object and the object of the
+current node yields `equality', then the new object should not be stored again
+in the tree. The function <code>rejected()</code> is called to process the duplicated
+<code>Node</code>.  
+    </ul>
+    Here are the two <code>add()</code> functions:
+        <pre>
+    #include "tree.h"
+
+    void Tree::add(Node const &amp;newNode)
+    {
+        if (!node)
+        {
+            node = newNode.clone();
+            return;
+        }
+
+        int
+            cmp = node-&gt;compare(newNode);
+
+        if (!cmp)               // already stored
+        {
+            node-&gt;rejected(newNode);
+            return;
+        }
+
+        add
+        (
+            cmp &lt; 0 ? left : right, newNode
+        );
+    }
+
+    void Tree::add(Tree *&amp;tree, Node const &amp;newNode)
+    {
+        if (!tree)
+            tree = new Tree(newNode);
+        else
+            tree-&gt;add(newNode);
+    }
+
+</pre>
+
+
+</p><p>
+<a name="l330"></a>
+
+             
+<strong>18.2.2.4: Scanning the tree</strong></p><p>
+        <a name="concrete/scanning"></a>
+    The class <code>Tree</code> offers three methods of scanning a binary tree: preorder,
+inorder and postorder. The three functions defining these actions are
+recursive:
+        <pre>
+    #include "tree.h"
+
+    void Tree::preorder_walk()
+    {
+        if (left)
+            left-&gt;preorder_walk();
+        if (node)
+            node-&gt;process();
+        if (right)
+            right-&gt;preorder_walk();
+    }
+
+    void Tree::inorder_walk()
+    {
+        if (node)
+            node-&gt;process();
+        if (left)
+            left-&gt;inorder_walk();
+        if (right)
+            right-&gt;inorder_walk();
+    }
+
+    void Tree::postorder_walk()
+    {
+        if (left)
+            left-&gt;postorder_walk();
+        if (right)
+            right-&gt;postorder_walk();
+        if (node)
+            node-&gt;process();
+    }
+</pre>
+
+
+</p><p>
+<a name="l331"></a>
+
+             
+<strong>18.2.2.5: The primitive operations copy() and destroy()</strong></p><p>
+        <a name="concrete/primitive"></a>
+    The functions <code>copy()</code> and <code>destroy()</code> are two <code>private</code> member
+functions which implement primitive operations of the class <code>Tree</code>: the
+copying of the contents of another <code>Tree</code> or the destroying of the tree.
+        <pre>
+    #include "tree.h"
+
+    void Tree::destroy()
+    {
+        delete node;
+        if (left)
+            delete left;
+        if (right)
+            delete right;
+    }
+
+    void Tree::construct(Tree const &amp;other)
+    {
+        node = other.node ? other.node-&gt;clone() : 0;
+        left = other.left ? new Tree(*other.left) : 0;
+        right = other.right ? new Tree(*other.right) : 0;
+    }
+
+</pre>
+
+    Concerning this implementation we remark the following:
+    <ul>
+        <li > The function <code>destroy()</code> is recursive, even though this is not
+at once visible. A statement like <code>delete left</code> will activate the destructor
+for the <code>Tree</code> object which is pointed to by <code>left</code>; this in turn will
+call <code>destroy()</code> etc..
+        <li > Similarly, the function <code>construct()</code> is recursive. The code
+<code>left = new Tree(*other.left)</code> activates the copy constructor, which in
+turn calls <code>construct()</code> for the left branch of the tree.
+        <li > As is the case with the function <code>add()</code>, nodes themselves are
+cloned by the function <code>clone()</code>. This function must be provided by a
+concrete implementation of a derived class of <code>Node</code>.
+    </ul>
+
+</p><p><a name="l332"></a>
+<h3>18.2.3: Using Tree and Node</h3>
+    <a name="concrete/usage"></a>
+    We illustrate the usage of the classes <code>Tree</code> and <code>Node</code> by a program that
+counts words in files. Words are defined, rather blandly, as series of
+characters, separated by white spaces. The program shows which words are
+present in which file, and how many times.
+</p><p>Below is the listing of a class <code>Strnode</code>. This class is derived from
+<code>Node</code> and implements the virtual functions. Note how this class
+implements the counting of words; when a given word occurs more than one time,
+<code>Tree</code> will call the member function <code>rejected()</code>. This function
+simply increases the private counter variable <code>times</code>.
+    <pre>
+#include &lt;fstream&gt;
+#include &lt;iomanip&gt;
+#include &lt;string&gt;
+
+#include "tree.h"
+
+class Strnode: public Node
+{
+    public:
+        Strnode(string const &amp;s)
+        :
+            str(s),
+            times(1)
+        {
+        }
+        Node* clone() const
+        {
+            return (new Strnode(*this));
+        }
+        int compare (Node const &amp;other) const
+        {
+            return 
+            (
+                str.compare
+                (
+                    static_cast&lt;Strnode const &amp;&gt;(other).str
+                )
+            );
+        }
+        void process ()
+        {
+            if (times)
+                cout &lt;&lt; setw(20) &lt;&lt; str.c_str() &lt;&lt; ": " &lt;&lt; 
+                        setw(3) &lt;&lt; times &lt;&lt; endl;
+        }
+        void rejected(Node const &amp;node)
+        {
+            ++times;
+        }
+    private:
+        string
+            str;
+        unsigned
+            times;
+};
+
+void countfile(istream &amp;inf)
+{
+    Tree
+        tree;
+    string
+        word;
+
+    while (inf &gt;&gt; word)
+    {
+        Strnode
+            next(word);
+       
+        tree.add(next);
+    }
+    tree.inorder_walk();
+}
+
+int main (int argc, char **argv)
+{
+    int
+        exitstatus = 0;
+    
+    if (argc &gt; 1)
+    {
+        for (int i = 1; i &lt; argc; ++i)
+        {
+            ifstream
+                inf(argv[i]);
+
+            if (!inf)
+            {
+                cerr &lt;&lt; "can't open " &lt;&lt; argv[i] &lt;&lt; endl;
+                exitstatus++;
+                continue;
+            }
+            countfile(inf);
+        }
+    }
+    else
+        countfile (cin);
+
+    return (exitstatus);
+}
+</pre>
+
+
+</p><p><a name="ConcreteOptions"></a><a name="l333"></a>
+<h2>18.3: Classes to process program options</h2>
+<a name="configuration"></a>
+    <a name="configuration/intro"></a>
+    Programs usually can be given <em>options</em> by which the program can be
+configured to a particular task. Often programs have sensible default values
+for their options. Given those defaults, a <em>resource</em> file may be used to
+overrule the options that were hard-coded into the program. The resource file
+is normally used to configure the program to the specific needs of a
+particular computer system. Finally, the program can be given <em>command-line</em>
+options, by which the program can be configured to its task during one
+particular run.
+</p><p>In this section we will develop a set of classes starting from  the class
+<code>Configuration</code>, whose objects can process a great variety of
+options. Actually, we'll start from a small <a href="cplusplus18.html#configExample">demo program</a>,
+in which an object of the class <code>Configuration</code> is used. From there, the
+class <code>Configuration</code> will be developed, working our way down to the
+auxiliary classes that are used with the <code>Configuration</code> class.
+</p><p>The resulting program will be available as a zip-file containing the
+<a href="ftp://ftp.icce.rug.nl/pub/unix/configdemo.zip">sources and (Linux) binary program</a> at
+our <a href="ftp://ftp.icce.rug.nl/pub/unix">ftp-site</a>.
+The zip-archive contains all the sources and auxiliary files for creating the
+program, as well as an <a href="http://www.icce.rug.nl/docs/programs/icmake.html">icmake build
+script</a>.
+</p><p>
+</p><p><a name="l334"></a>
+<h3>18.3.1: Functionality of the class Configuration</h3>
+    <a name="configuration/configfunctionality"></a>
+    What functionality must a <code>Configuration</code> object have?
+<ul>
+    <li > Its <em>constructor</em> should get full control over the program
+arguments <code>int argc</code> and <code>char **argv</code>.
+    <li > The class will have several pointer data members. Consequently,
+the class will need a <em>destructor</em>.
+    <li > The <code>Configuration</code> object must be able to load a resourcefile.
+Our resource file will obey the standard <em>unix</em> form of configuration files:
+empty lines are ignored, and information on lines beyond the hashmark (#) is
+ignored. 
+    <li > The <code>Configuration</code> object must be able to process command-line
+options, which can be either with or without an extra argument.
+    <li > The object should be able to produce the plain name of the program,
+i.e., the name from which all directories are stripped. 
+    <li > The object should be able to produce the name of the resource file
+that was used.
+    <li > The object should be able to tell us how many command-line arguments
+are available, not counting command-line options and their arguments.
+    <li > The object should be able to produce the command-line arguments by
+their index-value, again not counting command-line options and their
+arguments.          
+    <li > The object should be able to produce an option, given the name of the
+option. We don't know yet what an <code>Option</code> is, but then, we don't have to if
+we decide at this point that pointers to <code>Option</code>s, rather than the
+<code>Option</code>s themselves are prodcued. 
+</ul>
+</p><p>Maybe of similar importance as the functionality the object <em>can</em> perform 
+is what the object <em>can not</em> perform:
+<ul>
+    <li > A program will normally not need multiple
+<code>Configuration</code>objects. Therefore there will be <em>no copy constructor</em>.
+    <li > For the same reason, the class will have <em>no overloaded assignment
+operator</em>. 
+</ul>
+What if we accidently try to use a copy-constructor or (overloaded) assignment
+operator? Those situations will be covered by the following <em>trick</em>: we will
+<em>mention</em> a copy constructor and an overloaded assignment operator in the
+interface of the class, but will not implement it. The compiler will, where
+needed, happily generate code calling these two functions, but the program
+can't be linked, since the copy constructor and the overloaded assignment
+operator aren't available. Thus we prevent the accidental use of these
+functions. This approach is used also with other, auxiliary, classes.
+</p><p>Now that we've specified the functionality we're ready to take a look at
+the interface. 
+</p><p>
+</p><p><a name="ConfigInterface"></a>
+<a name="l335"></a>
+
+             
+<strong>18.3.1.1: The interface of the class Configuration</strong></p><p>
+        <a name="configuration/configinterface"></a>
+    Here is the full interface of the <code>class Configuration</code>. In the interface,
+we recognize the functions we required when specifying the functionality of
+the class: the constructor, destructor, and the (not to be implemented) copy
+constructor and overloaded assignment operator. 
+</p><p>To process the resource file we have <code>loadResourceFile()</code>, the command-line
+options are processed by <code>loadCommandLineOptions()</code>. Next we see two plain
+accessors: <code>programName()</code> will return the plain program name, while
+<code>resourceFile()</code> will return the name of the resource file. To obtain the
+number of command-line arguments that are available when all command-line
+options have been processed we have <code>argc()</code>. The arguments themselves are
+obtained by overloaded index operator, using an <code>unsigned</code>
+argument. Finally, options can be obtained by name: for this another
+overloaded index operator is available, this time using a string 
+(<code>char const *</code>) for its argument.
+</p><p>The <code>private</code> section contains data: variables to access
+<code>argc</code> and <code>argv</code>, using reference-type variables; variables to store the
+program- and resource filenames, and two <code>Hashtable</code>s (the <code>class
+Hashtable</code> will be covered in section <a href="cplusplus18.html#ConfigHashtable">18.3.6</a>) containing,
+respectively, the precompiled options and the command-line options.
+</p><p>Here is the interface of the class <code>Configuration</code>:
+<pre>
+#ifndef _Configuration_H_
+#define _Configuration_H_
+
+#include "../hashtable/hashtable.h"
+
+class Option;
+
+class Configuration
+{
+    public:
+        Configuration(int &amp;argc, char const **&amp;argv, int initialCap = 20,
+                    double maxLoadFactor = 0.75);
+    
+        ~Configuration();
+
+        Configuration(Configuration const &amp;other);            // NI
+        Configuration &amp;operator=(Configuration const &amp;right); // NI
+    
+        void loadResourceFile(char const *fname);
+        void loadCommandLineOptions();
+        char const *programName();      // name of the program
+        char const *resourceFile();     // name of used resourcefile
+        unsigned argc() const;          // count beyond [0], c.q. options
+                                        // returns argv[index] | 0
+                                        // also beyond [0] c.q. options
+                                                        // option [name]
+        Option const * operator[](char const *name) const;
+        char const *operator[](unsigned index) const;   // argument[index]
+        
+    private:
+        int
+            argcShift,
+            &amp;argC;
+        char const
+            **&amp;argv;
+        char 
+            *progName;            
+        Hashtable
+            optionTable,
+            cmdLineOption;
+        char
+            *resourceFilename;
+};
+
+#include &lt;string.h&gt;
+#include "../option/option.h"
+#include "../string/string.h"
+#include "../mem/mem.h"
+#include "../ustream/ustream.h"
+#include "../stringtokenizer/stringtokenizer.h"
+
+#endif  _Configuration_H_
+</pre>
+
+</p><p>
+</p><p><a name="configExample"></a>
+<a name="l336"></a>
+
+             
+<strong>18.3.1.2: An example of a program using the class Configuration</strong></p><p>
+        <a name="configuration/example"></a>
+    Below we present the source of the demonstration program. The program sets up
+the memoryhandler, to make sure that failing memory allocations will be
+noticed. 
+</p><p>Next, a configuration object is created. This object is passed to an auxiliary
+function showing us interesting aspects of the object
+(<code>showConfigurationInformation()</code>). Although this function tells us things
+about the <code>Configuration</code> object, it was not made part of the class, since
+it was specifically designed in the context of the demonstration program,
+without adding any real functionality to the <code>Configuration</code> class.
+</p><p>Having displayed the raw information stored in the <code>Configuration</code> object,
+the resource-file is loaded. This might alter the values of the
+program-parameters, of which there are four in the demonstration
+program. Having loaded the resourcefile, the contents of the <code>Configuration</code>
+object are shown again.
+</p><p>Then, the command-line options (if any) are processed, followed by yet another
+display of the contents of the <code>Configuration</code> object.
+</p><p>Here is the source of the demonstration program:
+<pre>
+#include "demo.h"
+
+int main(int argc, char const **argv)
+{
+    Mem::installNewHandler();
+
+    Configuration
+        config(argc, argv);
+
+    showConfigurationInformation(config, "After constructing 'config'");
+
+    config.loadResourceFile("demo.rc");
+
+    showConfigurationInformation(config, "After reading demo.rc");
+
+    config.loadCommandLineOptions();
+
+    showConfigurationInformation(config, 
+            "After processing command-line options");
+
+    return (0);
+}
+</pre>
+
+</p><p>
+</p><p><a name="l337"></a>
+<h3>18.3.2: Implementation of the class Configuration</h3>
+</p><p>
+<a name="l338"></a>
+
+             
+<strong>18.3.2.1: The constructor</strong></p><p>
+        <a name="configuration/configconst"></a>
+    The constructor of the class <code>Configuration</code> expects <code>argc</code> and <code>argv</code>
+as reference-type variables. Apart from these two, tho extra parameters are
+defined, for which the <a href="cplusplus18.html#ConfigInterface">interface</a> defines default
+values: <code>initialCap</code> defines the initial capacity of the hashtables that are
+used by the <code>Configuration</code> object, and <code>maxLoadFactor</code> defining the
+maximum load percentage of the hashtables. So, with the default parameters the
+hashtables would be enlarged once more than 15 elements are stored in them.
+</p><p>Having initialized the reference variables and the hashtables the options are
+stored in the hashtables for fast access. The
+<a href="cplusplus18.html#configOption"><code>Option</code>-class</a> function <code>nextOptionDefinition()</code>
+produces a sequence of all options that are defined for the program. Each
+option's name and value is stored in the <code>optionTable</code> hashtable, and each
+option's command-line character and name is stored in the <code>cmdLineOption</code>
+hashtable. Therefore, the values of options can be retrieved immediately,
+given the name of the option, while the option's command-line character can be
+used to produce the name of the option, which can then be used in a second
+step to obtain the value of the option.
+</p><p>Here is the source of the constructor:
+<pre>
+
+#include "configuration.h"
+
+Configuration::Configuration(int &amp;argCount, char const **&amp;argVector, 
+                             int initialCap, double maxLoadFactor)
+:
+    argC(argCount),
+    argv(argVector),
+    optionTable(initialCap, maxLoadFactor),
+    cmdLineOption(initialCap, maxLoadFactor)
+{
+    resourceFilename = Mem::strdup("");
+
+    Option
+        *option;
+
+    while ((option = Option::nextOptionDefinition()))
+    {
+        String
+            *name = new String(option-&gt;getName());
+
+        optionTable.put(name, option);
+
+        String const
+            *cmdopt =  &amp;(option-&gt;getCmdLineOption());
+                
+        if (strlen(*cmdopt))
+            cmdLineOption.put(new String(*cmdopt), new String(*name)); 
+    }
+
+    char const 
+        *cp = strrchr(argv[0], '/');
+
+    progName = 
+        Mem::strdup
+        (
+            !cp ?
+                argv[0]
+            :
+                cp + 1
+        );
+
+    argcShift = 1;
+}
+
+
+
+
+
+
+
+
+</pre>
+
+</p><p>
+</p><p><a name="ConfigLoadResourceFile"></a>
+<a name="l339"></a>
+
+             
+<strong>18.3.2.2: loadResourceFile()</strong></p><p>
+        <a name="configuration/loadresources"></a>
+    The function <code>loadResourceFile()</code> processes a <em>unix</em>-style
+resource-files. In these files, empty lines are ignored, as well as
+information on a line beyond hash-marks (<code>#</code>) <em>if</em> these hashmarks are
+preceded by the beginning of the line or white space. Long lines may be
+stretched out over several lines by adding a continuation character (the
+backslash (<code>\</code>)) at the end of each line that continues on the next line.
+</p><p>To obtain the remaining lines of the configuration file,
+<code>loadResourceFile()</code> creates a <code>Ustream</code> object. The class <code>Ustream</code> was
+specifically designed for the processing of <em>unix</em>-style
+resource-files. As this class doesn't add much to the understanding of the 
+<code>Configuration</code>-class its interface and implementation is not discussed in
+the annotations. Rather, interface and implementation is found in the
+<a href="ftp://ftp.icce.rug.nl/pub/unix/configdemo.zip">configdemo.zip</a> file at our
+<a href="ftp://ftp.icce.rug.nl/pub/unix">ftp-site</a>.
+</p><p>The processing of the information in the configuration file is based on the
+assumption that all information on a line is organized as follows:
+<ul>
+    <li > The first word is an identifying word: it should match the name of an
+option. The word is called the <em>key</em>.
+    <li > The key is optionally terminated by a colon, e.g., 
+        <center><code>color:</code> </center>
+    <li > The remainder of the line, starting at the first non-blank character
+beyond the key, and ending at the last non-blank character on the line,
+is considered to be the <em>value</em> of the key.
+</ul>
+</p><p>With respect to this format, each key is looked up in the <code>optionTable</code>. If
+found, the value of the option is set to the key's value. Otherwise, if the
+key is not found, a warning message is written, by catching the exception
+thrown by the hashtable when it receives an undefined option-name.
+</p><p>Apart from the <code>Ustream</code> object, the function <code>loadResourceFile()</code> also
+uses a <code>StringTokenizer</code> object, which splits lines from the <code>Ustream</code>
+file into words. The first word is interpreted as <code>key</code>, while the function
+<code>range(index)</code> produces the unsplit line beyond word <code>index</code>. The class
+<code>StringTokenizer</code> is also found in the distributed <code>zip</code>-file.
+</p><p>
+</p><p>
+<a name="l340"></a>
+
+             
+<strong>18.3.2.3: loadCommandLineOptions()</strong></p><p>
+        <a name="configuration/loadcommandlineoptions"></a>
+    The function <code>loadCommandLineOptions()</code> uses the function <code>getopt()</code>
+which is available on <em>unix</em> systems to retrieve command-line options (and
+possibly their values) and to separate them from the remaining command-line
+arguments. The function <code>getopt()</code> expects (among other arguments) a string
+of command-line option letters, which are possibly followed by a colon. If a
+colon is following a command-line option, then information trailing the
+command-line option character or the next command-line argument is interpreted
+as the <em>value</em> of the command-line option. E.g., a command-line option
+character specified as <code>n:</code> may be specified on the command-line as <code>-n20</code>
+or <code>-n 20</code>. 
+</p><p>The function <code>Hashtable::catKeys()</code> is used to obtain a list of command-line
+option characters. Next, the options are extracted from the command-line
+arguments using <code>getopt()</code>. When an option has been found, the
+<code>cmdLineOption</code> hashtable is used to obtain the name of the option, then the
+<code>optionTable</code> hashtable is used to obtain a pointer to the option. 
+</p><p>Next the option receives a new value, through the virtual function
+<code>assign()</code>. This function is available for all options, and allows
+<code>loadCommandLineOptions()</code> to assign a new value to an option irrespective
+of the actual type of the option. 
+</p><p>Here is the code of the function <code>loadCommandLineOptions()</code>:
+</p><p><pre>
+#include "configuration.h"
+
+void  Configuration::loadCommandLineOptions()
+{
+    String
+        list;
+
+    cmdLineOption.catKeys(list);
+
+    register int
+        optionChar;
+    String
+        opt;
+    register char
+        *cp;                    
+    opterr = 0;                         // no error messages from getopt() 
+    while                               // while options are found
+    (
+        (optionChar = getopt(argC, (char *const *)argv, list)) != -1
+        &amp;&amp;
+        (cp = strchr(list, optionChar))
+    )
+    {
+        opt = " :";
+
+        opt[0] = (char)optionChar;      // create option-string
+        if (cp[1] != ':')               // no option value ?
+            opt[1] = 0;                 // then remove ':' from opt.
+
+        Option                          // get the configuration option
+            *option = (Option *)optionTable[cmdLineOption[&amp;opt]];
+
+        option-&gt;assign(optarg);         // assign the value
+    }
+    argcShift = optind;                 // first non-option index in argv 
+}
+
+
+
+
+
+
+</pre>
+
+
+</p><p>
+    <a name="configOption"></a><a name="l341"></a>
+<h3>18.3.3: The class Option</h3>
+    <a name="configuration/option"></a>
+    The class <code>Option</code> is designed as an abstract base class, defining the
+protocol to which all derived classes must adhere. Derived classes
+representing logical values (<code>Boolean</code>), integer values (<code>Int</code>), real
+values (<code>Double</code>) and textstrings (<code>Text</code>) will be constructed later on. 
+</p><p>The class itself is derived from another abstract base class,
+<a href="cplusplus18.html#ConfigObject"><code>Object</code></a>. Pointers to <code>Object</code>s are stored in, e.g.,
+<a href="cplusplus18.html#ConfigHashtable"><code>Hashtable</code>s</a>.
+</p><p>The class <code>Option</code> (cf. section <a href="cplusplus18.html#ConfigOptionInterface">18.3.3.1</a>), has a
+constructor, expecting an option <em>name</em> and the specification of
+a command-line parameter, and a <em>virtual</em> destructor to be able to deleting
+memory allocated by derived class objects through an <code>Option</code> pointer.
+</p><p>Default implementations returning the logical, int, double and textvalues of
+options are available as well. These implementations are replaced in derived
+classes by member functions returning the real, rather than the default, value
+of the derived class' object.
+</p><p>Since the options must be storable in a hashtable, and since the hashtable
+must be able to compare two different object for equality, abstract members
+<code>hashCode()</code> and <code>equals()</code> are available, to be implemented in the derived
+class' objects.
+</p><p>The name and command-line option are obtained via two accessor functions:
+<code>getName()</code> and <code>getCmdLineOption()</code>, respectively. 
+</p><p>To assign a value to an option one more function must be implemented by
+derived class options: <code>assign()</code>, to assign a value to an option.
+</p><p>The <code>static Option *nextOptionDefinition()</code> member function returns a pointer
+to an object of a class derived from <code>Option</code>. The returned option is
+constructed by a function that can be called from an element of the 
+    <center><code>static Option *(*optionConstructor[])(Mold const &amp;mold)</code> </center> 
+array of pointers 
+to functions returning pointers to <code>Option</code>s. Each of these functions
+expects a reference to a <code>Mold</code> struct. 
+</p><p>An array of these structs must be available as <code>static Mold mold[]</code>. The
+<code>Mold</code> array allows us to specify as <em>data</em> the ingredients of any option
+we require in our program. In other words: by defining the elements of an
+array <code>Option::Mold Option::mold[]</code> all kinds of program-options and their
+default values. can easily be defined.
+</p><p>For example, in our demonstration program four program options were defined,
+representing a logical value, an integer value, a real value and a textual
+string. Note that the following <code>mold[]</code> array is defined as <em>data</em>:
+<pre>
+#include "../demo.h"
+
+Option::Mold Option::mold[] =
+{
+    {Boolean,   "colors",   "c",    "True"},
+    {Int,       "trials",   "n:",   "20"},
+    {Double,    "epsilon",  "e:",   "0.004"},
+    {Text,      "files",    0,      "ls -Fla"},
+    {},
+};
+</pre>
+
+</p><p>The last element of the <code>mold[]</code> array 
+is an empty <code>struct</code>, acting as a sentinel.
+The remaining lines (refer to the <a href="cplusplus18.html#ConfigOptionInterface">struct Mold</a>
+in the interface of the
+class <code>Option</code>) contain four elements: 
+<ul>
+    <li > The first element indicates the type of option: the options mentioned
+in the <code>Type</code> enum are available. Note that this <code>enum</code> is <em>protected</em>:
+it's only used in derived classes.
+    <li > The second element is the name of the option, as it should appear in
+resource files and in the <code>Configuration</code>'s overloaded index operator.
+    <li > The third element is the command-line option character.  If set to
+zero, there is no command-line option. If the command-line option is followed
+by a colon, then the command-line option should be given an argument of its
+own. 
+    <li > The fourth element is the initial default value of the option. For
+logical (<code>Boolean</code>) options string values like 
+<code>on, off, true, false, 0, 1</code> in
+any casing are all acceptable. Note again that the initial default values are
+given as strings. 
+</ul>
+</p><p>
+</p><p><a name="ConfigOptionInterface"></a>
+<a name="l342"></a>
+
+             
+<strong>18.3.3.1: The interface of the class Option</strong></p><p>
+        <a name="configuration/optioninterface"></a>
+    Here is the complete interface of the abstract base class <code>Option</code>:
+<pre>
+#ifndef _Option_H_
+#define _Option_H_
+
+#include "../string/string.h"
+
+class Option: public Object
+{
+    public:
+        Option(char const *name, char const *cmdLineOpt);
+        ~Option();
+
+        virtual int         BoolValue()     const; 
+        virtual int         IntValue()      const; 
+        virtual double      DoubleValue()   const; 
+        virtual char const *TextValue()     const; 
+
+        unsigned    hashCode()                      const;
+        int         operator==(Object const &amp;other) const;
+
+        String const
+            &amp;getName() const,
+            &amp;getCmdLineOption() const;
+
+        virtual void assign(char const *string) = 0;
+
+        static Option *nextOptionDefinition();
+    protected:                           
+        enum Type
+        {
+            Sentinel,
+            Int,
+            Double,
+            Text,
+            Boolean,
+        };
+
+    private:
+        struct Mold
+        {
+            Type
+                optionType;
+            char
+                *name,
+                *cmdLineOption,
+                *defaultValue;
+        };
+
+        static Mold 
+            mold[];
+
+        static Option *(*optionConstructor[])(Mold const &amp;mold);
+                                    
+        String
+            name,
+            cmdLineName;
+};
+
+#include &lt;strstream.h&gt;
+#include "../booloption/booloption.h"
+#include "../intoption/intoption.h"
+#include "../doubleoption/doubleoption.h"
+#include "../textoption/textoption.h"
+
+#endif  _Option_H_
+
+
+</pre>
+
+
+</p><p><a name="ConfigNextOption"></a>
+<a name="l343"></a>
+
+             
+<strong>18.3.3.2: The static member nextOptionDefinition</strong></p><p>
+        <a name="configuration/nextoptiondefinition"></a>
+    The static member function <code>nextOptionDefinition()</code> is called repeatedly
+until it returns 0. The function visits all elements of the <code>mold[]</code> array,
+calling the static function <code>optionConstructor</code> associated with the
+option-type of the element of the array <code>mold[]</code> that is visited. 
+</p><p>The variable <code>optionConstructor[]</code> is an array, which is initialized as data
+of the <code>class Option</code>. The elements of the <code>optionConstructor[]</code> array are
+pointers to <code>Constructor()</code> functions of all the derived classes. These
+functions construct actual derived class option objects, and expect the
+ingredients for the construction as a reference to a <code>Mold struct</code>.
+</p><p>The function <code>nextOptionDefinition()</code> is:
+<pre>
+#include "option.h"
+
+Option *Option::nextOptionDefinition()
+{
+    static unsigned
+        index = 0;
+
+    if (mold[index].optionType == Sentinel)
+        return (0);
+
+    Option
+        *option = 
+            optionConstructor[mold[index].optionType]
+            (mold[index]);
+
+    index++;
+    return (option);
+}
+</pre>
+
+</p><p>The array <code>optionConstructor[]</code> is initialized as follows:
+<pre>
+#include "option.h"
+
+Option *(*Option::optionConstructor[])(Mold const &amp;mold) =
+{
+    0,
+    IntOption::Constructor,
+    DoubleOption::Constructor,
+    TextOption::Constructor,
+    BoolOption::Constructor,
+};
+</pre>
+
+Note that in this initialization reflects the ordering of the 
+<code>Option::Type</code> enum. There is no constructor for the <code>Sentinel</code>
+enum-value, while the remaining elements contain the addresses for the
+different derived-class option types.
+
+</p><p><a name="l344"></a>
+<h3>18.3.4: Derived from Option: The class TextOption</h3>
+    <a name="configuration/textoption"></a>
+    Below (in section <a href="cplusplus18.html#ConfigTextOptionInterface">18.3.4.1</a>) the interface of the class
+<code>TextOption</code>, derived from <code>Option</code>, is given. The class contains
+implementations of all the pure virtual functions of the class <code>Option</code>, and
+it mentions the existence of a copy constructor and overloaded assignment
+operator. However, these functions are (once again) not to be used, and are
+mentioned here as a safeguard against their being used accidently.
+</p><p>The interesting part of the interface is the function <code>static Option
+*Constructor(Mold const &amp;mold)</code>: it constructs a <code>TextOption</code> object
+(through <code>TextOption</code>'s constructor), using the ingredients it encounters in
+the <code>Mold</code> it receives as its argument. Note that the prototype of
+<code>Constructor</code> corresponds to the prototype of the elements of the array
+<a href="cplusplus18.html#ConfigOptionInterface">Option::optionConstructor[]</a>. As we have seen (in
+section <a href="cplusplus18.html#ConfigNextOption">18.3.3.2</a>), 
+<code>Option:optionConstructor[Text]</code> has been given the value
+<code>TextOption::Constructor</code>, thus setting up the connection between an
+option-type and the constructor for such an option from the ingredients found
+in an <code>Option::Mold</code>.
+</p><p>The other three classes derived from the class <code>Option</code> are constructed
+similarly. The reader is referred to their interfaces and implementation in
+the <code>zip</code>-archive in our
+<a href="ftp://ftp.icce.rug.nl/pub/unix/configdemo.zip">ftp-site</a>.
+</p><p>
+</p><p><a name="ConfigTextOptionInterface"></a>
+<a name="l345"></a>
+
+             
+<strong>18.3.4.1: The interface of the class TextOption</strong></p><p>
+        <a name="configuration/textoptioninterface"></a>
+    Here is the interface of the class <code>TextOption</code>, derived from <code>Option</code>:
+<pre>
+
+#ifndef _TextOption_H_
+#define _TextOption_H_
+
+#include "../option/option.h"
+
+class TextOption: public Option
+{
+    public:
+        static Option *Constructor(Mold const &amp;mold);
+        TextOption(char const *name, char const *cmdLineOpt, 
+                   char const *initialValue);
+        ~TextOption();
+
+        TextOption(TextOption const &amp;other);                // NI
+        TextOption &amp;operator=(TextOption const &amp;other);     // NI
+
+        void assign(char const *str);
+        char const *TextValue() const;
+        char const *toString() const;
+    private:
+        char 
+            *value;
+};
+
+#include "../mem/mem.h"
+
+#endif  _TextOption_H_
+</pre>
+
+
+</p><p>
+<a name="l346"></a>
+
+             
+<strong>18.3.4.2: The implementation of the assign() function</strong></p><p>
+        <a name="configuration/textoptionassign"></a>
+    As an example of an implementation of an <code>assign()</code> function, we present the function <code>TextOption::assign()</code>. As defined by the interface of the 
+<a href="cplusplus18.html#ConfigOptionInterface">class Option</a>, this function has one parameter, a
+<code>char const *str</code>. It needs to perform only two tasks: First, the old value
+of the <code>TextOption</code> object is deleted, then a new value is
+assigned. Corresponding <code>assign()</code> functions are available for the other
+derived option classes. 
+</p><p>Here is the implementation of <code>TextOption::assign()</code>:
+<pre>
+#include "textoption.h"
+
+void TextOption::assign(char const *str)
+{
+    delete value;
+    value = Mem::strdup(str);
+}
+</pre>
+
+</p><p>
+</p><p>
+    <a name="ConfigObject"></a><a name="l347"></a>
+<h3>18.3.5: The class Object</h3>
+    <a name="configuration/object"></a>
+    The <code>class Object</code> is an abstract base class. Pointers to <code>Object</code>s are be
+stored in <a href="cplusplus18.html#ConfigHashtable"><code>Hashtable</code>s</a>. The class is a very simple
+one, containing a virtual destructor (doing nothing in particular), and
+requiring the implementation of three pure virtual functions:
+<ul>
+    <li ><code>int operator==(Object const &amp;other)</code>, used to compare two objects 
+of classes derived from the class <code>Object</code>,
+    <li ><code>unsigned hashCode()</code>, returning a hashcode for the object. This
+function is used in combination with a <code>Hashtable</code> object.
+    <li ><code>char const *toString()</code>, returning a printable  representation of the
+object. 
+</ul>
+Here is the interface of the class <code>Object</code>:
+<pre>
+#ifndef _Object_H_
+#define _Object_H_
+
+class Object
+{
+    public:
+        virtual ~Object();
+        
+        virtual int         operator==(Object const &amp;other) const = 0;
+        virtual unsigned    hashCode()                  const = 0;
+        virtual char const *toString()                  const = 0;
+};
+
+#endif  _Object_H_
+</pre>
+
+    
+</p><p>
+    <a name="ConfigHashtable"></a><a name="l348"></a>
+<h3>18.3.6: The class Hashtable</h3>
+    <a name="configuration/hashtable"></a>
+    The <code>class Hashtable</code> is used to store and retrieve objects of classes
+derived from the class <code>Object</code>. The class contains two pointers to vectors
+of pointers to <code>Object</code>s, containing the <em>keys</em> and <em>values</em> that are
+stored in the hashtable. Furthermore, the class has data-members holding the
+actual number of elements that are stored in the hashtable (<code>n</code>), the
+number of elements of the two vectors of pointers to <code>Object</code>s
+(<code>capacity</code>), the original number of elements of these vectors
+(<code>initialCapacity</code>) and the maximum proportion of elements of the vectors
+that may be occupied (<code>maxLoadFactor</code>). 
+</p><p>The <code>Hashtable</code> objects are self-expanding. Once <code>maxLoadFactor</code> threatens
+to be exceeded, the table is expanded automatically.
+</p><p>The functionality of the hashtable includes members for retrieving values of
+the objects stored in the table using either the name of a key (as a <code>char
+const *</code>) or a pointer to an <code>Object</code>; a member to add a new key/value
+pair to the table, and a utility member <code>catKeys()</code> returning a string
+containing the catenated names of all keys. This latter function is used by
+the <a href="cplusplus18.html#ConfigNextOption"><code>Option::nextOptionDefinition()</code></a> to tell
+<code>getopt()</code> what command-line option characters it can expect.
+</p><p>The interface of the <code>class Hashtable</code> also shows some private
+member functions, used for expanding the table, and for inserting and
+retrieving elements from the table. Some of these functions are covered in the
+following discussion. Functions not needing special attention are available in
+the <a href="ftp://ftp.icce.rug.nl/pub/unix/configdemo.zip">zip-archive</a>.
+</p><p>Here is the interface of the <code>class Hashtable</code>:
+<pre>
+
+#ifndef _Hashtable_H_
+#define _Hashtable_H_
+
+#include "../string/string.h"
+
+class Object;
+
+class Hashtable
+{
+    public:
+        Hashtable(int initialCapacity, double maxLoadFactor = 0.75);
+        ~Hashtable();
+
+        Hashtable(Hashtable const &amp;other);                  // NI
+        Hashtable const &amp;operator=(Hashtable const &amp;other); // NI
+
+        Object const *operator[](Object const *key) const; 
+        Object const *operator[](char const *key) const; 
+        Object const *put(Object *key, Object *value);  // returns value
+
+        void catKeys(String &amp;target);               // catenate the keys
+                                                    // as strings
+        char const *toString() const;
+    private:
+        void installVectors(int capacityRequest);
+        int lookup(Object const *key) const;    // key must exist
+        int mayInsert(Object *key);             // key might not exist
+
+                                            // the key in the table
+        int expanded();                     // 1 if table was expanded
+
+        unsigned
+            capacity,
+            initialCapacity,
+            n;
+        double
+            maxLoadFactor;
+        Object
+            **keys,
+            **values;
+};
+
+#include &lt;unistd.h&gt;
+#include &lt;stdlib.h&gt;
+
+#include "../option/option.h"
+
+#endif  _Hashtable_H_
+
+
+
+</pre>
+
+</p><p>
+</p><p>
+<a name="l349"></a>
+
+             
+<strong>18.3.6.1: The Hashtable constructor</strong></p><p>
+        <a name="configuration/hashconstructor"></a>
+    The constructor of the hashtable initializes the data-members of the table,
+and then calls <code>installVectors()</code> to initialize the <code>keys</code> and <code>values</code>
+vectors. Here is the constructor of the <code>class Hashtable</code>:
+<pre>
+#include "hashtable.h"
+
+Hashtable::Hashtable(int iniCap, double maxFactor)
+{
+    maxLoadFactor = maxFactor;
+    n = 0;
+    initialCapacity = iniCap;
+
+    capacity = 0;
+    keys = 0;
+    values = 0;
+
+    installVectors(initialCapacity);
+}
+</pre>
+
+</p><p>The function <code>installVectors()</code> simply creates two vectors of the required
+number of elements (i.e., <code>capacity</code>), initializing the vectors with
+null-pointers. 
+</p><p>
+<a name="l350"></a>
+
+             
+<strong>18.3.6.2: The function mayInsert()</strong></p><p>
+        <a name="configuration/mayinsert"></a>
+    The functions <code>mayInsert()</code> returns the index of a key that is stored in the hashtable. The difference with the function <code>lookup()</code> is that the function
+<code>lookup()</code> requires the key to be available in the hashtable, whereas the
+function <code>mayInsert()</code> will insert the key when it isn't available yet. 
+</p><p>If the function <code>lookup()</code> doesn't find the key in the table, it throws a
+<code>char const *</code> exeption, containing the name of the key. The exception is
+thereupon caught by the function
+<a href="cplusplus18.html#ConfigLoadResourceFile"><code>Configuration::loadResourceFile()</code></a>. The
+function <code>mayInsert()</code>, however, will try to insert a non-existing key into
+the hashtable. 
+</p><p>Before looking for a key, both <code>lookup()</code> and <code>mayInsert()</code> first
+determine an initial hashcode, using the key's <code>hashCode()</code> function. A
+simple add-the-hash rehash scheme is used to cope with collisions. The
+add-the-hash value is at least 1 and at most the current capacity minus
+one. Using a prime-sized hashtable, this ensures that all elements of the
+hashtable are visited by repeatedly adding the add-the-hash value to the index
+value that was last used.
+</p><p>The insertion process itself consists of a perpetual loop, that terminates
+when the index of the key in the hashtable has been determined. 
+</p><p>If an empty element of the <code>key</code> vector is hit,
+<a href="cplusplus18.html#ConfigExpand"><code>expand()</code></a> is called, which may enlarge the hashtable.
+If the table was enlarged, both the hashcode and the add-the-hash value of the
+actual key are recomputed, and the perpetual loop starts its next
+cycle. Otherwise, the key is entered at the empty element's position, and its
+index value is returned.
+</p><p>If the key is found in the vector of keys, then the corresponding index
+position is returned. Alternatively, a collision may occur, and the index
+value is incremented by the add-the-hash value, followed by the next cycle of
+the perpetual loop. 
+</p><p>Thus, the <code>lookup()</code> and <code>mayInsert()</code> functions return the index of the
+provided key. Apart from that, <code>lookup()</code> will throw an exception when the
+provided key isn't found in the table.
+</p><p>Here is the sourcetext of the function <code>mayInsert()</code>:
+<pre>
+#include "hashtable.h"
+
+//  addTheHash is set in the range 1 .. capacity - 1, and the initial
+//  index is made equal to the addTheHash value. Since addTheHash is non-zero
+//  a new index computed by adding the addTheHash value to the index will 
+//  always get another value. The zeroth index of the hashtable will only be
+//  used as the result of a collision, but that doesn't matter: hashtables
+//  aren't filled up completely anyway.
+
+int Hashtable::mayInsert(Object *key)
+{
+    unsigned
+        hashCode = key-&gt;hashCode();
+    register unsigned
+        addTheHash = 1 + hashCode % (capacity - 1),
+        index = addTheHash;                 // within the capacity range
+
+    while (1)
+    {
+        if (!keys[index])                   // empty slot ?
+        {
+            if (expanded())                 // hashtable was expanded ?
+            {
+                addTheHash = 1 + hashCode % (capacity - 1);
+                index = addTheHash;         // new index after expansion
+
+                continue;                   // restart the checking
+            }
+            keys[index] = key;              // place the key here
+            ++n;                            // n contains #-elements
+
+            return (index);                 // and produce its index
+        }
+                                        
+        if (*keys[index] == *key)       // same object ?
+            return (index);                 // return its index
+    
+        if ((index += addTheHash) &gt;= capacity)   // collision: try next entry
+            index -= capacity;
+    }
+}
+
+</pre>
+
+</p><p>
+</p><p><a name="ConfigExpand"></a>
+<a name="l351"></a>
+
+             
+<strong>18.3.6.3: The function expanded()</strong></p><p>
+        <a name="configuration/expanded"></a>
+    The function <code>expanded()</code> first checks the loadfactor of the hashtable: if
+the actual number of elements divided by the capacity of the table exceeds
+<code>maxLoadFactor</code>, the current <code>keys</code> and <code>values</code> vectors are saved, and
+new vectors containing <code>initialCapacity</code> extra elements are installed.
+</p><p>Next, the elements of the old <code>keys</code> vector are visited. If a non-empty
+element is found, that element and its value are stored in the hashtable using
+the function <code>put()</code>. This process continues until <code>n</code> elements (the
+number of non-empty elements in the old vectors) are stored in the enlarged
+table. Since the function <code>put()</code> <em>owns</em> the objects that its arguments
+point to (i.e., <code>Object *</code>s rather than <code>Object const *</code>s are used, the
+objects the elements of the old vectors point to must <em>not</em> be
+deleted. Therefore, at the end of the function <code>expanded()</code> the old keys and
+values vectors are simply deleted, disregarding the objects their elements
+point to.
+</p><p>
+</p><p><a name="l352"></a>
+<h3>18.3.7: Auxiliary classes</h3>
+    <a name="configuration/auxiliary"></a>
+    The classes we've covered so far rely on the specific functionality of other
+classes. The memory management class <code>Mem</code> is  a good example: while
+standard functions are available for the allocation of memory, these functions
+reduce to the function <code>malloc()</code>, and not to the operator
+<code>new</code>. Since the operator <code>new</code> can be protected by the
+<code>set_new_handler()</code> function, it's a good idea to duplicate the popular
+standard memory allocating functions based on <code>malloc()</code> by functions using
+<code>new</code>. 
+</p><p>Another example is found in the class <code>Util</code>, containing functions we think
+are useful, but which we could not place conceptually easy in other
+classes. For example, the utility class contains a function <code>prime()</code>
+returning a prime number.
+</p><p>The following utility classes are available:
+<ul>
+    <li ><code>Mem</code>: this class handles memory allocation through the operator
+<code>new</code> rather than through the function <code>malloc()</code>.
+    <li ><code>String</code>: objects of this class represent strings, and can perform
+certain string-related tasks.
+    <li ><code>StringTokenizer</code>: objects of this class break up strings into
+substrings according to a set of delimiters.
+    <li ><code>Ustream</code>: objects of this class handle <em>unix</em>-style configuration
+files, in which empty lines and information on lines beyond the hash-mark are
+ignored.
+    <li ><code>Util</code>: this class contains functions performing tasks which do not
+belong conceptually to other classes.
+</ul>
+</p><p>The <code>Mem</code> and <code>Util</code> classes contain just static member functions, and do
+not require objects to be used. For the other classes objects must be defined.
+</p><p>The next sections will cover the interfaces of these classes. The
+implementation of the functions of these classes is found in the
+<a href="ftp://ftp.icce.rug.nl/pub/unix/configdemo.zip">zip-archive</a> at our
+ftp-site. 
+
+</p><p>
+<a name="l353"></a>
+
+             
+<strong>18.3.7.1: The class Mem</strong></p><p>
+        <a name="configuration/mem"></a>
+    The class <code>Mem</code> contains functions related to the allocation of memory,
+using the operator <code>new</code>. Using <code>new</code>, it is easy to catch exhausted
+dynamic memory through the function <code>set_new_handler()</code>.
+</p><p>The class contains functions to install a <code>new</code>-handler, to duplicate and
+concatenate strings, to compare strings, and to reallocate memory. As all these
+functions are static, there is no need to create a <code>Mem</code> object.
+</p><p>The function <code>realloc()</code> isn't a particularly elegant attempt to make
+available a function that resembles the standard <code>malloc()</code>-based
+<code>realloc()</code> function. Actually, in the demonstration program it's used only
+by the <code>StringTokenizer</code> constructor. However, by making it a member of the
+latter class, we feel we would mix up memory allocation with string handling.
+</p><p>The <code>Mem::realloc()</code> function does a rather crude job: it should be used
+only for enlarging the required amount of memory, in which case the extra
+allocated memory remains completely uninitialized. 
+</p><p>The other member functions are implemented in a standard way. Most of them
+accept null-pointers as arguments as well. Here is the interface of the
+<code>class Mem</code>:
+<pre>
+#ifndef _Mem_H_
+#define _Mem_H_
+
+class Mem
+{
+    public:
+        static void installNewHandler();
+        static char *strdup(char const *str);   
+        static int casecmp(char const *s1, char const *s2);
+        static int cmp(char const *s1, char const *s2);
+        static char *strndup(char const *str, unsigned len);
+        static char *strcat(char const *src1, char const *src2);
+        static void *realloc(void *addressOfPointerToOldData,
+                            unsigned dataSize, unsigned oldN,
+                            unsigned newN);
+    private:
+        static void memoryExhausted();
+};
+
+#include &lt;iostream.h&gt;
+#include &lt;new.h&gt;
+#include &lt;string.h&gt;
+
+#endif  _Mem_H_
+
+
+
+
+
+
+
+
+</pre>
+
+</p><p>
+</p><p>
+<a name="l354"></a>
+
+             
+<strong>18.3.7.2: The class String</strong></p><p>
+        <a name="configuration/string"></a>
+    Objects of the class <code>String</code> represent strings: 0-delimited series of
+ascii-characters. The class is derived from <code>Object</code>, so <code>String</code> objects
+can be stored in <code>Hashtable</code>s. 
+</p><p>Apart from the functions required by the class <a href="cplusplus18.html#ConfigObject"><code>Object</code></a>,
+the class <code>String</code> contains all standard members, like a copy constructor
+and a overloaded assignment operators. Apart from these members, there is a
+conversion operator, allowing the use of a <code>String</code> object as a <code>char
+const *</code>, and there are members for enlarging the string by catenating another
+string to it, and for retrieving a character using the index-operator.
+</p><p>Here is the interface of the class <code>String</code>:
+<pre>
+#ifndef _String_H_
+#define _String_H_
+
+#include &lt;iostream.h&gt;
+#include &lt;stdarg.h&gt;
+
+#include "../object/object.h"
+
+class String: public Object
+{
+    public:
+        String();
+        String(char const *arg);
+        ~String();            
+    
+        String(String const &amp;other);
+        String &amp;operator=(String const &amp;rvalue);
+        String &amp;operator=(char const *rvalue);
+    
+        int operator==(Object const &amp;other) const;
+        unsigned hashCode() const;
+        char const *toString() const;
+        
+        operator char const *() const;
+        String &amp;strcat(char const *str2);
+        char &amp;operator[](unsigned index);
+    private:
+        char
+            *string;
+};  
+
+#include "../mem/mem.h"
+#include "../hashtable/hashtable.h"
+
+#endif  _String_H_
+
+
+
+
+</pre>
+
+
+</p><p>
+<a name="l355"></a>
+
+             
+<strong>18.3.7.3: The class StringTokenizer</strong></p><p>
+        <a name="configuration/stringtokenizer"></a>
+    The class <code>StringTokenizer</code> is used for breaking up strings into substrings
+according to a (set of) delimiters. By default, the white-space delimiters are
+used. The constructor of the class expects an ascii-z string (and optionally a
+string of delimiter-characters) and will split the string into substrings 
+according to the set of delimiters. 
+</p><p>The substrings are retrievable through the overloaded index-operator,
+returning pointers to <code>String</code> objects, which are then owned by the calling
+function. Another member function is <code>range()</code>, returning the substring
+starting at a particular index-position. For example, if <code>StringTokenizer
+st</code> contains five substrings, <code>st.range(3)</code> will return the substring of the
+original string starting at <code>st[3]</code>.
+</p><p>Here is the interface of the class <code>StringTokenizer</code>:
+<pre>
+
+#ifndef _StringTokenizer_H_
+#define _StringTokenizer_H_
+
+#include "../string/string.h"
+
+class StringTokenizer
+{
+    public:
+        StringTokenizer(char const *cp, char const *delimiters = " \t\n");
+        ~StringTokenizer();
+
+        StringTokenizer(StringTokenizer const &amp;other);              // NI
+        StringTokenizer &amp;operator=(StringTokenizer const &amp;other);   // NI
+
+        String *operator[](unsigned index);
+        String *range(unsigned from);       // until the last one
+
+    private:
+        struct SubString
+        {
+            char
+                *str;
+            unsigned
+                length;
+        };  
+
+        char
+            *str;
+        SubString
+            *subString;
+        unsigned
+            n;
+};
+
+#endif  _StringTokenizer_H_
+
+
+
+
+
+</pre>
+
+
+</p><p>
+<a name="l356"></a>
+
+             
+<strong>18.3.7.4: The class Ustream</strong></p><p>
+        <a name="configuration/ustream"></a>
+    The class <code>Ustream</code> processes files as <em>unix</em>-like configuration files.
+In these files empty lines are ignored, as is information starting at a
+hash-mark at the beginning of a line or preceded by a white-space
+character. Furthermore, lines are combined if the last character of a line is
+a backslash.
+</p><p>The constructor of the class expects one argument: the name of the file to be
+processed. Having created a <code>Ustream</code> object, the conversion operator
+<code>operator void *()</code> can be used to determine the successful opening of the
+file: it returns <code>0</code> if the file wasn't opened successfully. 
+</p><p>The (non-empty, non-comment section of) lines of the file are returned by the
+member <code>read()</code>  as a <code>char *</code>: the line is owned by the calling
+function. Calling <code>read()</code> succeeds until a null-pointer is returned. 
+</p><p>After a successful read-operation, the member-function <code>lineNr()</code> will
+return the actual linenumber of the just read line in the original file. In
+this case empty and comment-lines <em>are</em> counted.
+</p><p>The file is closed when the <code>Ustream</code> object is destroyed.
+</p><p>Here is the interface of the class <code>Ustream</code>:
+<pre>
+
+#ifndef _Ustream_H_
+#define _Ustream_H_
+
+#include &lt;fstream.h&gt;
+
+class Ustream
+{
+    public:
+        Ustream(char const *fname);
+    
+        Ustream(Ustream const &amp;other);                  // NI
+        Ustream const &amp;operator=(Ustream const &amp;right); // NI
+    
+        operator void *();              // direct status-check
+    
+        char *read();                   // 0 if no more lines
+        int lineNr();
+        
+    private:
+        ifstream
+            stream;
+        int
+            line;
+};
+
+#include "../mem/mem.h"
+
+
+#endif  _Ustream_H_
+</pre>
+
+</p><p>
+</p><p>
+<a name="l357"></a>
+
+             
+<strong>18.3.7.5: The class Util</strong></p><p>
+        <a name="configuration/util"></a>
+    The class <code>Util</code> contains several utility functions, which did not belong
+elsewhere. The functions <code>atod()</code> and <code>atoi()</code> convert, respectively, 
+strings to doubles and strings to ints, and they differ from the standard
+functions <code>atof()</code> and <code>atoi()</code> only by the fact that the <code>Util</code>
+functions accept null-pointers as well. 
+</p><p>The function <code>prime()</code> uses the sieve of Aristosthenes to generate the first
+prime exceeding the value given as its argument.
+</p><p>The function <code>hashPjw()</code> returns a hashvalue for a string. This algorithm is
+given in <em>Aho, Sethi, and Ullman</em>'s <em>Compilers: Principles, Techniques and
+Tools, 1986, p. 435</em> as <em>P. J. Weinberger's</em> algorithm for computing
+hash-values. 
+</p><p>The interface of the class <code>Util</code> is given below:
+<pre>
+#ifndef _Util_H_
+#define _Util_H_
+
+#include &lt;values.h&gt;
+    // uses INTBITS to find the # of bits in a word, hence in an int
+
+class Util
+{
+    public:
+        static double atod(char const *value);      // convert to double
+        static int atoi(char const *value);         // convert to int
+        static unsigned prime(unsigned lowerBound); // first prime exceeding 
+                                                    // lowerBound
+        static unsigned hashPjw(char const *key);   // return hashvalue
+    private:
+        int const 
+            bitsPerInt = INTBITS,
+            moduloMask = bitsPerInt - 1;
+        static int
+            shiftBitsPerInt;
+};
+
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;math.h&gt;
+
+#endif  _Util_H_
+</pre>
+
+
+</p><p>
+</p><p><a name="BisonAndFlex"></a><a name="l358"></a>
+<h2>18.4: Using Bison and Flex</h2>
+<a name="concrete/bisonflex"></a>
+    The example discussed in this section digs into the peculiarities of using a 
+parser- and scanner-generator with <strong>C++</strong>. Once the input for a program 
+exceeds a certain level of complexity, it's advantageous to use a scanner- and 
+parser-generator for creating the code which does the actual input 
+recognition. The example about this topic assumes that the reader knows how to 
+use the scanner generator <code>flex</code> and the parser generator <code>bison</code>. Both 
+<code>bison</code> and <code>flex</code> are well documented elsewhere. The original 
+predecessors of <code>bison</code> and <code>flex</code>, called <code>yacc</code> and <code>lex</code> are 
+described in several books, e.g. in <a href="http://www.ora.com/catalog/lex/noframes.html">O'Reilly's book `lex &amp; yacc'</a>.
+</p><p>However, the scanner and parser generators are also (and maybe even
+more commonly, nowadays) available as free software. Both <code>bison</code>
+and <code>flex</code> can be obtained from <a href="ftp://prep.ai.mit.edu/pub/gnu">prep.ai.mit.edu/pub/gnu</a>. <code>Flex</code> will create a <code>C++</code> class
+when called as <code>flex++</code>, or when the <code>-+</code> flag is used. With
+<code>bison</code> the situation is a bit more complex. Scattered over the
+Internet several <code>bison++</code> archives can be found (e.g., in
+<a href="ftp://rzbsdi01.uni-trier.de/pub/unix/compiler-toolkit/bison++/">rzbsdi01.uni-trier.de</a>). The
+information in these archives usually dates back to 1993,
+irrespective of the version number mentioned with the archive
+itself. (However, the given ftp-archive also contains dos-executables,
+for those who are interested....)
+</p><p>Using <code>flex++</code> and <code>bison++</code> a <code>class</code>-based scanner and parser can be 
+generated. The advantage of this approach is that the interface to the scanner 
+and the parser tends to become a bit cleaner than without using the <code>class</code> 
+interface.
+</p><p>Below two examples are given. In the first example only a lexical scanner is 
+used to monitor the production of a file from several parts. This example 
+focuses on the lexical scanner, and on switching files while churning
+through the parts. The second example uses both a scanner and a parser to
+transform standard arithmetic expressions to their postfix notation, commonly
+encountered in code generated by compilers and in <code>HP</code>-calculators.
+The second example focuses on the parser.
+</p><p>
+</p><p>
+    <a name="Flexpp"></a><a name="l359"></a>
+<h3>18.4.1: Using Flex++ to create a scanner</h3>
+    <a name="concrete/usingflex"></a>
+    
+In this example a lexical scanner is 
+used to monitor the production of a file from several parts. This example 
+focuses on the lexical scanner, and on switching files while churning
+through the parts. The setup is as follows: The input-language knows of
+an <code>#include</code> statement, which is followed by a string indicating the
+file which should be included at the location of the <code>#include</code>.
+</p><p>In order to avoid complexities that have nothing to do with the current
+example, the format of the <code>#include</code> statement is restricted to the 
+form <code>#include &lt;filepath&gt;</code>.
+The file specified between the pointed brackets should be available at
+the location indicated by <code>filepath</code>. If the file is not available,
+the program should terminate using a proper error message. 
+</p><p>The program is started with one or two filename arguments. If the program is
+started with just one filename argument, the output is written to the standard
+output stream <code>cout</code>. Otherwise, the output is written to the stream whose
+name is given as the program's second argument.
+</p><p>The program uses a maximum nesting depth. Once the maximum is exceeded, the 
+program terminates with an appropriate error message. In that case, the 
+filenamestack indicating where which file was included should be printed.
+</p><p>One minor extra feature is that comment-lines should be recognized: <code>include</code>
+directives in comment-lines should be ignored, comment being the standard
+<strong>C++</strong> comment-types.
+</p><p>The program is created in the following steps:
+<ul>
+    <li > First, the file <code>lexer</code> is constructed, containing the 
+         specifications of the input-language.
+    <li > From the specifications in <code>lexer</code> the requirements for the
+        <code>class Scanner</code> evolve. The <code>Scanner</code> class is a wrapper around
+        the class <code>yyFlexLexer</code> generated by <code>flex++</code>. The requirements
+        results in the specification of the interface for the class 
+        <code>Scanner</code>. 
+    <li > Next, the <code>main()</code> function is constructed. A <code>Startup</code> object
+        is created to inspect the commandline arguments. If successful,
+        the <code>scanner</code>'s member <code>yylex()</code> is called to construct the
+        output file.
+    <li > Now that  the global setup of the program has been specified,
+         the member functions of the different classes are constructed.
+    <li > Finally, the program is compiled and linked.
+</ul>
+</p><p>
+</p><p>
+<a name="l360"></a>
+
+             
+<strong>18.4.1.1: The flex++ specification file</strong></p><p>
+        <a name="concrete/lexer"></a>
+    The organization of the lexical scanner specification file is similar
+to the one used with <code>flex</code>. However, <code>flex++</code> creates a class
+(<code>yyFlexLexer</code>) from which the <code>class Scanner</code> will be derived.
+</p><p>The code associated with the regular expression rules will be located inside
+the class <code>yyFlexLexer</code>. However, it would be handy to access the
+member-functions of the derived class within that code. Fortunately, class
+derivation and inheritance helps us to realize this. In the specification of
+the class <code>yyFlexLexer()</code>, we notice that the function <code>yylex()</code> is a
+<em>virtual</em> function. In the <code>FlexLexer.h</code> header file we see <code>virtual int
+yylex()</code>:
+        <pre>
+
+    class yyFlexLexer: public FlexLexer 
+    {
+        public:
+            yyFlexLexer( istream* arg_yyin = 0, ostream* arg_yyout = 0 );
+    
+            virtual ~yyFlexLexer();
+    
+            void yy_switch_to_buffer( struct yy_buffer_state* new_buffer );
+            struct yy_buffer_state* yy_create_buffer( istream* s, int size );
+            void yy_delete_buffer( struct yy_buffer_state* b );
+            void yyrestart( istream* s );
+    
+            virtual int yylex();
+            virtual void switch_streams( istream* new_in, ostream* new_out );
+    
+        protected:
+            ...
+    };
+    
+</pre>
+
+    Consequently, if <code>yylex()</code> is defined in a derived class, then this
+function of the derived class will be called from a base class (i.e.,
+<code>yyFlexLexer</code>) pointer. Since the <code>yylex()</code> function of the derived class
+is called, that function will have access to the members of its class, and to
+the public and protected members of its base class.
+</p><p>The context in which the generated scanner is placed is (by default) 
+the function <code>yyFlexLexer::yylex()</code>. However, this context can be changed by
+defining the <code>YY_DECL</code>-macro. This macro, if defined, determines the context
+in which the generated scanner will be placed. So, in order to make the
+generated scanner part of the <em>derived class</em> function <code>yylex()</code>, three
+things must be done:
+    <ul>
+    <li > The macro <code>YY_DECL</code> must be defined in the lexer specficiation
+file. It must define the derived class function <code>yylex()</code> as the scanner
+function. For example:
+        <center><code>#define YY_DECL int Scanner::yylex()</code> </center>
+    <li > The function <code>yylex()</code> must be declared in the class definition of
+the derived class.
+    <li > As the function <code>yyFlexLexer::yylex()</code> is a <em>virtual</em> function, it
+must still be defined. It is not called, though, so its definition may be a
+simple 
+        <pre>
+
+    int yyFlexLexer::yylex()
+    {
+        return (0);
+    }
+        
+</pre>
+
+     </ul>
+</p><p>The definition of the <code>YY_DECL</code> macro and the <code>yyFlexLexer::yylex()</code>
+function can conveniently be placed in the lexer specification file, as shown
+below. 
+</p><p>Looking at the regular expressions themselves, notice that we'll need rules
+for the recognition of the comment, for the <code>include</code> directive, and for the
+remaining characters.  This is all fairly standard practice. When an include
+directive is detected, the derived-class' member function <code>switchSource()</code>
+is called, which will perform the required file switching. When the end of the
+file (<code>EOF</code>) is detected, the derived class' member function <code>popSource()</code>
+is called, which will pop the previous previously pushed file, returning
+1. Once the file-stack is empty, the function will return 0, resulting in the
+call of <code>yyterminate()</code>, which will terminate the scanner.
+</p><p>The lexical scanner specification file has three sections: a <strong>C++</strong>
+<em>preamble</em>, containing code which can be used in the code defining
+the actions to be performed once a regular expression is matched, a
+<code>Flex++ symbol area</code>, which is used for the definition of symbols,
+like a mini scanner, or <code>options</code>, like <code>%option yylineno</code> when the
+lexical scanner should keep track of the line numbers of the files it
+is scanning and, finally a <em>rules</em> section, in which the regular
+expressions and their actions are given. In the current example, the
+lexer should mainly copy information from the <code>istream *yyin</code> to the
+<code>ostream *yyout</code>, for which the predefined macro <code>ECHO</code> can be
+used.
+</p><p>Here is the complete and annotated lexical scanner specification file
+to be used with <code>flex++</code>:
+</p><p><pre>
+%{
+/* ----------------------------------------------------------------------------
+                                 C++ -preamble.
+   Include header files, other than those generated by flex++ and bison++.
+      E.g., include the interface to the class derived from yyFlexLexer
+----------------------------------------------------------------------------*/
+
+                            // the yylex() function that's actually
+                            // used
+#define YY_DECL int Scanner::yylex()
+
+#include "scanner.h"        // The interface of the derived class
+
+int yyFlexLexer::yylex()    // not called: overruled by
+{                           // Scanner::yylex()
+    return (0);
+}
+  
+%}
+
+/* ----------------------------------------------------------------------------
+                              Flex++ symbol area
+                              ~~~~~~~~~~~~~~~~~~
+      The symbols mentioned here are used for defining e.g., a miniscanner
+---------------------------------------------------------------------------- */
+%x comment 
+%option yylineno
+
+eolnComment     "//".*
+anyChar         .|\n
+
+/* ----------------------------------------------------------------------------
+                               Flex rules area:
+                               ~~~~~~~~~~~~~~~~
+     Regular expressions below here define what the lexer will recognize.
+---------------------------------------------------------------------------- */
+%%
+    /*
+        The comment-rules: comment lines are ignored.    
+    */
+{eolnComment}
+"/*"                    BEGIN comment;
+&lt;comment&gt;{anyChar}
+&lt;comment&gt;"*/"           BEGIN INITIAL;
+
+    /*                
+        File switching: #include &lt;filepath&gt;
+    */
+"#include "[^&gt;]*"&gt;"     switchSource();
+
+    /* 
+        The default rules: eating all the rest, echoing it to output    
+    */ 
+{anyChar}               ECHO;
+
+    /*
+        The &lt;&lt;EOF&gt;&gt;)rule: pop a pushed file, or terminate the lexer
+    */
+&lt;&lt;EOF&gt;&gt;                 {
+                            if (!popSource())
+                                yyterminate();
+                        }
+
+
+
+
+</pre>
+
+</p><p>Since the derived class is able to access the information stored within the
+lexical scanner itself (it can even access the information <em>directly</em>, since
+the data members of <code>yyFlexLexer</code> are <code>protected</code>, and thus accessible to
+derived classes), very much processing can be done by the derived class'
+member functions.  This results in a very clean setup of the lexer
+specification file, in which hardly any code is required in the <em>preamble</em>.
+</p><p>
+</p><p>
+<a name="l361"></a>
+
+             
+<strong>18.4.1.2: The derived class: Scanner</strong></p><p>
+        <a name="concrete/scanner"></a>
+    The <code>class Scanner</code> is derived from the <code>class yyFlexLexer</code>, generated by
+<code>flex++</code>. The derived class has access to the data controlled by the lexical
+scanner. In particular, the derived class has access to the following data
+members:
+    <ul>
+    <li ><code>char *yytext</code>: contains the text matched by a regular expression
+    <li ><code>int yyleng</code>: the length of the text in <code>yytext</code>
+    <li ><code>int yylineno</code>: the current line number (only if <code>%option yylineo</code>
+        was specified in the lexer specfication file)
+     </ul>
+Other members are available as well, but they are less often used in our 
+experience. Details can be found in the file <code>FlexLexer.h</code>, which is part
+of the <code>flex</code> distribution.
+</p><p>The <code>class Scanner</code> has to perform two tasks: It should push file information
+about the current file to a filestack, and should pop the information pushed
+last once <code>EOF</code> is detected on a file. 
+</p><p>Several member functions are
+needed for the accomplishment of these tasks. As they are auxiliary to the 
+<code>switchSource()</code> and <code>popSource()</code> functions, they are private members.
+In practice, these private members are developed once the need for them arises.
+In the following interface of the <code>Scanner</code> class the final header
+file is given. Note that, apart from the private member functions, several
+private data members are used as well. These members are initialized in the 
+constructor <code>Scanner()</code> and are used in the private member functions. They
+are discussed below, in the context of the member functions using them.
+</p><p><pre>
+#include &lt;FlexLexer.h&gt;  // provides yyFlexLexer interface
+#include &lt;fstream.h&gt;    
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+class Scanner: public yyFlexLexer
+{
+    public:             
+        Scanner(istream *yyin);
+
+        int yylex();        // overruling yyFlexLexer's yylex()
+    private:
+        void switchSource();
+        int  popSource();
+        int scanYYText(); // 1: nextSource contains new name
+        void performSwitch();
+        void checkCircularity();
+        void checkDepth();
+
+        yy_buffer_state
+            **state;
+        char         
+            **fileName,
+            *srcPtr,
+            *nextSource;
+
+        int
+            stackTop;
+
+        static int const
+            sizeof_buffer = 16384,
+            stackDepth = 10;
+};
+</pre>
+
+</p><p>The <code>switchSource()</code> member function should interpret the information given
+in <code>yytext</code>: it is interpreted by <code>scanYYText()</code>. If <code>scanYYText()</code>
+can extract a filename from <code>yytext</code> a switch to another file can be 
+performed. This switch is performed by <code>performSwitch()</code>. If the filename
+could not be extracted, a message is written to the outputstream. Here is
+the code of <code>switchSource()</code>:
+</p><p><pre>
+
+#include "scanner.h"
+
+void Scanner::switchSource()
+{   
+    if (scanYYText())
+        performSwitch();
+}
+</pre>
+
+</p><p>The <code>performSwitch()</code> function and the matching function <code>popSource()</code>
+handle a simple file switch. In particular, the <code>yylineno</code> variable is not
+updated when a file switch is performed. If line numbers are to be monitored,
+the <code>performSwitch()</code> and <code>popSource()</code> functions should respectively
+push the current value of <code>yylineno</code> on a stack,  and thereafter 
+reset <code>yylineno</code>, and (at <code>EOF</code>) pop <code>yylineno</code> from the stack. 
+</p><p>The member function <code>scanYYText()</code> performs a simple scan of the information
+in <code>yytext</code>. If a name is detected following <code>#include &lt;</code> that name is 
+stored in the private data member <code>nextSource</code>, and 1 is returned.
+Otherwise, the information in <code>yytext</code> is copied to <code>yyout</code>, and 0 is 
+returned. Here is the source for <code>scanYYText()</code>:
+</p><p><pre>
+
+#include "scanner.h"
+
+int Scanner::scanYYText()
+{                               
+    delete nextSource;          // build new buffer
+    nextSource = new char[yyleng];
+
+    if 
+    (
+        sscanf(yytext, "#include %[^ \t\n&gt;]", nextSource) != 1
+        ||
+        !(srcPtr = strchr(nextSource, '&lt;'))
+    )
+    {
+        *yyout &lt;&lt; yytext;       // copy #include to yyout
+        return (0);             // scan failed
+    }
+    srcPtr++;
+    return (1);
+}
+</pre>
+
+</p><p>The function <code>performSwitch()</code> performs the actual file-switching. The
+<code>yyFlexLexer</code> class provides a series of member functions that can be used
+for file switching purposes. The file-switching capability of a <code>yyFlexLexer</code>
+object is founded on the <code>struct yy_buffer_state</code>, containing the state of 
+the scan-buffer of the file that is currently scanned by the lexical scanner.
+This buffer is pushed on a stack when an <code>#include</code> is encountered, to
+be replaced with the buffer of the file that is mentioned in the <code>#include</code>
+directive. 
+</p><p>The switching of the file to be scanned is realized in the following steps:
+    <ul>
+    <li > First, the current depth of the <code>include</code>-nesting is inspected.
+        If the <code>stackDepth</code> is reached, the stack is full, and the program
+        aborts with an appropriate message. For this the member function
+        <code>checkDepth()</code> is called.
+    <li > Next, the <code>fileName</code> stack is inspected, to avoid circular 
+        inclusions. If <code>nextSource</code> is encountered in the <code>fileName</code>
+        array, the inclusion is refused, and the program terminates with
+        an appropriate message. The member function <code>checkCircularity()</code>
+        is called for this task.
+    <li > Then, a new <code>ifstream</code> object is created, assigned to 
+        <code>nextSource</code>. If this fails, the program terminates with an 
+        appropriate message.
+    <li > Finally, a new <code>yy_buffer_state</code> is created for the newly opened
+        stream, and the lexical scanner is instructed to switch to that
+        stream using <code>yyFlexLexer</code>'s member function <code>yy_switch_to_buffer</code>.
+     </ul>
+    The sources for the member functions <code>performSwitch(), checkDepth()</code>, and
+<code>checkCircularity()</code> are given next:
+</p><p><pre>
+
+#include "scanner.h"
+
+void Scanner::performSwitch()
+{   
+    ++stackTop;
+    checkDepth();
+    checkCircularity();
+    
+    ifstream
+        *newStream = new ifstream(srcPtr);
+        
+    if (!*newStream)
+    {
+        cerr &lt;&lt; "Can't open " &lt;&lt; srcPtr &lt;&lt; endl;
+        exit(1);
+    }
+    state[stackTop] = yy_current_buffer;
+    yy_switch_to_buffer(yy_create_buffer(newStream, sizeof_buffer));
+}
+</pre>
+
+</p><p><pre>
+
+#include "scanner.h"
+
+void Scanner::checkDepth()
+{
+    if (stackTop == stackDepth)
+    {
+        cerr &lt;&lt; "Inclusion level exceeded. Maximum is " &lt;&lt; stackDepth &lt;&lt; endl;
+        exit (1);
+    }
+}
+</pre>
+
+</p><p><pre>
+
+#include "scanner.h"
+
+void Scanner::checkCircularity()
+{   
+    delete fileName[stackTop];
+
+    fileName[stackTop] = new char [strlen(srcPtr) + 1];
+    strcpy(fileName[stackTop], srcPtr);
+    
+    int
+        index;
+
+    for (index = 0; strcmp(srcPtr, fileName[index]); index++)
+        ;
+        
+    if (index != stackTop)
+    {
+        cerr &lt;&lt; "Circular inclusion of " &lt;&lt; srcPtr &lt;&lt; endl;
+        while (stackTop &gt; index)
+        {
+            cerr &lt;&lt; fileName[stackTop] &lt;&lt; " was included in " &lt;&lt; 
+                    fileName[stackTop - 1] &lt;&lt; endl;
+            --stackTop;
+        }
+        exit (1);
+    }
+}
+</pre>
+
+</p><p>The member function <code>popSource()</code> is called to pop the previously pushed
+sourcefile from the stack, to continue its scan just beyond the just processed
+<code>#include</code> directive. The <code>popSource()</code> function first inspects 
+<code>stackTop</code>: if the variable is at least 0, then it's an index into the 
+<code>yy_buffer_state</code> array, and thus the current buffer is deleted, to be
+replaced by the state waiting on top of the stack. This is realized by
+the <code>yyFlexLexer</code> members <code>yy_delete_buffer</code> and <code>yy_switch_to_buffer</code>.
+</p><p>If a previous buffer waited on top of the stack, then 1 is returned, indicating
+a successful switch to the previously pushed file. If the stack was empty,
+0 is returned, and the lexer will terminate.
+</p><p>Here is the source of the function <code>popSource()</code>:
+</p><p><pre>
+
+#include "scanner.h"
+
+int Scanner::popSource()
+{       
+    if (stackTop &gt;= 0)
+    {
+        yy_delete_buffer(yy_current_buffer);
+        yy_switch_to_buffer(state[stackTop]);
+
+        stackTop--;
+        return (1);
+    }
+    return (0);
+}
+</pre>
+   
+</p><p>These functions complete the implementation of the complete lexical scanner.
+the lexical scanner itself is stored in the <code>Scanner::yylex()</code> function.
+The <code>Scanner</code> object itself only has three public
+member functions: one function to push a sourcefile on a stack when a switch to
+the next sourcefile is requested, one function to restore the previously 
+pushed source, and of course <code>yylex()</code> itself.
+</p><p>Finally, the constructor will initialize the <code>Scanner</code> object. Note that
+the interface contains an overloaded assignment operator and a copy 
+constructor. By mentioning these two functions in the interface only, 
+without implementing them, they cannot be used in a program: the linking phase
+of a program using such functions would fail. In this case this is intended 
+behavior: the <code>Scanner</code> object does its own job, and there simply is no need
+for the assignment of a <code>Scanner</code> object to another one, or for 
+the duplication of a <code>Scanner</code> object.
+</p><p>The constructor itself is a simple piece of code. Here is its source:
+</p><p><pre>
+
+#include "scanner.h"
+
+Scanner::Scanner(istream *yyin)
+{
+    switch_streams(yyin, yyout);
+
+    state = new yy_buffer_state * [stackDepth];
+    memset(state, 0, stackDepth * sizeof(yy_buffer_state *));
+
+    fileName = new char * [stackDepth];
+    memset(fileName, 0, stackDepth * sizeof(char *));
+    
+    nextSource = 0;
+    
+    stackTop = -1;
+}
+</pre>
+
+
+</p><p>
+<a name="l362"></a>
+
+             
+<strong>18.4.1.3: The main() function</strong></p><p>
+        <a name="concrete/scanmain"></a>
+    The main program is a very simple one. As the program expects a
+filename to start the scanning process at, initially the number of
+arguments is checked. If at least one argument was given, then a
+<code>ifstream</code> object is created. If this object can be created, then a
+<code>Scanner</code> object is created, receiving the address of the
+<code>ifstream</code> object as its argument. Then the <code>yylex()</code> member
+function of the <code>Scanner</code> object is called. This function is
+inherited from the <code>Scanner</code>'s base class <code>yyFlexLexer</code>.
+</p><p>Here is the source-text of the main function:
+</p><p><pre>
+/*                              lexer.cc
+
+   A C++ main()-frame generated by C++ for lexer.cc
+
+*/
+
+#include "lexer.h"           /* program header file */
+
+
+int main(int argc, char **argv)
+{       
+    if (argc == 1)
+    {
+        cerr &lt;&lt; "Filename argument required\n";
+        exit (1);
+    }
+
+    ifstream
+        yyin(argv[1]);
+
+    if (!yyin)
+    {
+        cerr &lt;&lt; "Can't read " &lt;&lt; argv[1] &lt;&lt; endl;
+        exit(1);
+    }
+     
+    Scanner
+        scanner(&amp;yyin);
+
+    scanner.yylex();
+    return (0);
+}
+
+</pre>
+
+
+</p><p>
+<a name="l363"></a>
+
+             
+<strong>18.4.1.4: Building the scanner-program</strong></p><p>
+        <a name="concrete/scancompile"></a>
+    The final program is constructed in two steps. These steps are given
+for a <em>unix</em> system, on which <code>flex++</code> and the <code>Gnu</code> <strong>C++</strong>
+compiler <code>g++</code> have been installed:
+    <ul>
+    <li > First, the lexical scanner's source is created using <code>flex++</code>. For
+this the command
+        <center><code>flex++ lexer</code> </center>
+can be given.
+    <li > Next, all sources are compiled and linked, using the
+<code>libfl.a</code> library. The appropriate command here is
+        <center><code>g++ -o scanner *.cc -lfl</code> </center>
+     </ul>
+    For the purpose of debugging a lexical scanner the rules that are matched
+and the tokens that are returned are useful information. When <code>flex++</code> is
+called with the <code>-d</code> flag, debugging code will be part of the generated
+scanner. Apart from that, the debugging code must be activated. Assuming the
+scanner object is called <code>scanner</code>, the statement
+        <center><code>scanner.set_debug(1);</code> </center>
+    must be given following the creation of the <code>scanner</code> object.
+</p><p>
+</p><p><a name="l364"></a>
+<h3>18.4.2: Using both bison++ and flex++</h3>
+    <a name="concrete/usingbison"></a>
+    When the input language exceeds a certain level of complexity, a <em>parser</em> is
+generally needed to control the complexity of the input language. In these
+cases, a <em>parser generator</em> is used to generate the code that's required to
+determine the grammatical correctness of the input language. The function of
+the scanner is to provided chunks of the input, called <em>tokens</em>, for the
+parser to work with.
+</p><p>Starting point for a program using both a parser and a scanner is the grammar:
+the grammar is specified first. This results in a set of tokens which can be
+returned by the lexical scanner (commonly called the <em>lexer</em>. Finally,
+auxiliary code is provided to fill in the blanks: the actions which are
+performed by the parser and the lexer are not normally specified with the
+grammatical rules or lexical regular expressions, but are executed by
+functions, which are called from within the parser's rules or associated with
+the lexer's regular expressions.
+</p><p>In the previous section we've seen an example of a <strong>C++</strong> class generated by
+<code>flex++</code>. In the current section the parser is our main concern. The parser
+can be generated from a grammar specified for the program <code>bison++</code>. The
+specification of <code>bison++</code> is similar to the specifications required for
+<code>bison</code>, but a class is generated, rather than a single function. In the
+next sections we'll develop a program converting <em>infix</em> expressions, in
+which binary operators are written between their operands, to <em>postfix</em>
+expressions, in which binary operators are written following their operands. A
+comparable situation holds true for the unary operators <code>-</code> and <code>+</code>: We
+can ignore the <code>+</code> operator, but the <code>-</code> is converted to a unary minus.
+</p><p>Our calculator will recognize a minimal set of operators: multiplication,
+addition, parentheses, and the unary minus. We'll distinguish real numbers
+from integers, to illustrate a subtlety in the bison-like grammar
+specifications, but that's about it: the purpose of this section, after all,
+is to illustrate a <strong>C++</strong> program, using a parser and a lexer, and not to
+construct a full-fledged calculator.
+</p><p>In the next few sections we'll start developing the grammar in a <code>bison++</code>
+specification file. Then, the regular expressions for the scanner are
+specified according to the requirements of <code>flex++</code>. Finally the program is
+constructed.
+</p><p>The class-generating bison software (bison++) is not widely available. The
+version used by us is 2.20. It can be obtained from
+</p><p><a href="ftp://ftp.icce.rug.nl/pub/unix/bison++2.20.tar.gz">ftp.icce.rug.nl:/pub/unix/bison++2.20.tar.gz</a>.
+</p><p>
+</p><p>
+<a name="l365"></a>
+
+             
+<strong>18.4.2.1: The bison++ specification file</strong></p><p>
+        <a name="concrete/bison"></a>
+    The bison specification file used with <code>bison++</code> is comparable to the
+specification file used with <code>bison</code>. Differences are related to the
+class nature of the resulting parser. The calculator will distinguish real
+numbers from ints, and will support the basic set of arithmetic operators.
+</p><p>The <code>bison++</code> specification file consists of the following sections:
+    <ul>
+    <li > The <em>header</em> section. This section is comparable to the <strong>C</strong>
+specification section used with <code>bison</code>. The difference being the
+<code>%header{</code> opening. In this section we'll encounter mainly declarations:
+header files are included, and the <code>yyFlexLexer</code> object is declared.
+    <li > The token section. In this section the bison tokens, and the priority
+rules for the operators are declared. However, <code>bison++</code> has several extra
+items that can be declared here. They are important and warrant a section of
+their own.
+    <li > The rules. The grammatical rules define the grammar. This section has
+not changed since the <code>bison</code> program. 
+     </ul>
+</p><p>
+</p><p>
+<a name="l366"></a>
+
+             
+<strong>18.4.2.2: The bison++ token section</strong></p><p>
+            <a name="concrete/token"></a>
+    The token section contains all the tokens that are used in the
+grammar, as well as the priority rules as used for the mathematical
+operators. Moreover, several new items can be declared here:
+    <ul>
+    <li ><code>%name ParserName</code>. The name <code>ParserName</code> will be the name
+of the parser's class. This entry should be the first entry of the
+token-section. It is used in cases where multiple grammars are used,
+to make sure that the different parser-classes use unique
+identifiers. By default the name <code>parse</code> is used.
+    <li ><code>%define name content</code>. The <code>%define</code> has the same function
+as the <code>#define</code> statement for the <code>C++</code> preprocessor. It can be
+used to define, e.g., a macro. Internally, the defined symbol will be
+the concatenation of <code>YY_</code>, the parser's classname, and the name of
+the macro. E.g.,
+                      <center><code>YY_ParserName_name</code> </center>
+    Several symbols will normally be defined here. Of all the definitions that
+can be given here, two are <em>required</em>:
+    <ul>
+        <li ><code>%define LEX_BODY inline-code</code>: here the body of the call to the
+lexer is defined. It can be defined as <code>= 0</code> for an abstract parser-class,
+but otherwise it must contain the code (including surrounding curly braces)
+representing the call to the lexer. For example, if the lexer object generated
+by <code>flex++</code> is called <code>lexer</code>, this declaration should be
+    <center><code>%define LEX_BODY {return lexer.yylex();}</code> </center>
+        <li ><code>%define ERROR_BODY inline-code</code>: similarly, the body of
+the code of the call to the error-function is defined here. It can
+be defined as <code>= 0</code>, in which case the parser's class will again
+become abstract. Otherwise, it is used to specify the inner
+workings of the error function, including surrounding braces. E.g.,
+       <center><code>%define ERROR_BODY { cerr &lt;&lt; "syntax Error\n"; }</code> </center>
+     </ul>
+    When the <code>LEX_BODY</code> and <code>ERROR_BODY</code> definitions are omitted, then the
+compiler is not able to complete the virtual table of the parser class, and
+the linking phase will report an error like
+             <center><code>undefined reference to `Parser virtual table'</code> </center>
+</p><p>The remaining symbols are optional, and can be (re)defined as needed:
+        <ul>
+        <li ><code>%define DEBUG 1</code>: if non-0 debugging code will be included
+in the parser's source.
+        <li ><code>%define ERROR_VERBOSE</code>: if defined, the parser's stack
+will be dumped when an error occurs.
+        <li ><code>%define LVAL yylval</code>: the default variable name is shown
+here: the variable name containing the parser's semantic value is by
+default <code>yylval</code>, but its name may be redefined here.
+        <li ><code>%define INHERIT :public ClassA, public ClassB</code>: the
+inheritance list for the parser's class. Note that it starts with the
+<code>':'</code> character. The <code>define</code> should be left out if the parser's
+class isn't derived from another class. 
+        <li ><code>%define MEMBERS member-prototypes</code>: if the parser should
+contain extra members, they must be declared here. Note that there is
+only one <code>%define MEMBERS</code> definition allowed. So, if multiple
+members are to be declared, they must all be declared at this
+point. To prevent very long lines in the specification file, the \ can
+be used at the end of a line, to indicate that it continues on the
+next line of the source-text. E.g.,
+        <pre>
+
+    %define MEMBERS void lookup(); void lookdown();
+        
+</pre>
+
+        The <code>MEMBERS</code> section starts in a <code>public</code> section. If private
+members are required too, a <code>private:</code> directive can be part of the
+<code>MEMBERS</code> section.
+        <li > Constructor-related defines: When a special parser
+constructor is needed, then three <code>%defines</code> can be used:
+            <ul>
+            <li ><code>%define CONSTRUCTOR_PARAM parameterlist</code>: this
+defines the parameterlist for the parser's constructor. Here the types and
+names of the parameters of the parser should be given. The surrounding
+parentheses of the parameterlist are not part of the <code>CONSTRUCTOR_PARAM</code>
+definition. 
+            <li ><code>%define CONSTRUCTOR_INIT :initializer(s)</code>: this
+defines the base-class and member initializers for the constructor. Note the
+initial colon following <code>CONSTRUCTOR_INIT</code>, which is required. The colon may
+be given immediately after the <code>CONSTRUCOR_INIT</code> statement, or blanks may be
+used to separate the symbol from the colon.
+            <li ><code>%define CONSTRUCTOR_CODE { code }</code>: this
+defines the code of the parser's constructor.
+         </ul>
+        When the parser doesn't need special effects, a constructor
+will not be needed. In those cases the parser can be created as
+follows (using the default parser-name):
+                         <center><code>parse parser;</code> </center>
+     </ul>
+    <li ><code>%union</code>. This starts the definition of the semantical value
+union. It replaces the <code>#define YYSTYPE</code> definition seen with
+<code>bison</code>. An example of a <code>%union</code> declaration is
+<pre>
+
+    %union 
+    {   
+        int 
+            i;
+        double
+            d;
+    };
+
+</pre>
+
+    The union cannot contain objects as its fields, as constructors cannot be
+called when a union is created. This means that a <code>string</code> cannot be a
+member of the union. A <code>string *</code>, however, <em>is</em> a possible union
+member. As a side line: the lexical scanner has no need to know about this
+union. The scanner can simply pass its scanned text to the parser through its
+<code>YYText()</code> member function. At the appropriate action block a statements like
+        <center><code>$$.i = atoi(scanner.YYText());</code> </center>
+    can be used to convert the matched text to a value of an appropriate
+type. 
+    <li > Associating tokens and nonterminals with unionfields. Tokens and
+nonterminals can be associated with unionfields. This is strongly advised. By
+doing so, the parser's actions-code becomes much cleaner than if the tokens
+aren't associated with fields. As nonterminals can also be associated
+with unionfields, the generic returnvariable <code>$$</code> or the
+generic returnvalues <code>$1, $2</code>, etc, that are associated with components of
+rules can be used, rather than <code>$$.i, $3.d</code>, etc.  To associate a
+nonterminal or a token with a unionfield, the <code>&lt;fieldname&gt;</code> specification is
+used. E.g., <pre>
+
+    %token &lt;i&gt; INT          // token association (deprecated)
+           &lt;d&gt; DOUBLE
+    %type  &lt;i&gt; intExpr      // non-terminal association
+
+</pre>
+
+    In this example, note that both the tokens and the nonterminals can be
+associated with a field of the union. However, as noted earlier, the lexical
+scanner has no need to know about all this. In our opinion, it is cleaner to
+let the scanner do just one thing: scan texts. The parser knows what it's all
+about, and may convert strings like <code>"123"</code> to an integer
+value. Consequently, we are discouraging the association of a unionfield and a
+token.  In the upcoming description of the rules of the grammar this will be
+further illustrated.
+    <li > In the <code>%union</code> discussion the <code>%token</code> and <code>%type</code>
+specifications should be noted. They are used for the specficiation of
+the tokens (terminal symbols) that can be returned by the lexical
+scanner, and for the specification of the returntypes of nonterminals.
+Apart from <code>%token</code> the token-indicators <code>%left, %right</code> and
+<code>%nonassoc</code> may be used to specify the associativity of
+operators. The token(s) mentioned at these indicators are interpreted
+as tokens indicating operators, associating in the indicated
+direction. The precedence of operators is given by their order: the
+first specification has the lowest precedence. To overrule a certain
+precedence in a certain context, <code>%prec</code> can be used. As all this is
+standard <code>bison</code> practice, it isn't further discussed in this
+context. The documentation provided with the <code>bison</code> distribution
+should be consulted for further reference.
+     </ul>
+</p><p>
+</p><p>
+<a name="l367"></a>
+
+             
+<strong>18.4.2.3: The bison++ grammar rules</strong></p><p>
+            <a name="concrete/rules"></a>
+    The rules and actions of the grammar are specified as usual. The
+grammar for our little calculator is given below. A lot of rules, but
+they illustrate the use of nonterminals associated with value-types.
+<pre>
+
+lines:
+    lines
+    line
+|
+    line
+;
+
+line:
+    intExpr
+    '\n'
+    {
+        cerr &lt;&lt; "int: " &lt;&lt; $1 &lt;&lt; endl;
+    }
+|
+    doubleExpr
+    '\n'
+    {
+        cerr &lt;&lt; "double: " &lt;&lt; $1 &lt;&lt; endl;
+    }
+|
+    '\n'
+    {
+        cout &lt;&lt; "Good bye\n";
+        YYACCEPT;
+    }
+|
+    error
+    '\n'
+;
+
+intExpr:
+    intExpr '*' intExpr
+    {
+        $$ = $1 * $3;
+    }
+|
+    intExpr '+' intExpr
+    {
+        $$ = $1 + $3;
+    }
+|
+    '(' intExpr ')'
+    {
+        $$ = $2;
+    }
+|
+    '-' intExpr         %prec UnaryMinus
+    {
+        $$ = -$2;
+    }
+|
+    INT
+    {
+        $$ = atoi(lexer.YYText());
+    }
+;
+
+doubleExpr:
+    doubleExpr '*' doubleExpr
+    {
+        $$ = $1 * $3;
+    }
+|
+    doubleExpr '+' doubleExpr
+    {
+        $$ = $1 + $3;
+    }
+|
+    doubleExpr '*' intExpr
+    {
+        $$ = $1 * $3;
+    }
+|
+    doubleExpr '+' intExpr
+    {
+        $$ = $1 + $3;
+    }
+|
+    intExpr '*' doubleExpr
+    {
+        $$ = $1 * $3;
+    }
+|
+    intExpr '+' doubleExpr
+    {
+        $$ = $1 + $3;
+    }
+|
+    '(' doubleExpr ')'
+    {
+        $$ = $2;
+    }
+|
+    '-' doubleExpr         %prec UnaryMinus
+    {
+        $$ = -$2;
+    }
+|
+    DOUBLE
+    {
+        $$ = atof(lexer.YYText());
+    }
+;
+
+</pre>
+
+With these rules a very simple calculator is defined in which integer
+and real values can be negated, added, and multiplied, and in which
+standard priority rules can be circumvented using parentheses. The
+rules show the use of typed nonterminal symbols: <code>doubleExpr</code> is
+linked to real (double) values, <code>intExpr</code> is linked to integer
+values. Precedence and type association is defined in the token
+section of the parser specification file, which is:
+<pre>
+
+%name  Parser                
+%union 
+{
+    int i;
+    double d;
+};
+%token      INT
+            DOUBLE
+%type   &lt;i&gt; intExpr
+        &lt;d&gt; doubleExpr
+
+%left   '+'
+%left   '*'
+%right  UnaryMinus
+
+%define MEMBERS                                         \ 
+    virtual ~Parser()   {}                              \ 
+    private:                                            \ 
+        yyFlexLexer lexer;              
+%define LEX_BODY {return lexer.yylex();}
+
+%define ERROR_BODY { cerr &lt;&lt; "error encountered\n"; }
+
+</pre>
+
+In the token section we see the use of the <code>%type</code> specifiers,
+connecting <code>intExpr</code> to the <code>i</code>-field of the semantic-value union,
+and connecting <code>doubleExpr</code> to the <code>d</code>-field. At first sight it
+looks a bit complex, since the expression rules must be included for
+each individual returntype. On the other hand, if the union itself
+would have been used, we would have had to specify somewhere in the
+returned semantic values what field to use: less rules, but more
+complex and error-prone code.
+</p><p>Also, note that the lexical scanner is included as a member of the
+parser. There is no need to define the scanner outside of the parser, as it's
+not used outside of the parser object. The virtual destructor is included as
+an member to prevent the compiler from complaining about the parser having a
+non-virtual destructor. 
+</p><p>
+</p><p>
+<a name="l368"></a>
+
+             
+<strong>18.4.2.4: The flex++ specification file</strong></p><p>
+        <a name="concrete/bisonflexspec"></a>
+    The flex-specification file to be used with our little calculator is
+simple: blanks are skipped, single characters are returned, and
+numerical values are returned as either <code>Parser::INT</code> or
+<code>Parser::DOUBLE</code> values. Here is the complete <code>flex++</code>
+specification file:
+        <pre>
+
+    %{ 
+    #include "parser.h"
+    %}
+    
+    %%
+    
+    [ \t]                       ;
+    [0-9]+                      return(Parser::INT);
+    
+    "."[0-9]*                   |                                        
+    [0-9]+("."[0-9]*)?          return(Parser::DOUBLE);
+    
+    exit                        |
+    quit                        return (Parser::DONE);
+    
+    .|\n                        return (*yytext);
+        
+</pre>
+
+</p><p>            
+</p><p>
+<a name="l369"></a>
+
+             
+<strong>18.4.2.5: The generation of the code</strong></p><p>
+        <a name="concrete/codegeneration"></a>
+    The code is generated in the same way as with <code>bison</code> and
+<code>flex</code>. To order <code>bison++</code> to generate the files  <code>parser.cc</code>
+and <code>parser.h</code>, the command 
+    <center><code>bison++ -d -o parser.cc parser</code> </center> 
+can be given.
+</p><p><code>Flex++</code> will thereupon generate code on <code>lexer.cc</code> using the command
+    <center><code>flex++ -I -olexer.cc lexer</code> </center>
+Note here that <code>flex++</code> expects no blanks between the <code>-o</code> flag
+and <code>lexer.cc</code>.
+</p><p>On <em>unix</em>, linking and compiling the generated sources and the
+source for the main program (listed below) is realized with the
+following command:
+    <center><code>g++ -o calc -Wall *.cc -lfl -s</code> </center>
+Note the fact that  the <code>libfl.a</code> library is mentioned here. If it's
+not mentioned unresolved functions like <code>yywrap()</code> emerge.
+</p><p>A source in which the <code>main()</code> function, the lexical
+scanner and the parser objects are defined is, finally:
+        <pre>
+
+    #include "parser.h"
+    int main()
+    {
+        Parser
+            parser;
+        return (parser.yyparse());
+    }
+        
+</pre>
+
+</p><p>
+</p><p>
+</p><p>
+<hr>
+<ul>
+    <li> <a href="cplusplus17.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

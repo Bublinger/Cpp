@@ -1,0 +1,44 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: ex05b - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Creating command line "rc.exe /l 0x407 /fo"Debug/ex05b.res" /d "_DEBUG" /d "_AFXDLL" "C:\vcpp32\ex05b\ex05b.rc"" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP8002.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Fp"Debug/ex05b.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"C:\vcpp32\ex05b\ex05b.cpp"
+"C:\vcpp32\ex05b\ex05bDoc.cpp"
+"C:\vcpp32\ex05b\ex05bView.cpp"
+"C:\vcpp32\ex05b\MainFrm.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP8002.TMP" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP8003.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Fp"Debug/ex05b.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"C:\vcpp32\ex05b\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP8003.TMP" 
+Erstellen der Befehlzeile "link.exe /nologo /subsystem:windows /incremental:yes /pdb:"Debug/ex05b.pdb" /debug /machine:I386 /out:"Debug/ex05b.exe" /pdbtype:sept  .\Debug\ex05b.obj .\Debug\ex05bDoc.obj .\Debug\ex05bView.obj .\Debug\MainFrm.obj .\Debug\StdAfx.obj .\Debug\ex05b.res "
+<h3>Ausgabefenster</h3>
+Ressourcen werden kompiliert...
+Kompilierung läuft...
+StdAfx.cpp
+Kompilierung läuft...
+ex05b.cpp
+ex05bDoc.cpp
+ex05bView.cpp
+MainFrm.cpp
+Generieren von Code...
+Linker-Vorgang läuft...
+
+
+
+<h3>Ergebnisse</h3>
+ex05b.exe - 0 Fehler, 0 Warnung(en)
+</pre>
+</body>
+</html>

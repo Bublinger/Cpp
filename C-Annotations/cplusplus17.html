@@ -1,0 +1,2955 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus18.html">Next chapter</a>
+    <li> <a href="cplusplus16.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="Templates"></a><a name="l280"></a>
+<h1>Chapter 17: Templates</h1>
+<a name="templates"></a>
+    
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="templates/intro"></a>
+    The <strong>C++</strong> language support a mechanism which allows programmers to define
+completely general functions or classes, based on hypothetical arguments or
+other entities. Code in which this mechanism has been used is found in de
+<a href="cplusplus08.html#Containers">chapter on abstract containers</a>.
+</p><p>These general functions or classes become concrete
+code once their definitions are applied to real entities. The general
+definitions of functions or classes are called <em>templates</em>, the concrete
+implementations <em>instantiations</em>.
+</p><p>In this chapter we will examine template functions and template classes.
+
+</p><p><a name="l281"></a>
+<h2>17.1: Template functions</h2>
+    <a name="templatefunctions/intro"></a>
+    Template functions are used in cases where a single implementation of a
+function is not practical due to the different types that are distinguished
+in <strong>C++</strong>. If a function is defined as 
+        <center><code>fun(int *array)</code> </center>
+    then this function will likely run into problems if it is passed the
+address of an array of <code>double</code> values. The function will normally have to be
+duplicated for parameters of different types. For example, a function
+computing the sum of the elements of an array for an array of <code>ints</code>
+is:
+    <pre>
+
+        int sumVector(int *array, unsigned n)
+        {
+            int 
+                sum(0);        
+            for (int idx = 0; idx &lt; n; ++idx)
+                sum += array[idx];
+            return (sum);
+        }        
+    
+</pre>
+
+    The function must be overloaded for arrays of doubles:
+    <pre>
+
+        double sumVector(double *array, unsigned n)
+        {
+            double 
+                sum(0);        
+            for (int idx = 0; idx &lt; n; ++idx)
+                sum += array[idx];
+            return (sum);
+        }        
+    
+</pre>
+
+    In a local program development situation this hardly ever happens, since
+only one or two <code>sumVector()</code> implementations will be required. But the
+strongly typed nature of <strong>C++</strong> stands in the way of creating a truly general
+function, that can be used for any type of array. 
+</p><p>In cases like these, <em>template functions</em> are used to create the truly
+general function. The template function can be considered a general <em>recipe</em>
+for constructing a function that can be used with the general array. In the
+coming sections we'll discuss the construction of template functions. First,
+the <a href="cplusplus17.html#TEMPFUNDEF">construction</a> of a template function is discussed. Then
+the <a href="cplusplus17.html#TEMPFUNINST">instantiation</a> is covered. With template functions the
+argument deduction deserves special attention, which is given in section
+<a href="cplusplus17.html#TEMPFUNARGS">17.1.3</a>. 
+</p><p>
+</p><p>
+    <a name="TEMPFUNDEF"></a><a name="l282"></a>
+<h3>17.1.1: Template function definitions</h3>
+        <a name="templatefunctions/definitions"></a>
+    The definition of a template function is very similar to the definition of a
+normal function, except for the fact that the parameters, the types that are
+used in the function, and the function's return value may be specified in a
+completely general way. The function <code>sumVector()</code> in the previous section
+can as follows be rewritten as a template function:
+        <a name="SUMVECTOR"></a>
+        <pre>
+
+    template &lt;class T&gt;
+    T sumVector(T *array, unsigned n)
+    {
+        T
+            sum(0);        
+        for (int idx = 0; idx &lt; n; ++idx)
+            sum += array[idx];
+        return (sum);
+    }        
+        
+</pre>
+
+    Note the correspondence with the formerly defined <code>sumVector()</code>
+functions. In fact, if a <code>typedef int T</code> had been specified, the template
+function, except for the initial <code>template</code> line, <em>would</em> be the first
+<code>sumVector()</code> function of the previous section. So, the essence of the
+template function is found in the first line. From the above example:
+        <center><code>template &lt;class T&gt;</code> </center>
+    This line starts out the definition or declaration of a template
+function. It is followed by the <em>template parameter list</em>, which is a
+comma-separated non-empty list of so-called <em>template type</em> or <em>template
+non-type parameters</em>, surrounded by angular brackets <code>&lt;</code> and <code>&gt;</code>. In the
+template function <code>sumVector()</code> the only template parameter is <code>T</code>, which
+is a template type parameter. ttT) is the formal type that is used in
+the template function definition to represent the actual type that will be
+specified when the template function is instantiated. This type is used in the
+parameter list of the function, it is used to define the type of a local
+variable of the function, and it is used to define the return type of the
+function. 
+</p><p>Normal scope rules and identifier rules apply to template definitions and
+declarations: the type <code>T</code> is a <em>formal name</em>, it could have been named
+<code>Type</code>. The formal typename that is used overrules, within the scope of the
+template definition or declaration, any previously defined identifiers by that
+name.
+</p><p>A template <em>non-type</em> parameter represents a constant expression, which
+must be known by the time the template is instantiated, and which is specified
+in terms of existing types, such as an <code>unsigned</code>.
+</p><p>An alternative definition for the above template function, using a
+template non-type parameter is:
+        <a name="SUMVECTORSIZE"></a>
+        <pre>
+        template &lt;class T, unsigned size&gt;
+        T sumVector(const T (&amp;array)[size])
+        {
+            T
+                sum(0);        
+            for (int idx = 0; idx &lt; size; ++idx)
+                sum += array[idx];
+            return (sum);
+        }        
+</pre>
+
+    Template function definitions may have multiple type and non-type
+parameters. Each parameter name must be unique. For example, the following
+template declaration declares a template function for a function
+<code>outerProduct()</code>, returning a pointer to vectors of <code>size2 T2</code> elements,
+and expecting two vectors of, respectively, <code>size1</code> and <code>size2</code> elements:
+            <pre>
+
+    template 
+    &lt;
+        class T1, 
+        class T2, 
+        unsigned size1, 
+        unsigned size2
+    &gt;
+        T1
+        (
+            *outerProduct
+            (
+                T2 const (&amp;v1)[size1], 
+                T2 const (&amp;v2)[size2]
+            )
+        )[size2];
+            
+</pre>
+
+    Note that the return type <code>T1</code> of the returned vectors is intentionally
+specified different from <code>T2</code>. This allows us to specify, e.g., return type
+<code>double</code> for the returned outer product, while the vectors passed to
+<code>outerProduct</code> are of type <code>int</code>.
+    Instead of using the keyword <code>class</code>, the keyword <code>typename</code> can be
+used in template type parameter lists. However, the keyword <code>typename</code> is
+<em>required</em> in certain situations that may occur when the template function
+is defined. For example, assume we define the following template function:
+    <pre>
+
+        template &lt;class T&gt;
+        void function()
+        {
+            unsigned
+                p;
+            ...
+            {
+                T::member
+                    *p;
+                ...
+            }
+        }        
+    
+</pre>
+
+    Although the layout of the above function suggests that <code>p</code> is defined
+as a pointer to the type <code>member</code>, that must have been declared in the class
+that is specified when the function is instantiated, it actually is
+interpreted by the compiler as a multiplication of <code>T::member</code> and <code>p</code>.
+</p><p>The compiler does so, because it cannot know from the template definition
+whether <code>member</code> is a <em>typename</em>, defined in the class <code>T</code>, or a
+<em>member</em> of the class <code>T</code>. It takes the latter and, consequently,
+interprets the <code>*</code> as a multiplication operator. 
+</p><p>What if this interpretation was not intended? In that case the
+<code>typename</code> keyword must be used. In the following template definition the
+<code>*</code> indicates a pointer definition to a <code>T::member</code> type.
+    <pre>
+
+        template &lt;class T&gt;
+        void function()
+        {
+            unsigned
+                p;
+            ...
+            {
+                typename T::member
+                    *p;
+                ...
+            }
+        }        
+    
+</pre>
+
+
+</p><p>
+<a name="l283"></a>
+
+             
+<strong>17.1.1.1: The keyword 'typename'</strong></p><p>
+            <a name="templatefunctions/typename"></a>
+    As illustrated in section <a href="cplusplus17.html#TEMPFUNDEF">17.1.1</a> The keyword <code>typename</code> can be
+used to disambiguate members and typenames in cases where the template type
+parameter represents a class type. It can also be used instead of the
+<code>class</code> keyword indicating a template type. So, instead of
+        <pre>
+
+    template &lt;class T&gt;
+    void function(T type)
+    {
+        ...
+    }
+        
+</pre>
+
+    the function can be defined as:
+        <pre>
+
+    template &lt;typename T&gt;
+    void function(T type)
+    {
+        ...
+    }
+        
+</pre>
+
+</p><p>
+</p><p>
+    <a name="TEMPFUNINST"></a><a name="l284"></a>
+<h3>17.1.2: Instantiations of template functions</h3>
+        <a name="templatefunctions/instantiations"></a>
+    Consider the <a href="cplusplus17.html#SUMVECTOR">first template function definition</a> in section
+<a href="cplusplus17.html#TEMPFUNDEF">17.1.1</a>. This definition is a mere recipe for constructing a
+particular function. The function is actually constructed once it is used, or
+its address is taken. Its type is implicitly defined by the nature of its
+parameters. 
+</p><p>For example, in the following code assumes that the function <code>sumVector</code> has
+been defined in the header file <code>sumvector.h</code>. In the function <code>main()</code>
+the function <code>sumVector()</code> is called once for the <code>int</code> array <code>x</code>, once
+for the <code>double</code> array <code>y</code>, and once the address is taken of a
+<code>sumVector()</code> function. By taking the address of a <code>sumVector</code> function
+the type of the argument is defined by the type of the pointer variable, in
+this case a pointer to a function processing a array of <code>unsigned long</code>
+values. Since such a function wasn't available yet (we had functions for
+<code>ints</code> and <code>doubles</code>, it is constructed once its address is required. Here
+is the function <code>main()</code>:
+        <a name="INSTANTIATEFIRST"></a>
+        <pre>
+
+    #include "sumvector.h"
+
+    int main()
+    {
+        int
+            x[] = {1, 2};
+        double
+            y[] = {1.1, 2.2};
+    
+        cout &lt;&lt; sumVector(x, 2) &lt;&lt; endl     // first instantiation
+            &lt;&lt; sumVector(y, 2) &lt;&lt; endl;     // second instantiation
+    
+        unsigned long                       // third instantiation
+            (*pf)(unsigned long *, unsigned) = sumVector;
+    
+        return (0);
+    }
+        
+</pre>
+
+    While in the above example the functions <code>sumVector()</code> could be
+instantiated, this is not always possible. Consider the following code:
+        <pre>
+
+    #include "template.h"
+
+    unsigned fun(unsigned (*f)(unsigned *p, unsigned n));
+    double fun(double (*f)(double *p, unsigned n));
+    
+    int main()
+    {
+        cout &lt;&lt; fun(sumVector) &lt;&lt; endl;
+        return (0);
+    }
+        
+</pre>
+
+    In the above example the function <code>fun()</code> is called in the function
+<code>main()</code>. Although it appears that the address of the function
+<code>sumVector()</code> is passed over to the function <code>fun()</code>, there is a slight
+problem: there are two overloaded versions of the function <code>fun()</code>, and
+<em>both</em> can be given the address of a function <code>sumVector()</code>. The first
+function <code>fun()</code> expects an <code>unsigned *</code>, the second one a <code>double
+*</code>. Which instantiation must be used for <code>sumVector()</code> in the
+<code>fun(sumVector)</code> expression? This is an ambiguity, which balks the
+compiler. The compiler complains with a message like
+        <pre>
+
+    In function `int main()':
+    call of overloaded `fun ({unknown type})' is ambiguous
+    candidates are: fun(unsigned int (*)(unsigned int *, unsigned int))
+                    fun(double (*)(double *, unsigned int))
+        
+</pre>
+
+    Situations like this should of course be avoided. Template functions can
+only be instantiated if this can be done unambiguously. It is, however,
+possible to disambiguate the situation using a cast. In the
+following code fragment the (proper) <code>double *</code> implementation is forced by
+means of a <code>static_cast</code>:
+        <a name="INSTANTIATECAST"></a>
+        <pre>
+
+    #include "template.h"
+
+    unsigned fun(unsigned (*f)(unsigned *p, unsigned n));
+    double fun(double (*f)(double *p, unsigned n));
+    
+    int main()
+    {
+        cout &lt;&lt; fun(static_cast&lt;double (*)(double *, unsigned)&gt;(sumVector)) 
+            &lt;&lt; endl;
+        return (0);
+    }
+        
+</pre>
+
+    But casts should be avoided, where possible. Fortunately the cast can be
+avoided in this kind of situation, as described in section
+<a href="cplusplus17.html#TEMPFUNEXPLICIT">17.1.4</a>.
+</p><p>If the same template function definition was included in different source
+files, which are then compiled to different object files which are thereupon
+linked together, there will, per type of template function, be only one
+instantiation of the template function in the final program.
+</p><p>This is illustrated by the following example, in which the address of a
+function <code>sumVector()</code> for <code>int</code> arrays is written to <code>cout</code>. The first
+part defines a function <code>fun()</code> in which the address of a <code>sumVector()</code>
+function is written to <code>cout</code>. The second part defines a function <code>main()</code>,
+defined in a different sourcefile, in which the address of a similar
+<code>sumVector()</code> function is written to <code>cout</code>, and in which <code>fun()</code> is
+called:
+        <pre>
+
+    // This is source file 1: fun.cc
+    #include "template.h"
+    void fun()
+    {
+        cout &lt;&lt; static_cast&lt;void *&gt;
+                (
+                    static_cast&lt;int (*)(int *, unsigned)&gt;
+                    (sumVector)
+                )
+            &lt;&lt; endl;
+    }
+
+    // This is source file 2: main.cc
+    #include "template.h"
+
+    void fun();
+
+    int main()
+    {
+        fun();
+        
+        cout &lt;&lt; static_cast&lt;void *&gt;
+                (
+                    static_cast&lt;int (*)(int *, unsigned)&gt;
+                    (sumVector)
+                ) 
+            &lt;&lt; endl;
+
+        return (0);
+    }
+        
+</pre>
+
+    After compiling and linking the above two source files, the resulting
+program produces output like:
+        <pre>
+
+    0x8048760
+    0x8048760
+        
+</pre>
+
+    the addresses of the two functions are the same, so each function
+eventually uses the same implementation of the template function. 
+</p><p>Knowing this, it is also understandable that it is possible to <em>declare</em> a
+template function, if it is <em>known</em> that the required instantiation is
+available in another sourcefile. E.g., the function <code>fun()</code> in the above
+example could be defined as follows:
+        <pre>
+
+    template&lt;class T&gt;
+    T sumVector(T *tp, unsigned n);
+
+    void fun()
+    {
+        cout &lt;&lt; static_cast&lt;void *&gt;
+                (
+                    static_cast&lt;int (*)(int *, unsigned)&gt;
+                    (sumVector)
+                )
+            &lt;&lt; endl;
+    }
+        
+</pre>
+
+    To make this work, one must of course be certain that the instantiation is
+available elsewhere. The <em>advantage</em> of this approach is that the compiler
+doesn't have to instantiate a template function, which speeds up the
+compilation of the function <code>fun()</code>, the <em>disadvantage</em> is that we have to
+do the bookkeeping ourselves: is the template function used somewhere else or
+not? 
+</p><p>A third approach, is to <em>declare</em> template functions in header files,
+keeping the definition in a template source file. In the template source file
+the functions are instantiated by pointers to the appropriate functions. For
+example, define <code>sumvector.cc</code> as follows:
+        <pre>
+
+    template&lt;class T&gt;
+    T sumVector(T *tp, unsigned n)
+    {
+        return (*tp);
+    }
+
+    static void
+        *p1 = static_cast&lt;int (*)(int *, unsigned)&gt;(sumVector);
+        
+</pre>
+
+    and declare the <code>sumVector</code> template function in all sourcefiles using
+<code>sumVector</code>. This way the compiler keeps track of which <code>sumVector()</code>
+functions are required, linking them from the <code>sumvector.o</code> object when
+necessary. Of course, they must be available there. But if they aren't then
+they can be defined simply by providing another pointer defnition, followed by
+a recompilation of <code>sumvector.cc</code>. The advantage here is gain in compilation
+time (and maybe a clear overview of what template functions are actually
+instantiated), as well as <em>data hiding</em>: the implementation of the template
+function is not required by the users of the implementation, and can therefore
+be hidden from them. The disadvantage is the definition of a bunch of
+<code>static void *</code> variables: they are used as <code>rvalues</code> for the addresses of
+instantiated template functions. Another disadvantage is that the template
+definition is not available for other situations. If some program would
+benefit from a <code>sumVector()</code> instantiation for a type that is not available
+in <code>sumvector.cc</code>, the template itself or the <code>sumvector.cc</code> sourcefile
+would be required (since we strongly agree with the principles of the free
+software foundation, the latter disadvantage is actually more of an
+<em>advantage</em> in our opinion :-).
+</p><p>Finally, as the structure of the <code>void *</code> definitions is always the
+same, a <code>macro</code> definition might come in handy here. E.g., the
+<code>sumvector.cc</code> source file in which three <code>sumVector()</code> functions are
+instantiated could be written as follows:
+        
+        <a name="INSTANTIATEMACRO"></a>
+        <pre>
+
+    template&lt;class T&gt;
+    T sumVector(T *tp, unsigned n)
+    {
+        return (*tp);
+    }
+                        // NOTE: the next line ends at the backslash
+    #define instantiate(type)   \  
+        static_cast&lt;type (*)(type *, unsigned)&gt;(sumVector)
+
+    static void                 
+        *p[] =
+        {
+            instantiate(int),
+            instantiate(double),
+            instantiate(unsigned)
+        };
+
+    #undef instantiate
+        
+</pre>
+
+    This model can be used over and over again: the <code>instantiate()</code> macro is
+never defined outside of the sourcefile itself, while instantiations can be
+generated on the fly by new <code>instantiate()</code> macro calls.
+
+</p><p>
+    <a name="TEMPFUNARGS"></a><a name="l285"></a>
+<h3>17.1.3: Argument deduction</h3>
+        <a name="templatefunctions/argumentdeduction"></a>
+    The compiler determines what type of template function is needed by examining
+the types and values of the arguments of template functions. This process is
+called <em>template argument deduction</em>. With template argument deduction, the
+type of the return value of the template function is not considered.
+</p><p>For example, consider once again the function 
+        <center><a href="cplusplus17.html#SUMVECTORSIZE">T sumVector(const T (&amp;array)[size])</a> </center>
+    given in section <a href="cplusplus17.html#TEMPFUNDEF">17.1.1</a>:
+        <pre>
+        template &lt;class T, unsigned size&gt;
+        T sumVector(const T (&amp;array)[size])
+        {
+            T
+                sum(0);        
+            for (int idx = 0; idx &lt; size; ++idx)
+                sum += array[idx];
+            return (sum);
+        }        
+</pre>
+
+    In this function the template non-type parameter <code>size</code> is determined
+from the size of the array that is used with the call. Since the size of an
+array is known to the compiler, the compiler can determine the <code>size</code>
+parameter by looking up the size of the array that is used as argument to the
+function <code>sumVector()</code>. If the size is not known, e.g., when a pointer to an
+array element is passed to the function, the compilation will not
+succeed. Therefore, in the following example, the first call of the function
+<code>sumVector()</code> will succeed, as <code>iArray</code> is an array; the second one will
+fail, as <code>iPtr</code> is a pointer, pointing to an array of (in principle) unknown
+size:
+        <pre>
+
+    #include "sumvector.t"  // define the template function
+
+    int main()
+    {
+        int
+            iArray[] = {1, 2, 3},
+            *iPtr = iArray;
+
+        sumVector(iArray);  // succeeds: size of iArray is known
+        sumVector(iPtr);    // fails: size of array pointed to by 
+                            // iPtr is unknown 
+        return (0);
+    }
+        
+</pre>
+
+</p><p>It is not necessary for a template function's argument to match exactly
+the type of the template function's corresponding parameter. Three kinds of
+conversions are allowed here:
+    <ul>
+        <li > <em>lvalue transformations</em>
+        <li > <em>qualification conversions</em>
+        <li > <em>conversion to a base class instantiated from a class template</em>
+    </ul>
+    These three conversions are now discussed and illustrated.
+</p><p>
+</p><p>
+<a name="l286"></a>
+
+             
+<strong>17.1.3.1: Lvalue transformations</strong></p><p>
+            <a name="templatefunctions/lvalue"></a>
+    There are three types of <em>lvalue transformations</em>:
+    <ul>
+        <li > <em>lvalue-to-rvalue conversions</em>
+        <li > <em>array-to-pointer conversions</em>
+        <li > <em>function-to-pointer conversions</em>
+    </ul>
+</p><p><ul>
+    <li><strong>lvalue-to-rvalue conversions.</strong> Simply stated, an <em>lvalue</em> is an
+expression that may be used to the left of an assignment operator. It is an
+object whose address may be determined, and which contains a value. In
+contrast, an <em>rvalue</em> is an expression that may be used to the right of an
+assignment operator: it represents a value that does not have an address and
+that cannot be modified.    <br>
+    In a statement like
+        <center><code>x = y;</code> </center>
+    (in which <code>x</code> and <code>y</code> are variables of comparable types), the value of
+<code>y</code> is determined.  Then this value is assigned to <code>x</code>. Determining
+the value of <code>y</code> is called an <em>lvalue-to-rvalue conversion</em>. An
+lvalue-to-rvalue conversion takes place in situations where the value of an
+<code>lvalue</code> expression is required. This also happens when a variable is used
+as argument to a function having a <em>value parameter</em>.
+    <li><strong>array-to-pointer conversions.</strong> An <em>array-to-pointer conversion</em>
+occurs when the name of an array is assign to a pointervariable. This if
+frequently seen with functions using parameters that are pointer
+variables. When calling such functions, an array is often specified as
+argument to the function. The address of the array is then assigned to the
+pointer-parameter. This is called an <em>array-to-pointer conversion</em>.
+    <li><strong>function-to-pointer conversions.</strong> This conversion is most often seen
+with functions defining a parameter which is a pointer to a function. When
+calling such a function the name of a function may be specified for the
+parameter which is a pointer to a function. The address of the function is
+then assigned to the pointer-parameter. This is called a
+<em>function-to-pointer conversion</em>.  
+    </ul>
+</p><p>In the first <a href="cplusplus17.html#SUMVECTOR">sumVector()</a> function (section <a href="cplusplus17.html#TEMPFUNDEF">17.1.1</a>)
+the first parameter is defined as a <code>T *</code>. Here an array-to-pointer
+conversion is allowed, as it is an lvalue transformation, which is one of the
+three allowed conversions. Therefore, the name of an array may be passed to
+this function as its first argument.
+</p><p>
+</p><p>
+<a name="l287"></a>
+
+             
+<strong>17.1.3.2: Qualification conversions</strong></p><p>
+            <a name="templatefunctions/qualifications"></a>
+    A <em>qualification conversion</em> adds <code>const</code> or <code>volatile</code> qualifications
+to pointers. Assume the function <a href="cplusplus17.html#SUMVECTOR">sumVector()</a> in section
+<a href="cplusplus17.html#TEMPFUNDEF">17.1.1</a> was defined as follows:
+        <pre>
+
+    template &lt;class T&gt;
+    T sumVector(T const *array, unsigned n)
+    {
+        T
+            sum(0);        
+        for (int idx = 0; idx &lt; n; ++idx)
+            sum += array[idx];
+        return (sum);
+    }        
+        
+</pre>
+
+    In the above definition, a plain array or pointer to some type can be
+used in combination with this function <code>sumVector()</code>. E.g., an argument
+<code>iArray</code> could be defined as <code>int iArray[5]</code>. However, no damage is
+inflicted on the elements of <code>iArray</code> by the function <code>sumVector()</code>: it
+explicitly states so, by defining <code>array</code> as a <code>T const *</code>. Qualification
+conversions are therefore allowed in the process of template argument
+deduction. 
+
+</p><p>
+<a name="l288"></a>
+
+             
+<strong>17.1.3.3: Conversion to a base class</strong></p><p>
+            <a name="templatefunctions/baseclass"></a>
+    In section <a href="cplusplus17.html#TEMPCLASS">17.2</a> template classes are formally introduced. However,
+they were already <em>used</em> earlier: abstract containers (covered in chapter
+<a href="cplusplus08.html#Containers">8</a>) are actually defined as template classes.  Like `normal'
+classes, template classes can participate in the construction of class
+hierarchies. In section <a href="cplusplus17.html#DERIVEDTEMPCLASS">17.2.7</a> it is shown how a template class
+can be derived from another template class.
+</p><p>Assume that the template class <code>Pipe</code> is derived from the class
+<code>queue</code>. Furthermore, assume our function <code>sumVector()</code> was written to 
+return the sum of the elements of a <code>queue</code>:
+        <pre>
+
+    template &lt;class T&gt;
+    T sumVector(queue&lt;T&gt; &amp;queue)
+    {
+        T
+            sum(0);        
+
+        while (!queue.empty())
+        {
+            sum += gueue.front();
+            queue.pop();
+        }
+        return (sum);
+    }        
+        
+</pre>
+
+    All kinds of <code>queue</code> objects can be passed to the above
+function. However, it is also possible to pass <code>Pipe</code> objects to the
+function <code>sumVector()</code>: By instantiating the <code>Pipe</code> object, its base
+class, which is the template class <code>queue</code>, is also instantiated. Now:
+    <ul>
+        <li > <code>Pipe&lt;xxx&gt;</code> has <code>queue&lt;xxx&gt;</code> as its base class, and
+        <li > <code>queue&lt;xxx&gt;</code> is a possible first argument of the above template
+function <code>sumVector()</code>, and
+        <li > a function argument which is of a derived class type may be used
+with a base class parameter of a template function.
+    </ul>
+    Consequently, the definition `<code>Pipe&lt;int&gt; pi;</code>' implies the
+instantiation of the base class <code>queue&lt;int&gt;</code>, which is an allowed type for
+the first parameter of <code>sumVector()</code>. Therefore, <code>pi</code> may be passed as
+argument to <code>sumVector()</code>.
+</p><p>This conversion is called a <em>conversion to a base class instantiated
+from a class template</em>. In the above example, the <em>class template</em> is
+<code>Pipe</code>, the base class is <code>queue</code>.
+</p><p>
+</p><p>
+<a name="l289"></a>
+
+             
+<strong>17.1.3.4: Summary: the template argument deduction algorithm</strong></p><p>
+            <a name="templatefunctions/algorithm"></a>
+    The following algorithm is used with template argument deduction when a
+template function is called with one or more arguments: 
+    <ul>
+    <li > In turn, the template parameters are identified in the parameters of
+the called function.
+    <li > For each template parameter, the template's type is deduced from the
+template function's argument (e.g., <code>int</code> if the argument is a <code>Pipe&lt;int&gt;
+object</code>). 
+    <li > The three allowed conversions (see section <a href="cplusplus17.html#TEMPFUNARGS">17.1.3</a>) for
+template arguments are applied where necessary.
+    <li > If the same template parameter is used with multiple function
+parameters, the template types of the arguments must be the same. E.g.,
+with template function
+        <center><code>twoVectors(vector&lt;Type&gt; &amp;v1, vector&lt;Type&gt; &amp;v2)</code> </center>
+    the arguments used with <code>twoVectors()</code> must have equal types. E.g.,
+        <pre>
+
+    vector&lt;int&gt;
+        v1,
+        v2;
+    ...
+    twoVectors(v1, v2);
+        
+</pre>
+
+    </ul>
+</p><p>
+    <a name="TEMPFUNEXPLICIT"></a><a name="l290"></a>
+<h3>17.1.4: Explicit arguments</h3>
+        <a name="templatefunctions/explicit"></a>
+    Consider once again the function <a href="cplusplus17.html#INSTANTIATEFIRST">main()</a> is section
+<a href="cplusplus17.html#TEMPFUNINST">17.1.2</a>. Here the function <code>sumVector()</code> was called as follows:
+        <pre>
+
+    #include "sumvector.h"
+
+    int main()
+    {
+        int
+            x[] = {1, 2};
+        double
+            y[] = {1.1, 2.2};
+    
+        cout &lt;&lt; sumVector(x, 2) &lt;&lt; endl
+            &lt;&lt; sumVector(y, 2) &lt;&lt; endl;
+        ...
+    }
+        
+</pre>
+
+    In both cases the final argument of the function is of type <code>int</code>, but
+in the template's definition, the second parameter is an unsigned. The
+conversion <code>unsigned -&gt; int</code> is not one of the allowed conversions <em>lvalue
+transformations, qualification conversions</em> or <code>conversion to a base
+class</code>. Why doesn't the compiler complain in this case? In cases where the
+type of the argument is fixed, <em>standard type conversions</em> are allowed, and
+they are applied automatically by the compiler. The types of arguments may
+also be made explicit by providing casts. In those cases there is no need for
+the compiler to deduce the types of the arguments. 
+</p><p>In section <a href="cplusplus17.html#TEMPFUNINST">17.1.2</a>, a cast was used to
+<a href="cplusplus17.html#INSTANTIATECAST">disambiguate</a>. Rather than using a <code>static_cast</code>, the
+type of the required function can be made explicit using another syntax: the
+function name may be followed by the types of the arguments, surrounded by
+pointed brackets. Here is the example of section <a href="cplusplus17.html#TEMPFUNINST">17.1.2</a> using
+explicit template argument types:
+        <pre>
+
+    #include "template.h"
+
+    unsigned fun(unsigned (*f)(unsigned *p, unsigned n));
+    double fun(double (*f)(double *p, unsigned n));
+    
+    int main()
+    {
+        cout &lt;&lt; fun(sumVector&lt;double, unsigned&gt;) 
+            &lt;&lt; endl;
+        return (0);
+    }
+        
+</pre>
+
+    The explicit argument type list should follow the types mentioned in the
+<code>template&lt;...&gt;</code> line preceding the template's function definition. The type
+<code>class T</code> in the template line of the function <code>sumVector()</code> is made
+explicit as type <code>double</code>, and not as, e.g., a type <code>double *</code>, which was
+used in the <code>static_cast</code> in the <a href="cplusplus17.html#INSTANTIATECAST">example</a> of section
+<a href="cplusplus17.html#TEMPFUNINST">17.1.2</a>.
+</p><p>Explicit template arguments may be partially specified. Like the
+specification of arguments of functions for which default arguments are
+defined, trailing template arguments may be omitted from the list of explicit
+template argument types. When they are omitted, the types mentioned in the
+<code>template&lt;&gt;</code> line preceding the template's function definition are used. So,
+in the above example the explicit argument type <code>unsigned</code> may be omitted
+safely, as the type of the second template's argument is already known from
+the argument type list. The function <code>main()</code> can therefore also be written
+as: 
+        <pre>
+
+    int main()
+    {
+        cout &lt;&lt; fun(sumVector&lt;double&gt;)
+            &lt;&lt; endl;
+        return (0);
+    }
+        
+</pre>
+
+    Explicit template arguments can also be used to simplify the definition of
+the <a href="cplusplus17.html#INSTANTIATEMACRO">instantiate</a> macro in section
+<a href="cplusplus17.html#TEMPFUNINST">17.1.2</a>. Using an explicit template argument, the code gets so simple
+that the macro itself can be completely avoided.  Here is the revised code of
+the example:
+        <pre>
+
+    template&lt;class T&gt;
+    T sumVector(T *tp, unsigned n)
+    {
+        return (*tp);
+    }
+    static void                 
+        *p[] =
+        {
+            &amp;sumVector&lt;int&gt;,
+            &amp;sumVector&lt;double&gt;,
+            &amp;sumVector&lt;unsigned&gt;
+        };
+        
+</pre>
+
+    Note that the initial <code>&amp;</code>-tokens indicating the addresses of the
+<code>sumVector()</code> functions are required when the addresses of the functions are
+assigned to pointer variables.
+</p><p>
+</p><p><a name="TEMPFUNEXDEC"></a>
+<a name="l291"></a>
+
+             
+<strong>17.1.4.1: Template explicit instantiation declarations</strong></p><p>
+            <a name="templatefunctions/declarations"></a>
+    The explicit instantiations that were defined in the previous section were all
+embedded in the array of void pointers <code>p[]</code>, which array was used to have a
+target for the addresses of the instantiated function. 
+</p><p>This is, admittedly not too elegant, but it works well. However, it is also
+possible to <em>declare</em> a template providing explicit types of the template's
+arguments with the purpose of instantiating the corresponding template
+functions. An <em>explicit instantiation declaration</em> starts with the keyword
+<code>template</code>, to be followed by an explicit template function
+declaration. Although this is a declaration, it is considered by the compiler
+as a request to instantiate that particular variant of the function. 
+</p><p>Using explicit instantiation declarations the final example of the previous
+section can be rewritten as follows:
+        <pre>
+
+    template&lt;class T&gt;
+    T sumVector(T *tp, unsigned n)
+    {
+        return (*tp);
+    }
+
+    template      int sumVector&lt;int&gt;(int *, unsigned);
+    template   double sumVector&lt;double&gt;(double *, unsigned);
+    template unsigned sumVector&lt;unsigned&gt;(unsigned *, unsigned);
+        
+</pre>
+
+    As can be seen from this example, explicit instantiation declarations are
+mere function declarations, e.g., 
+        <center><code>int sumVector(int *, unsigned);</code> </center>
+    embellished with the <code>template</code> keyword and an explicit template
+argument list, e.g., <code>&lt;int&gt;</code>. 
+
+</p><p><a name="l292"></a>
+<h3>17.1.5: Template explicit specialization</h3>
+        <a name="templatefunctions/specialization"></a>
+    Although the function <code>sumVector()</code> we've seen in the previous sections is
+well suited for arrays of elements of the basic types (like <code>int, double</code>,
+etc.), the template implementation is of course not appropriate in cases where
+the <code>+=</code> operator is not defined or the <code>sum(0)</code> initialization makes no
+sense. In these cases an <code>template explicit specialization</code> may be provided,
+</p><p>The template's implementation of the <code>sumVector()</code> is not suited for
+variables of type <code>char *</code>, like the <code>argv</code> parameter of <code>main()</code>. If we
+want to be able to use <code>sumVector()</code> with variables of type <code>char *</code> as
+well, we can define the following special form of <code>sumVector()</code>:
+        <pre>
+
+    #include &lt;string&gt;
+    #include &lt;numeric&gt;
+
+    template &lt;&gt; char *sumVector&lt;char *&gt;(char **argv, unsigned argc)
+    {
+        string
+            s = accumulate(argv, argv + argc, string());
+
+        return (strcpy (new char[s.size() + 1], s.c_str()));
+    }
+        
+</pre>
+
+    A template explicit specialization starts with the keyword <code>template</code>,
+followed by an empty set of pointed brackets. This is followed by the head of
+the function, which follows the same syntax as a <a href="cplusplus17.html#TEMPFUNEXDEC">template explicit
+instantiation declaration</a>, albeit that the trailing <code>;</code> of
+the declaration is replaced by the actual function body of the specialization
+implementation. 
+</p><p>The template explicit specialization is normally included in the same file
+as the standard implementation of the template function. 
+</p><p>If the template explicit specialization is to be used in a different file
+than the file in which it is defined, it must be declared. Of course, being a
+template function, the definition of the template explicit specialization can
+also be included in every file in which it is used, but that will also slow
+down the compilation of those other files. 
+</p><p>The declaration of a template explicit specialization obeys the standard
+syntax of a function declaration: the definition is replaced by a semicolon.
+Therefore, the declaration of the above template explicit specialization is
+        <center><code>template &lt;&gt; char *sumVector&lt;char *&gt;(char **, unsigned);</code> </center>
+    Note the pair of pointed brackets following the <code>template</code> keyword. Were
+they omitted, the function would reduce to a template instantiation
+declaration: you would not notice it, except for the longer compilation time,
+as using a template instantiation declaration implies an extra instantiation
+(i.e., compilation) of the function.
+</p><p>In the <em>declaration</em> of the template explicit specialization the explicit
+specification of the template arguments (in the <code>&lt; ... &gt;</code> list following the
+name of the function) can be omitted if the types of the arguments can be
+deduced from the types of the arguments. With the above declaration this is
+the case. Therefore, the declaration can be simplified to:
+        <center><code>template &lt;&gt; char *sumVector(char **, unsigned);</code> </center>
+</p><p>Comparably, the <code>template &lt;&gt;</code> part of the template explicit
+specialization may be omitted. The result is an ordinary function or ordinary
+function declaration. This is not an error: template functions and
+non-template functions may overload each other. Ordinary functions are less
+restrictive in the type conversions that are allowed for their arguments than
+template functions, which might be a reason for using an ordinary function. On
+the other hand, a template explicit specialization must obey the form of the
+general template function of which it is a specialization. If the template
+function head is
+        <center><code>T sumVector(T *tp, unsigned n)</code> </center>
+    then the template explicit specialization cannot be 
+    <center><code>template&lt;&gt; char *sumVector&lt;char const *&gt;(char const **, unsigned)</code> </center>
+    as this results in different interpretations of the formal type <code>T</code> of
+the template: <code>char *</code> or <code>char const *</code>. 
+</p><p>
+</p><p><a name="l293"></a>
+<h3>17.1.6: Overloading template functions</h3>
+        <a name="templatefunctions/overloading"></a>
+    Template functions may be overloaded. The function <code>sumVector()</code> defined
+earlier (e.g. in section <a href="cplusplus17.html#TEMPFUNDEF">17.1.1</a>) may be overloaded to accept, e.g.,
+variables of type <code>vector</code>:
+        <pre>
+
+    #include &lt;vector&gt;
+    #include &lt;numeric&gt;
+
+    template &lt;class T&gt;
+    T sumVector(vector&lt;T&gt; &amp;array)
+    {
+        return (accumulate(array.begin(), array.end(), T(0)));
+    }        
+        
+</pre>
+
+    Such a template function can be used by passing it an argument of type
+<code>vector</code>, as in:
+        <pre>
+
+    void fun(vector&lt;int&gt; &amp;vi)
+    {
+        cout &lt;&lt; sumVector(vi) &lt;&lt; endl;
+    }
+        
+</pre>
+
+</p><p>Apart from defining overloaded versions, the overloaded versions can of
+course also be declared. E.g.,
+        <pre>
+
+    template &lt;class T&gt;
+    T sumVector(vector&lt;T&gt; &amp;array);
+        
+</pre>
+
+</p><p>Using templates may result in ambiguities which overloading can't
+solve. Consider the following template function definition:
+        <pre>
+
+    template&lt;class T&gt;
+    bool differentSigns(T v1, T v2)
+    {
+        return
+        (
+            v1 &lt; 0 &amp;&amp; v2 &gt;= 0
+            ||
+            v1 &gt;= 0 &amp;&amp; v2 &lt; 0
+        );
+    }
+        
+</pre>
+
+    Passing <code>differentSigns()</code> an <code>int</code> and an <code>unsigned</code> is an error,
+as the two types are different, whereas the template definition calls for
+identical types. Overloading doesn't really help here: defining a template
+having the following prototype is ok with the <code>int</code> and <code>unsigned</code>,
+but now two instantiations are possible with <em>identical</em> types.
+        <pre>
+
+    template&lt;class T1, class T2&gt;
+    bool differentSigns(T1 v1, T2 v2);
+        
+</pre>
+
+    This situation can be disambiguated by using template explicit
+arguments, e.g., <code>differentSigns&lt;int, int&gt;(12, 30)</code>. But template explicit
+arguments could be used anyway with the second overloaded version of the
+function: the first definition is superfluous and can be omitted.
+</p><p>On the other hand, if one overloaded version can be interpreted as a
+<em>more specialized</em> variant of another version of a template function, then
+in principle the two variants of the template function could be used if the
+arguments are of the more specialized types. In this case, however, there is
+no ambiguity, as the compiler will use the more specialized variant if the
+arguments so suggest.
+</p><p>So, assume an overloaded version of <code>sumVector()</code> is defined having
+the following prototype and a snippet of code requiring the instantiation of
+<code>sumVector</code>:
+        <pre>
+
+    template &lt;class T&gt;
+    T sumVector(T, unsigned);
+
+    extern int
+        iArray[];
+
+    void fun()
+    {
+        sumVector(iArray, 12);
+    }
+        
+</pre>
+
+    The above example doesn't produce an ambiguity, even though the
+<a href="cplusplus17.html#SUMVECTOR">original sumVector()</a> given in section <a href="cplusplus17.html#TEMPFUNDEF">17.1.1</a> and the
+version declared here could both be used for the call. Why is there no
+ambiguity here?
+</p><p>In situations like this there is no ambiguity if both declarations are
+identical but for the fact that one version is able to accept a superset of
+the possible arguments that are acceptable for the other version. The original
+<code>sumVector()</code> template can accept only a pointer type as its first
+argument. The version declared here can accept a pointer type as well as any
+non-pointer type. A pointer type <code>iArray</code> is passed, so both template
+functions are candidates for instantiation. However, the original
+<code>sumVector()</code> template function can <em>only</em> accept a pointer type as its
+first argument. It is therefore more specialized than the one given here, and
+it is therefore selected by the compiler. If, for some reason, this is <em>not</em>
+appropriate, then an explicit template argument can be used to overrule the
+selection made by the compiler. E.g.,
+        <center><code>sumVector&lt;int *&gt;(iArray, 12);</code> </center>
+</p><p>
+</p><p><a name="l294"></a>
+<h3>17.1.7: Selecting an overloaded (template) function</h3>
+        <a name="templatefunctions/selection"></a>
+    The following steps determine the actual function that is called, given a set of (template or non-template) overloaded functions:
+    <ul>
+        <li > First, a set of candidate functions is constructed. This set
+contains all functions that are visible at the point of the call, having the
+same name as the function that is called. For a template function to be
+considered here, depends on the actual arguments that are used. These
+arguments must be acceptable given the standard template argument deduction
+process described in section <a href="cplusplus17.html#TEMPFUNARGS">17.1.3</a>. For example,  assuming all of
+the following declarations were provided, an instantiation
+of 
+        <pre>
+
+    template &lt;class T, class U&gt;
+    bool differentSigns(T t, U u);
+        
+</pre>
+
+and the functions
+        <pre>
+
+    bool differentSigns(double i, double j);
+    bool differentSigns(bool i, bool j);
+    bool differentSigns(int (&amp;i)[2]);
+        
+</pre>
+ 
+    will all be elements of the set of possible functions in the following code
+fragment, as all of the four functions have the same name of the function that
+is called:
+        <pre>
+
+    void fun(int arg1, double arg2)
+    {
+        differentSigns(arg1, arg2);
+    }
+        
+</pre>
+
+</p><p><li > Second, the set of <em>viable functions</em> is constructed. Viable
+functions are functions for which type conversions exist that can be applied
+to match the types of the parameters of the functions and the types of the
+actual arguments. This removes the last two function declarations from the
+initial set: the third function is removed as there is no standard conversion
+from <code>double</code> to <code>int</code>, and the fourth function is removed as there is a
+mismatch in the number of arguments between the called function and the
+declared function.
+</p><p><li > Third, the remaining functions are ranked in order of preference,
+and the first one is going to be used. Let's see what this boils down to:
+</p><p>For the template function, the function <code>differentSign&lt;int, double&gt;</code> is
+instantiated. For this function the types of the two parameters and arguments
+for a pairwise exact match: score two points for the template function.
+</p><p>For the function <code>bool differentSigns(double i, double j)</code> the type of
+the second parameter is exactly matches the type of the second argument, but a
+(standard) conversion <code>int -&gt; double</code> is required for the first argument:
+score one point for this function.
+</p><p>Consequently, the template function is selected as the one to be used. As
+an exercise, feed the abouve four declarations and the function <code>fun()</code> to
+the compiler and wait for the linker errors: ignoring the undefined reference
+to <code>main()</code>, the linker will complain that the
+(template) function 
+    <center><code>bool differentSigns&lt;int, double&gt;(int, double)</code> </center>
+    is an undefined reference. 
+    </ul>
+</p><p>If the template would have been declared as
+        <pre>
+
+    template &lt;class T&gt;
+    bool differentSigns(T t, T u);
+        
+</pre>
+
+    then no template function would have been instantiated here. This is ok,
+as the ordinary function <code>differentSigns(double, double)</code> will now be
+used. An error occurs only if no instantiation of the template function can be
+generated and if no acceptable ordinary function is available. If such a case,
+the compiler will generate an error like
+    <center><code>no matching function for call to `differentSigns (int &amp;, double &amp;)</code> </center>
+</p><p>As we've seen, a template function in which all type parameters exactly
+match the types of the arguments prevails over an ordinary function in which a
+(standard) type conversion is required. Correspondingly, 
+a template explicitly specialized function will prevail over an instantiation 
+of the general template if both instantiations show an exact match between
+the types of the parameters and the arguments. For example, if the following
+template declarations are available:
+        <pre>
+
+    template &lt;class T, class U&gt;
+    bool differentSigns(T t, U u);
+
+    template &lt;&gt; bool differentSigns&lt;double, int&gt;(double, int);
+        
+</pre>
+
+    then the template explicitly specialized function will be selected without
+generating an extra instantiation from the general template definition.
+</p><p>Another situation in which an apparent ambiguity arises is when both an
+ordinary function is available and a proper instantiation of a template can be
+generated, both exactly matching the types of the arguments of the called
+function. In this case the compiler does not flag an ambiguity as the
+oridinary function is considered the more specialized function, which is
+therefore selected. 
+</p><p>As a rule of thumb consider that when there are multiple viable functions
+sharing the top ranks of the set of viable functions, 
+then the function template instantiations are removed from the set. If only
+one function remains, it is selected. Otherwise, the call is ambiguous.
+
+</p><p>
+    <a name="NAMERESFUN"></a><a name="l295"></a>
+<h3>17.1.8: Name resolution within template functions</h3>
+        <a name="templatefunctions/nameresolution"></a>
+    Consider once more our function <code>sumVector()</code> of section <a href="cplusplus17.html#TEMPFUNDEF">17.1.1</a>,
+but now it's given a somewhat different implementation:
+        <pre>
+
+    template &lt;class T&gt;
+    T sumVector(T *array, unsigned n)
+    {
+        T
+            sum = accumulate(array, array + n, T(0));        
+
+        cout &lt;&lt; "The array has " &lt;&lt; n &lt;&lt; " elements." &lt;&lt; endl;
+        cout &lt;&lt; "The sum is " &lt;&lt; sum &lt;&lt; endl;
+
+        return (sum);
+    }        
+        
+</pre>
+
+    In this template definition, <code>cout</code>'s <code>operator&lt;&lt;</code> is called to
+display a <code>char const *</code> string, an <code>unsigned</code>, and a <code>T</code>-value. The
+first <code>cout</code> statement displays the string and the <code>unsigned</code> value, no
+matter what happens in the template. These types <em>do not depend on a
+template parameter</em>. If a type does not depend on a template parameter, the
+necesary declarations for compiling the statement must be available when the
+definition of the template is given. In the above template definition this
+implies that 
+        <center><code>ostream &amp;ostream::operator&lt;&lt;(unsigned)</code> </center>
+    and
+        <center><code>ostream &amp;ostream::operator&lt;&lt;(char const *)</code> </center>
+    must be known to the compiler when the definition of the template is
+given. On the other hand, 
+        <center><code>cout &lt;&lt; ... &lt;&lt; sum &lt;&lt; endl</code> </center>
+    cannot be compiled by the time the template's definition is given, as the
+type of the variable <code>sum</code> <em>depends on a template parameter</em>. The
+statement can therefore be checked for semantical correctness (i.e., the
+question whether <code>sum</code> can be inserted into <code>cout</code>) can only be answered
+at the point where the template function is instantiated.
+</p><p>Names (variables) whose type depend on a template parameter are resolved
+when the template is instantiated: at that point the relevant declarations
+must be available. The location where this happens is called the template's
+<em>point of instantiation</em>. As a rule of thumb, make sure that the necessary
+declarations (usually: header files) are available at every instantiation of
+the template.
+</p><p>
+</p><p><a name="TEMPCLASS"></a><a name="l296"></a>
+<h2>17.2: Template classes</h2>
+    <a name="templateclasses/intro"></a>
+    Like templates for functions, templates can be constructed for complete
+classes. A template class can be considered when the class should be available
+for different types of data. Template classes are frequently used in <strong>C++</strong>:
+chapter <a href="cplusplus08.html#Containers">8</a> covers general data structures like <code>vector, stack</code>
+and <code>queue</code>, which are available as <em>template classes</em>. The algorithms and
+the data on which the algorithms operate are completely separated from each
+other. To use a particular data structure on a particular data type, only the
+data type needs to be specified at the definition or declaration of the
+template class object, e.g., <code>stack&lt;int&gt; istack</code>.
+</p><p>In the upcoming sections the construction of such a template class is
+discussed. In a sense, template classes compete with object oriented
+programming (cf. chapter <a href="cplusplus16.html#Polymorphism">16</a>), where a similar mechanism is
+seen. Polymorphism allows the programmer to separate algorithms from data, by
+deriving classes from the base class in which the algorithm is implemented,
+while implementing the data in the derived class, together with
+member functions that were defined as pure virtual functions in the base class
+to handle the data.
+</p><p>Generally, template classes are easier to use. It is certainly easier to write
+<code>stack&lt;int&gt; istack</code> to create a stack of <code>ints</code> than it is to derive a new
+class <code>Istack: public stack</code> and to implement all necessary member functions
+to be able to create a similar stack of <code>ints</code> using object oriented
+programming. On the other hand, for each different type that is used with a
+template class the complete class is reinstantiated, whereas in the context of
+object oriented programming the derived classes <em>use</em>, rather than <em>copy</em>,
+the functions that are already available in the base class.
+</p><p>Below a simple version of the template class <code>vector</code> is constructed:
+the essential characteristics of a template class are illustrated, without
+attempting to redo the existing <code>vector</code> class completely.
+</p><p>
+    
+</p><p>
+    <a name="TEMPCLASSDEF"></a><a name="l297"></a>
+<h3>17.2.1: Template class definitions</h3>
+        <a name="templateclasses/definitions"></a>
+    The construction and use of template classes will be covered in the coming
+sections, where a basic template class <code>bvector</code> (<em>basic vector</em> will be
+constructed.
+</p><p>The construction of a template class can normally begin with the construction
+of a normal class interface around a hypothetical type <code>Type</code>. If more
+hypothetical types are required, then hypothetical types <code>U, V, W</code>, etc. can
+be used as well. Assume we want to construct a class <code>bvector</code>, that can be
+used to store values of type <code>Type</code>. We want to provide the class with the
+following members:
+    <ul>
+        <li > Constructors to create an object of the class <code>bvector</code>,
+possibly of a given size, as well as a copy constructor, since memory will be
+allocated by the object to store the values of type <code>Type</code>.
+        <li > A destructor.
+        <li > An overloaded <code>operator=</code> operator.
+        <li > A <code>operator[]</code> to retrieve and reassign the elements giving
+their indices.
+        <li > Forward and backward iterators to be able to visit all elements
+sequentially, either from the first to the last or from the last to the first.
+        <li > A <code>sort()</code> member to sort the elements of type <code>Type</code>.
+        <li > A member <code>push_back()</code> to add a new element at the end of the
+vector. 
+    </ul>
+    Should the set of members include members that can be used with <code>const</code>
+objects? In practical situations it probably should, but for now these members
+are not included in the interface: I've left them for the reader to implement.
+</p><p>Now that we have decided which members we want, the class interface can be
+constructed. Like template functions, a template class definition begins with
+the keyword <code>template</code>, to be followed by a non-empty list of template
+<em>type</em> and/or <em>non-type</em> parameters, surrounded by angular brackets. This
+template announcement is then followed by the class interface, in which the
+template parameters may be used to represent types and constants. Here is
+initial class interface of the <code>bvector</code> template class, already showing
+member functions <code>construct</code> and <code>destroy</code> which are used in the
+implementation of the copy constructor, the destructor, and the overloaded
+assignment operator. The class also already contains an <code>iterator</code> type:
+it's defined simply as a pointer to an element of the vector. 
+The reverse-iterator will be added later.
+    Note that the <code>bvector</code> template class contains only a
+template type parameter, and no non-type parameter.
+        <a name="BVECTOR"></a>
+        <pre>
+    template &lt;class Type&gt;
+    class bvector
+    {
+        public:
+            typedef reverse_iter&lt;Type&gt; reverse_iterator;
+
+            bvector();
+            bvector(unsigned n);
+            bvector(bvector&lt;Type&gt; const &amp;other);
+            ~bvector();
+            bvector&lt;Type&gt; const &amp;operator=(bvector&lt;Type&gt; const &amp;other);
+            Type &amp;operator[](int index);
+            bvector&lt;Type&gt; &amp;sort();
+            void push_back(Type const &amp;value);
+            Type *begin();
+            Type *end();
+            reverse_iterator rbegin();
+            reverse_iterator rend();
+            unsigned size();
+        private:
+            void construct(bvector&lt;Type&gt; const &amp;other);
+            Type 
+                *start,
+                *finish,
+                *end_of_storage;
+    };
+            
+
+</pre>
+
+    Within the class interface definition the abstract type <code>Type</code> can be
+used as a normal typename. However, note the <code>bvector&lt;Type&gt;</code> constructions
+appearing in the interface: there is no plain <code>bvector</code>, as the <code>bvector</code>
+will be bound to a type <code>Type</code>, to be specified later on in the program
+using a <code>bvector</code>. 
+</p><p>Different from template functions, template class parameters can have
+default arguments. This holds true both for template type- and template
+non-type parameters. If a template class is instantiated without specifying
+arguments for the template parameters, and if default template parameters were
+defined, then the defaults are used. Such defaults should be suitable for a
+majority of instantiations of the class. E.g., for the template class
+<code>bvector</code> the template announcement could have been altered to specify
+<code>int</code> as the default type:
+        <center><code>template &lt;class Type = int&gt;</code> </center>
+    The class contains three data members: pointers to the begin and end of
+the allocated storage area (respectively <code>start</code> and <code>end_of_storage</code>) and
+a pointer pointing just beyond the element that was last allocated. The
+allocation scheme will add elements beyond the ones that are actually required
+to reduce the number of times the vector must be reallocated to accomodate new
+elements.
+</p><p>Template class <em>declarations</em> are constructed by removing the template
+interface definition (the part between the curly braces), replacing the
+definition by a semicolon:
+        <pre>
+
+    template &lt;class Type&gt;
+    class bvector;
+        
+</pre>
+
+    here too, default types may be specified.
+</p><p>In section <a href="cplusplus17.html#BVECTORIMP">17.3</a> the full implementation of the <code>bvector</code>
+template class is given.
+</p><p>
+</p><p><a name="l298"></a>
+<h3>17.2.2: Template class instantiations</h3>
+        <a name="templateclasses/instantiations"></a>
+    template classes are instantiated when an object of the template class is
+defined. When a template class object is defined (or declared) the template
+parameters must be explicitly specified (note that the parameters having 
+default arguments are also specified, albeit as defaults). 
+The template arguments are never deducted, as with template functions. To 
+define a <code>bvector</code> to store <code>ints</code>, the construction
+        <pre>
+
+    bvector&lt;int&gt;
+        bvInt;
+        
+</pre>
+
+    is used. For a <code>bvector</code> for <code>strings</code> 
+        <pre>
+
+    bvector&lt;string&gt;
+        bvString;
+        
+</pre>
+
+    is used. 
+</p><p>In combination with the keyword <code>extern</code> these variables are
+<em>declared</em> rather than <em>defined</em>. E.g.,
+        <pre>
+
+    extern bvector&lt;int&gt;
+        bvInt;
+        
+</pre>
+
+</p><p>A template (type) parameter can be used to designate a type within another
+template. In the following function the template function
+<code>manipulateVector()</code> is defined, using type parameter <code>T</code>. It receives,
+defines, and returns <code>bvector</code> references and objects:
+        <pre>
+
+    template &lt;class T&gt;
+    bvector&lt;T&gt; &amp;manipulateVector(bvector&lt;T&gt; &amp;vector)
+    {
+        bvector&lt;T&gt;
+            extra(vector);
+        ...
+        return (vector);
+    }
+        
+</pre>
+
+</p><p>A template class is not instantiated if a reference or pointer to the
+class template is used. In the above example, the <code>bvector&lt;int&gt; extra(...)</code>
+results in a template instantiation, but the parameter and the return value of
+the function <code>manipulateVector()</code>, being references, don't result in
+template instantiations. However, if a member function of a template class is
+used with a pointer or reference to a template class object, then the class
+<em>is</em> instantiated. E.g., in the following code
+        <pre>
+
+    template &lt;class T&gt;
+    void add(bvector&lt;T&gt; &amp;vector, int value)
+    {
+        vector.push_back(value);
+    }
+        
+</pre>
+
+    the class <code>bvector&lt;int&gt;</code> will be instantiated.
+</p><p>
+</p><p><a name="l299"></a>
+<h3>17.2.3: Nontype parameters</h3>
+        <a name="templateclasses/nontype"></a>
+    Template nontype parameters must be constant expressions. I.e., the compiler
+must be able to evaluate their values. For example, the following class uses a
+template type parameter to define the type of the elements of a buffer, and a
+template nontype parameter to define the size of the buffer:
+        <pre>
+
+    template &lt;class Type, unsigned size&gt;
+    class Buffer
+    {
+        ...
+        Type
+            buffer[size];
+    };
+        
+</pre>
+
+    The <code>size</code> parameter must be a constant value when a <code>Buffer</code> object
+is defined or declared. E.g.,
+        <pre>
+
+    Buffer&lt;int, 20&gt;
+        buffer;
+        
+</pre>
+
+    Note that 
+    <ul>
+        <li > Global variables have constant addresses, that can be used as
+arguments for nontype parameters
+        <li > Local and dynamically allocated variables have addresses that are
+not known by the compiler when the source file is compiled. These addresses
+can therefore not be used as arguments for nontype parameters.
+        <li > Lvalue transformations are allowed: if a pointer is defined
+as a nontype parameter, an arrayname may be specified.
+        <li > Qualification conversions are allowed: a pointer to a non-const
+object may be used with a  non-type parameter defined as a <code>const</code> pointer.
+        <li > Promotions are allowed: a constant of a <em>narrower</em> datatype may
+be used for a nontype parameter of a <em>wider</em> type (e.g., <code>short</code> when an
+<code>int</code> is called for, <code>long</code> when a <code>double</code> is called for).
+        <li > Integral conversions are allowed: if an <code>unsigned</code> parameter is
+specified, an <code>int</code> may be used.
+    </ul>
+</p><p>
+</p><p><a name="l300"></a>
+<h3>17.2.4: Template class member functions</h3>
+        <a name="templateclasses/members"></a>
+    Normal design considerations should be followed when constructing template
+class member functions or template class constructors: template class type
+parameters should preferably be defined as <code>T const &amp;</code>, rather than <code>T</code>,
+to prevent unnecessary copying of large <code>T</code> types. Template class
+constructors should use member initializers rather than member assignment
+within the body of the constructors, again to prevent double assignment of
+composed objects: once by the default constructor of the object, once by the
+assignment itself.
+</p><p>Template member functions must be known to the compiler when the template is 
+instantiated. The current <em>GNU g++</em> compiler does not allow precompiled
+template classes, therefore the member functions of templates are inline 
+functions. They can be defined inside the template interface or outside the
+template interface. Template member functions are defined as the inline
+member functions of any other class. However, for the member functions that are
+defined outside of the template's interface 
+    <ul>
+        <li > No <em>inline</em> keyword is required in the interface,
+        <li > A <code>template &lt;template parameter list&gt;</code> definition is required.
+    </ul>
+</p><p>In the <a href="cplusplus17.html#BVECTOR">bvector</a> template class a member function 
+        <center><code>void push_back(T const &amp;value);</code> </center>
+    is declared. Its definition, outside of the template's interface, could
+be:
+        <pre>
+
+    template &lt;class T&gt;
+    void bvector&lt;T&gt;::push_back(T const &amp;t)
+    {
+        if (finish == end_of_storage)
+        {
+            end_of_storage &lt;&lt;= 1;
+            T
+                *tmp = copy(start, finish, new T[max]);
+            delete [] start;
+            finish = tmp + (finish - start);
+            finish = tmp;
+        }
+        *finish++ = t;
+    }
+        
+</pre>
+
+    Note the fact that the class type of <code>push_back</code> is the generic 
+<code>bvector&lt;T&gt;</code> type. The abstract type <code>T</code> is also used to define the
+type of the variable <code>tmp</code>.
+</p><p>
+</p><p><a name="l301"></a>
+<h3>17.2.5: Template classes and friend declarations</h3>
+        <a name="templateclasses/friends"></a>
+    Template classes may define other functions and classes as friends. There are
+three types of friend declarations that can appear within a template class:
+    <ul>
+        <li > A <em>nontemplate</em> friend function or class. This is a well-known
+friend declaration.
+        <li > A <em>bound</em> friend template class or function. Here the template
+parameters of the current template are used to <em>bind</em> the types of another
+template class or function, so that a one-to-one correspondence between the
+template's parameters and the template parameters of the friend template class
+or function is obtained.
+        <li > A <em>unbound</em> friend template class or function. Here the
+template parameters of the friend template class or function remain to be
+specified, and are not related in some predefined way to the current
+template's parameters.
+    </ul>
+    The following sections will discuss the three types of friend declarations
+in further detail. 
+
+</p><p>
+<a name="l302"></a>
+
+             
+<strong>17.2.5.1: Nontemplate friends</strong></p><p>
+            <a name="templateclasses/normalfriends"></a>
+    A template class may declare another function or class or class member
+function as its friend.  Such a friend may access the private members of the
+template. Friend classes and ordinary friend functions can be declared as
+friends, but a class interface must have been seen by the compiler before 
+one of its members can be declared a friend of a template class (in order to
+verify the name of the friend function against the interface.
+</p><p>For example, here are some friend declarations:
+    <pre>
+
+    class Friend
+    {
+        public:
+            void member();
+    };
+
+    template &lt;class T&gt;
+    class bvector
+    {
+        friend class AnotherFriend;     // declaration only is ok here
+        friend void anotherMember();    // declaration is ok here
+        friend Friend::member();        // Friend interface class required.
+        ...
+    };
+        
+</pre>
+
+    Such ordinary friends can be used, e.g., to access the static private
+members of the <code>bvector</code> class or they can themselves define <code>bvector</code>
+objects and access all members of these objects.
+</p><p>
+</p><p>
+<a name="l303"></a>
+
+             
+<strong>17.2.5.2: Bound friends</strong></p><p>
+            <a name="templateclasses/boundfriends"></a>
+    With <em>bound friend</em> template classes or functions there is a one-to-one
+mapping between the types that are used with the instantiations of the friends
+and the template class declaring them as friends. Here the friends are
+themselves templates. For example:
+        <pre>
+
+    template &lt;class T&gt;
+    class Friend;                   // declare a template class        
+
+    template &lt;class T&gt;
+    void function(Friend&lt;T&gt; &amp;t);    // declare a template function
+
+    template &lt;class T&gt;
+    class AnotherFriend
+    {
+        public:
+            void member();
+    }
+
+    template &lt;class T&gt;
+    class bvector
+    {
+        friend class Friend&lt;T&gt;;                     // 1
+        friend void function&lt;T&gt;(Friend&lt;T&gt; t);       // 2
+        friend void AnotherFriend&lt;T&gt;::member();     // 3
+    };
+        
+</pre>
+
+    Above, three friend declarations are defined:
+        <ul>
+        <li > At <code>1</code>, the class <code>Friend</code> is declared a friend of
+<code>bvector</code> if it is instantiated for the same type <code>T</code> as <code>bvector</code>
+itself. 
+        <li > At <code>2</code>, the function <code>funciont</code> is declared a friend of
+<code>bvector</code> if it is instantiated for the same type <code>T</code> as <code>bvector</code>
+itself. Note that the template type parameter <code>T</code> appears immediately
+following the function name in the friend declaration. Here the correspondence
+between the function's template parameter and <code>bvector</code>'s template parameter
+is defined. After all, <code>function()</code> could have been a parameterless
+function. Without the <code>&lt;T&gt;</code> affixed to the function name, it is an ordinary
+function, expecting an (unrestricted) instantiation of the class <code>bvector</code>
+for its argument. 
+        <li > At <code>3</code>, a specific member function of the class
+<code>AnotherFriend</code>, instantiated for type <code>T</code> is declared as a friend of the
+class <code>bvector</code>.
+        </ul>
+</p><p>Assume we would like to be able to insert the elements of a <code>bvector</code>
+into an <code>ostream</code> object, using the insertion operator <code>&lt;&lt;</code>. For such a
+situation the <code>copy()</code> generic algorithm in combination with the
+<code>ostream_iterator</code> comes in handy. However, the latter iterator is a
+template function, depending on type <code>T</code>. If we can assume that <code>start</code>
+and <code>finish</code> are iterators of <code>bvector</code>, then the implementation is
+quickly realized by defining <code>operator&lt;&lt;</code> as a template function, and by
+declaring this operator as a friend of the class <code>bvector()</code>:
+        <pre>
+
+    #include &lt;iterator&gt;
+    #include &lt;algorithm&gt;
+    #include &lt;iostream&gt;
+
+    template&lt;class T&gt;
+    class bvector
+    {
+        friend ostream &amp;operator&lt;&lt; &lt;T&gt; (ostream &amp;str, 
+                                            bvector&lt;T&gt; const &amp;vector);
+        private:
+            Iterator
+                *start,
+                *finish;
+    };        
+
+    template &lt;class T&gt;
+    ostream &amp;operator&lt;&lt;(ostream &amp;str, bvector&lt;T&gt; const &amp;vector)
+    {
+        ostream_iterator&lt;T *&gt;
+            out(str, " ");
+        return (copy(bvector.start, bvector.finish, out));
+    }
+        
+</pre>
+
+</p><p>
+</p><p>
+<a name="l304"></a>
+
+             
+<strong>17.2.5.3: Unbound friends</strong></p><p>
+            <a name="templateclasses/unboundfriends"></a>
+    By prepending the <code>friend</code> declarations by the <code>template&lt;typelist&gt;</code>
+phrase, the friends received their own template parameter list. The template
+types of these friends are completely independent from the type of the
+template class declaring the friends. Such friends are called <em>unbound
+friends</em>. Every instantiation of an unbound friend has unrestricted access to
+the private members of every instantiation of the template class declaring the
+friends.
+</p><p>Here is the syntactic convention for declaring an unbound friend function, an
+unbound friend class and an unbound friend member function of a class:
+        <pre>
+
+    template &lt;class Type&gt;
+    class bvector
+    {
+        template &lt;class T&gt;
+        friend void function(); // unbound friend function
+
+        template &lt;class T&gt;
+        friend class Friend;    // unbound friend class
+
+        template &lt;class T&gt;      // unbound friend member function
+        friend void AnotherFriend&lt;T&gt;::member();
+
+        ...
+    };
+        
+</pre>
+
+    Unbound friends may not yet be supported by your compiler, though. E.g.,
+earlier versions of the <code>GNU g++</code> compiler )) used to complain
+with a message like
+        <center><code>invalid member template declaration</code> </center>
+    However, current versions of the <code>egcs</code> compiler do accept unbound
+friends.
+
+</p><p><a name="l305"></a>
+<h3>17.2.6: Template classes and static data</h3>
+        <a name="templateclasses/static"></a>
+    When static members are defined in a template class, these static members are
+instantiated for every different instantiation of the template class. As they
+are static members, there will be only one member when multiple objects of the
+<em>same</em> template type(s) are defined. For example, in a class like:
+        <pre>
+
+    template &lt;class Type&gt;
+    class TheClass
+    {
+        ...
+        private:
+            static int
+                objectCounter;        
+    };
+        
+</pre>
+
+    There will be <em>one</em> <code>TheClass&lt;Type&gt;::objectCounter</code> for each different
+<code>Type</code>. However, the following will result in just one static variable,
+which is shared among the different objects:
+        <pre>
+
+    TheClass&lt;int&gt;
+        theClassOne,
+        theClassTwo;
+        
+</pre>
+
+    Remeber that static members are only <em>declared</em> in their classes. They
+must be <em>defined</em> separately.  With static members of template classes this
+is not different. But, comparable to the implementations of static functions,
+the definitions of static members are usually provided in the same file as the
+template class interface itself. The definition of the static member
+<code>objectCounter</code> is therefore:
+        <pre>
+
+    template &lt;class Type&gt;
+    class TheClass
+    {
+        ...
+        private:
+            static int
+                objectCounter;        
+    };
+
+    template &lt;class Type&gt;
+    int 
+        TheClass&lt;Type&gt;::objectCounter = 0;
+        
+</pre>
+
+    In the above case <code>objectCounter</code> is an <code>int</code>, and thus independent of
+the template type parameter <code>Type</code>. In a list-like construction, where a
+pointer to objects of the class itself is required, the template type
+parameter <code>Type</code> does enter the definition of the static variable, as is
+shown in the following example:
+        <pre>
+
+    template &lt;class Type&gt;
+    class TheClass
+    {
+        ...
+        private:
+            static TheClass
+                *objectPtr;
+    };
+
+    template &lt;class Type&gt;
+    TheClass&lt;Type&gt; 
+        *TheClass&lt;Type&gt;::objectPtr = 0;
+        
+</pre>
+
+    Note here that the definition can be read, as usual, from the variable
+name back to the beginning of the definition: <code>objectPtr</code> of the class
+<code>TheClass&lt;Type&gt;</code> is a pointer to an object of <code>TheClass&lt;Type&gt;</code>. 
+</p><p>
+</p><p>
+    <a name="DERIVEDTEMPCLASS"></a><a name="l306"></a>
+<h3>17.2.7: Derived Template Classes</h3>
+        <a name="templateclasses/derived"></a>
+    Template classes can be used in class derivation as well. Consider the
+following base class:
+        <pre>
+
+    template&lt;class T&gt;
+    class Base
+    {
+        public:
+            Base(T const &amp;t)
+            :
+                t(t)
+            {}
+            // and other members
+        private:
+            T const &amp;t;
+    };
+        
+</pre>
+
+    The above class is a template class, which can be used as a base class for
+the following template class <code>Derived</code>:
+        <pre>
+
+    template&lt;class T&gt;
+    class Derived: public Base&lt;T&gt;
+    {
+        public:
+            Derived(T const &amp;t)
+            :
+                Base(t)
+            {}
+            // and other members
+    };
+        
+</pre>
+
+    Other combinations are possible too: By specifying the template type
+parameters of the base class at the point where the base class is introduced
+as the base class of a derived class, the derived class becomes an ordinary
+(non-template) class:
+        <pre>
+
+    class Ordinary: public Base&lt;int&gt;
+    {
+        public:
+            Ordinary(int x)
+            :
+                Base(x)
+            {}
+    };
+
+    // With the following object definition:
+    Ordinary
+        o(5);
+        
+</pre>
+
+
+</p><p><a name="l307"></a>
+<h3>17.2.8: Nesting and template classes</h3>
+        <a name="templateclasses/nesting"></a>
+    When a class is nested within a template class, it automatically becomes a
+template class itself. The nested class may use the template parameters of the
+surrounding class, as shown in the following small program:
+        <pre>
+    #include &lt;vector&gt;
+
+    template&lt;class Type&gt;
+    class TheVector
+    {
+        public:
+            class Enumeration
+            {
+                public:
+                    Enumeration(vector&lt;Type&gt; const &amp;vector)
+                    :
+                        vp(&amp;vector),
+                        idx(0)
+                    {
+                    }                    
+                    Type const &amp;nextElement()   // uses 'Type'
+                    {
+                        if (idx == vp-&gt;size())
+                            throw NoSuchElementException(index);
+                        return ((*vp)[idx++]);
+                    }
+                    bool hasMoreElements()
+                    {
+                        return (idx &lt; vp-&gt;size());
+                    }
+                private:
+                    vector&lt;Type&gt;
+                        const *vp;
+                    unsigned
+                        idx;
+            };
+
+            TheVector&lt;Type&gt;::Enumeration getEnumeration()
+            {
+                return (Enumeration(vector));
+            }
+        private:
+            vector&lt;Type&gt;
+                vector;
+    };
+
+    int main()
+    {
+        TheVector&lt;int&gt;
+            theVector;
+
+        TheVector&lt;int&gt;::Enumeration
+            en = theVector.getEnumeration();
+
+        cout &lt;&lt; (en.hasMoreElements() ? "has more elements" : 
+                                        "no more elements") &lt;&lt; endl;
+
+        return (0);
+    }
+</pre>
+
+    In the above program the class <code>Enumeration</code> is a nested class, that
+uses the template parameter <code>Type</code> of its surrounding class. The nested
+class <code>Enumeration</code> defines an object that returns the subsequent elements
+of the vector of the surrounding class, and allows a simple query about the
+existence of another element.
+</p><p>(Parts of) the nested class are instantiated once used. E.g., in the above
+example, the function <code>nextElent()</code> is not used. This is why the example can
+be compiled to a working program, as the <code>NoSuchElementException()</code>
+exception was never defined!
+</p><p>Enumerations and typedefs can be defined nested in template classes as
+well. For example, with arrays the distinction between the last index that can
+be used and the number of elements frequently causes confusion in people who
+are first exposed to the <strong>C</strong>-array types. The following construction
+automatically provides a valid <code>last</code> and <code>nElements</code> definition:
+        <pre>
+
+    template&lt;class Type, int size&gt;
+    class Buffer
+    {
+        public:
+            enum Limits
+            {
+                last = size - 1,
+                nElements
+            };
+            typedef Type elementType;
+
+            Buffer()
+            :
+                b(new Type [size])
+            {}
+        private:
+            Type
+                *b;
+    };
+        
+</pre>
+
+    This small example defines <code>Buffer&lt;Type, size&gt;::elementType, 
+Buffer&lt;Type, size&gt;::last</code> and <code>Buffer&lt;Type, size&gt;::nElements</code> (as values), 
+as well as <code>Buffer&lt;Type, size&gt;::Limits</code> and <code>Buffer&lt;Type,
+size&gt;::elementType&gt;</code> (as typenames).
+</p><p>Of course, the above represents the template form of these values and
+declarations. They must be instantiated before they can be used. E.g,
+        <center><code>Buffer&lt;int, 80&gt;::elementType</code> </center> 
+    is a synonym of <code>int</code>.
+</p><p>Note that a construction like <code>Buffer::elementType</code> is illegal, as the type
+of the <code>Buffer</code> class remains unknown.
+
+</p><p><a name="l308"></a>
+<h3>17.2.9: Template members</h3>
+        <a name="templateclasses/templatemembers"></a>
+    It is possible to define a template class or a template function within
+another class (which itself may or may not be a template class). Such a
+template function or template class is called a <em>member template</em>. It is
+defined as any other ordinary template class, including the <code>template &lt;class
+...&gt;</code> header. E.g.,
+        <pre>
+
+    template &lt;class T&gt;
+    class Outer
+    {
+        public:
+            ...
+            template &lt;class T2&gt;     // template class
+            class Inner
+            {
+                public:
+                    T
+                        tVariable;
+                    T2
+                        t2Variable;
+            };
+            template &lt;class Type&gt;
+            Type process(Type const &amp;p1, Type const &amp;p2)
+            {
+                Type
+                    result;
+                ...
+                return (result);
+            }
+            ...
+    };
+        
+</pre>
+
+    The special characteristic of a member template is that it can use its own
+and its surrounding class' template parameters, as illustrated by the
+definition of <code>tVariable</code> in <code>Inner</code>.
+</p><p>Normall access rules apply: the function <code>process()</code> can be used by the
+general program, given an instantiated <code>Outer</code> object. Of course, this
+implies that a large number of possible instantiations of <code>process()</code> are
+possible. Actually, an instantiation is only then constructed when a
+<code>process()</code> function is in fact used. In the following code the function
+member function <code>int process(int const &amp;p1, int const &amp;p2)</code> is instantiated,
+even though the object is of the class <code>Outer&lt;double&gt;</code>:
+        <pre>
+
+    Outer&lt;double&gt;
+        outer;
+
+    outer.process(10, -3);
+        
+</pre>
+
+</p><p>The template member function allows the processing of any other type by an
+object of the class <code>Outer</code>, which becomes important if the other type can
+be converted to the type that's used by the outer template class. 
+</p><p>Any function can be defined as a template function, not just an ordinary
+member function. A constructor can be defined as a template as well:
+        <pre>
+
+    template &lt;class T&gt;
+    class Outer
+    {
+        public:
+            template &lt;class T2&gt;     // template class
+            Outer(T2 const &amp;initialValue)
+            {
+                ...
+            }
+            ...
+    };
+        
+</pre>
+
+    Here, an <code>Outer</code> object can be constructed for a particular type given
+another type that's passed over to the constructor. E.g. 
+        <pre>
+
+    Outer&lt;int&gt;
+        t(12.5);    // uses Outer(double const &amp;initialvalue)            
+        
+</pre>
+
+</p><p>Template members can be defined inline or outside of their containing
+class. When a member is defined outside of its surrounding class, the template
+parameter list must precede the template parameter list of the template
+member. E.g.,
+        <pre>
+
+    template &lt;class T&gt;
+    class Outer
+    {
+        public:
+            template &lt;class T2&gt;     // template class
+            class Inner;
+
+            template &lt;class Type&gt;
+            Type process(Type const &amp;p1, Type const &amp;p2);
+    };
+
+    template &lt;class T&gt; template &lt;class Type&gt;    // template class member
+    class Outer&lt;T&gt;::Inner&lt;Type&gt;
+    {
+        public: 
+            T
+                tVariable;
+            T2
+                t2Variable;
+    };  
+
+    template &lt;class T&gt; template &lt;class Type&gt;    // template function member
+    Type Outer&lt;T&gt;::process(Type const &amp;p1, Type const &amp;p2)
+    {
+        Type
+            result;
+        ...
+        return (result);
+    }
+        
+</pre>
+
+</p><p>Not all compilers fully support member templates yet. E.g., the current
+<code>GNU g++</code> compiler (2.95.2) does not support the member template classes,
+but it does support the member template functions.
+
+</p><p><a name="l309"></a>
+<h3>17.2.10: Template class specializations</h3>
+        <a name="templateclasses/specialization"></a>
+    Template class specializations are used in cases where template member
+functions cannot be used with a (class) type for which the template is
+instantiated. In those cases the template's member function(s) can be
+explicitly constructed to suit the needs of the particular type for which the
+template is instantiated. 
+</p><p>Assume we have a template class which supports the insertion of its type
+parameter into an ostream. E.g.,
+        <pre>
+
+    template &lt;class Type&gt;
+    class Inserter
+    {
+        public:
+            Inserter(Type const &amp;t)
+            :
+                object(t)
+            {}
+            ostream &amp;insert(ostream &amp;os) const
+            {
+                return (os &lt;&lt; object);
+            }
+        private:
+            Type 
+                object;
+    };
+        
+</pre>
+
+    In the example a plain member function is used to insert the current
+object into an ostream. The implementation of the <code>insert()</code> function shows
+that it uses the <code>operator&lt;&lt;</code>, as defined for the type that was used when
+the template class was instantiated. E.g., the following little program
+instantiates the class <code>Inserter&lt;int&gt;</code>:
+        <pre>
+
+    int main()
+    {
+        Inserter&lt;int&gt;
+            ins(5);
+    
+        ins.insert(cout) &lt;&lt; endl;
+        return (0);    
+    }
+        
+</pre>
+
+    Now suppose we have a <code>class Person</code> having, among other members,
+the following member function:
+        <pre>
+
+    class Person
+    {
+        public:
+            ostream &amp;insert(ostream &amp;ostr) const;
+    };
+        
+</pre>
+
+    This class cannot be used to instantiate <code>Inserter</code>, as it does not have
+a <code>operator&lt;&lt;()</code> function, which is used by the function
+<code>Inserter&lt;Type&gt;::insert()</code>. Attempts to instantiate <code>Inserter&lt;Person&gt;</code>
+will result in a compilation error. For example, consider the following
+<code>main()</code> function:
+        <pre>
+
+    int main()
+    {
+        Person 
+            person;
+        Inserter&lt;Person&gt;
+            p2(person);
+    
+        p2.insert(cout) &lt;&lt; endl;
+    }
+        
+</pre>
+
+    If this function is compiled, the compiler will complain about the missing
+function <code>ostream &amp; &lt;&lt; const Person &amp;</code>, which was indeed not
+available. However, the function <code>ostream &amp;Person::insert(ostream &amp;ostr)</code>
+<em>is</em> available, and it serves the same purpose as the required function
+<code>ostream &amp; Inserter&lt;Person&gt;::insert(ostream &amp;)</code>.
+</p><p>For this situation multiple solutions exist. One would be to define an
+<code>operator&lt;&lt;(Person const &amp;p)</code> function which calls the <code>Person::insert()</code>
+function. But in the context of the <code>Inserter</code> class, this might not what we
+want. Instead, we might want to look for a solution that is closer to the
+<code>class Inserter</code>. 
+</p><p>Such a solution exists in the form of a <em>template class
+specialization</em>. Such an <em>explicit specialization definition</em> starts with
+the wordt <code>template</code>, then two angular brackets (<code>&lt;&gt;</code>), which is then
+followed by the function definition for the instantiation of the template
+class for the particular template parameter(s). So, with the above function
+this yields the following function definition:
+        <pre>
+
+    template&lt;&gt;
+    ostream  &amp;Inserter&lt;Person&gt;::insert(ostream &amp;os) const
+    {
+        return (object.insert(os));
+    }
+        
+</pre>
+
+    Here we explicitly define a function <code>insert</code> of the class
+<code>Inserter&lt;Person&gt;</code>, which calls the appropriate function that lives in the
+<code>Person</code> class. 
+</p><p>Note that the explicit specialization definition is a true <em>definition</em>:
+it should <em>not</em> be given in the header file of the <code>Inserter</code> template
+class, but it should have its own sourcefile. However, in order to inform the
+compiler that an explicit specialization is available, it can be <em>declared</em>
+in the template's header file. The declaration is straightforward: the
+code-block is replaced by the semicolon:
+        <pre>
+
+    template&lt;&gt;
+    ostream  &amp;Inserter&lt;Person&gt;::insert(ostream &amp;os) const;
+        
+</pre>
+
+</p><p>It is even possible to specialize a complete template class. For the above
+class <code>Inserter</code> which would boil down to the following for the class
+<code>double</code>:
+        <pre>
+
+    template &lt;&gt;
+    class Inserter
+    {
+        public:
+            Inserter&lt;double&gt;(double const &amp;t);
+            ostream &amp;insert(ostream &amp;os) const;
+        private:
+            double
+                object;
+    };
+        
+</pre>
+
+    The explicit template class specialization is obtained by replacing all
+references to the template's class name <code>Inserter</code> by the class name and the
+type for which the specialization holds true: <code>Inserter&lt;double&gt;</code>, and by
+replacing occurrences of the template's type parameter by the actual type for
+which the specialization was constructed. The complete template class
+specialization interface must be given <em>after</em> the original template class
+has been defined. The definition of its members are, analogously to the
+<code>Inserter&lt;Person&gt;::insert()</code> function above, given in separate source
+files. However, in the case of a complete template class specialization, the
+definitions of its members should <em>not</em> be preceded by the <code>template&lt;&gt;</code>
+prefix. E.g.,
+        <pre>
+
+    Inserter&lt;double&gt;(double const &amp;t)   // NO template&lt;&gt; prefix !
+    :
+        object(t)
+    {}
+        
+</pre>
+
+</p><p>
+</p><p><a name="l310"></a>
+<h3>17.2.11: Template class partial specializations</h3>
+        <a name="templateclasses/partial"></a>
+    In cases where a template has more than one parameter, a <em>partial
+specialization</em> rather than a full specialization might be appropriate. With a
+<code>partial</code> specialization, a subset of the parameters of the original
+template can be redefined.
+</p><p>Let's assume we are working on a image processing program. A class defining an
+image receives two <code>int</code> template parameters, e.g.,
+        <pre>
+
+    template &lt;int columns, int rows&gt;
+    class Image        
+    {
+        public:
+            Image()
+            {
+                // use 'columns' and 'rows'
+            }
+            ...
+    };
+        
+</pre>
+
+    Now, assume that an image having 320 columns deserves special attention,
+as those pictures require, e.g., a special smoothing algorithm. From the
+general template given above we can now construct a <em>partially specialized</em>
+template, which <em>only</em> has a <code>columns</code> parameter. Such a template is like
+an ordinary template parameter, in which only the <code>rows</code> remain as a
+template parameter. At the definition of the class name the specialization is
+made explicit by mentioning a specialization parameter list:
+        <pre>
+
+    template &lt;int rows&gt;
+    class Image&lt;320, rows&gt;
+    {
+        public:
+            Image()
+            {
+                // use 320 columns and 'rows' rows.
+            }
+            ...
+    };
+        
+</pre>
+
+    With the above partially specialized template definition the 320 columns
+are explicitly mentioned at the class interface, while the <code>rows</code> remain
+variable. Now, if an image is defined as
+        <pre>
+
+    Image&lt;320, 240&gt;
+        image;
+        
+</pre>
+
+    two instantiations <em>could</em> be used: the fully general template is a
+candidate as well as the partially specialized template. Since the partially
+specialized template is <em>more specialized</em> than the fully general template,
+the <code>Image&lt;320, rows&gt;</code> template will be used. This is a general rule: a more
+specialized template instantiation is chosen in favor of a more general one
+whereever possible.
+</p><p>Every template parameter can be used for the specialization. In the last
+example the <code>columns</code> were specialized, but the <code>rows</code> could have been
+specialized as well. The following partial specialization of the template
+class <code>Image</code> specializes the <code>rows</code> parameter and leaves the <code>columns</code>
+open for later specification:
+        <pre>
+
+    template &lt;int columns&gt;
+    class Image&lt;columns, 200&gt;
+    {
+        public:
+            Image()
+            {
+                // use 'columns' columns and 200 rows.
+            }
+            ...
+    };
+        
+</pre>
+
+    Even when <em>both</em> specializations are provided there will (generally) be
+no problem. The following three images will result in, respectively, an
+instantiation of the general template, of the template that has been
+specialized for 320 columns, and of the template that has been specialized for
+the 200 rows:
+        <pre>
+
+    Image&lt;1024, 768&gt;
+        generic;
+    Image&lt;320, 240&gt;
+        columnSpecialization;
+    Image&lt;480, 200&gt;
+        rowSpecialization;
+        
+</pre>
+
+    With the <code>generic</code> image, no specialized template is available, so the
+general template is used. With the <code>columnSpecialization</code> image, 320 columns
+were specified. For that number of columns a specialized template is
+available, so it's used.  With the <code>rowSpecialization</code> image, 200 rows
+were specified. For that number of rows a specialized template is
+available, so that specialized template is used with <code>rowSpecialization</code>.
+</p><p>One might wonder what happens if we want to construct a
+        <pre>
+
+    Image&lt;320, 200&gt;
+        superSpecialized;
+        
+</pre>
+
+    image. Is this a specialization of the columns or of the rows? The answer
+is: neither. It's an ambiguity, precisely because <em>both</em> the columns <em>and</em>
+the rows could be used with a (differently) specialized template. If such an
+image is required, yet another specialized template is needed, albeit that
+that one isn't a <em>partially</em> specialized template anymore. Instead, it
+specializes all its parameters with the class interface:
+        <pre>
+
+    template &lt;&gt;
+    class Image&lt;320, 200&gt;
+    {
+        public:
+            Image()
+            {
+                // use 320 columns and 200 rows.
+            }
+            ...
+    };
+        
+</pre>
+
+    The above super specialization of the <code>Image</code> template will be used with
+the image having 320 columns and 200 rows.
+
+</p><p><a name="l311"></a>
+<h3>17.2.12: Name resolution within template classes</h3>
+        <a name="templateclasses/nameresolution"></a>
+    In section <a href="cplusplus17.html#NAMERESFUN">17.1.8</a> the name resolution process with template functions
+was discussed. As is the case with template functions, name resolution in
+template classes also proceeds in two steps. Names that do not depend on
+template parameters are resolved when the template is defined. E.g., if a
+member function in a template class uses a <code>qsort()</code> function, then
+<code>qsort()</code> does not depend on a template parameter. Consequently, <code>qsort()</code>
+must be known when the compiler sees the template definition, e.g., by
+including the file <code>stdlib.h</code>. 
+</p><p>On the other hand, if a template defines a <code>&lt;class Type&gt;</code> template
+parameter, which is the returntype of some template function, e.g.,
+        <pre>
+
+    Type returnValue();
+        
+</pre>
+
+    then we have a different situation. At the point where 
+template objects are defined or
+declared, at the point where template member functions are used, and 
+at the point where static data members of template classes are defined or
+declared, it must be able to resolve the template type parameters. So, if the
+following template class is defined:
+        <pre>
+
+    template &lt;class Type&gt;
+    class Resolver
+    {
+        public:
+            Resolver();
+            Type result();
+        private:
+            Type
+                datum;
+            static int
+                value;
+    };
+        
+</pre>
+
+    Then <code>string</code> must be known before each of the following examples:
+        <pre>
+
+    // ----------------------- example 1: define the static variable
+    int Resolver&lt;string&gt;::value = 12;   
+
+    // ----------------------- example 2: define a Resolver object
+    int main()
+    {
+        Resolver&lt;string&gt;
+            resolver;
+    }
+
+    // ----------------------- example 3: declare a Resolver object
+    extern Resolver&lt;string&gt;
+        resolver;
+        
+</pre>
+
+
+</p><p><a name="BVECTORIMP"></a><a name="l312"></a>
+<h2>17.3: An example: the implementation of the bvector template</h2>
+    <a name="templateclasses/bvectorimplementation"></a>
+    In this section the implementation of the basic vector <code>bvector</code>, introduced
+in section <a href="cplusplus17.html#TEMPCLASSDEF">17.2.1</a>, will be completed. 
+</p><p>The implementation of the <code>bvector</code> is generally straightforward: 
+the basic constructors initialize the data members of the <code>bvector</code>, using
+an auxiliary private function <code>init()</code>:
+        <pre>
+
+    bvector()
+    {
+        init(0);
+    };
+    bvector(unsigned n)
+    {
+        init(n);
+    }
+    void init(unsigned n)
+    {
+        if (n)
+        {
+            start = new Type[n];
+            finish = start + n;
+            end_of_storage = start + n;
+        }
+        else
+        {
+            start = 0;
+            finish = 0;
+            end_of_storage = 0;
+        }
+    }                    
+        
+</pre>
+
+    The copy-constructor, overloaded assignment operator and destructor are
+also constructed according to a general recipe. The destructor is simple: it
+only has to call the operator <code>delete</code> for <code>start</code>, using the <code>[]</code>
+notation to make sure that class objects stored in the <code>bvector</code> are deleted
+too. Therefore, no <code>destroy()</code> function was considered necessary in this
+class.  Note that storing pointers in the <code>bvector</code> is dangerous, as it is
+with the official <code>STL vector</code> type: the data pointed to by pointer elements
+of <code>bvector</code> is not deleted when the <code>bvector</code> itself is destroyed.
+</p><p>Here are the destructor, the copy constructor, the overloaded assignment
+operator and the private <code>construct()</code> function:
+        <pre>
+
+    ~bvector()
+    {
+        delete [] start;
+    }            
+
+    bvector(bvector&lt;Type&gt; const &amp;other)
+    {
+        construct(other);
+    }
+
+    bvector&lt;Type&gt; const &amp;operator=(bvector&lt;Type&gt; const &amp;other)
+    {
+        if (this != &amp;other)
+        {
+            delete [] start;
+            construct(other);
+        }
+        return (*this);
+    }
+
+    void construct(bvector&lt;Type&gt; const &amp;other)
+    {
+        init(other.finish - other.start);
+        copy(other.start, other.finish, start);
+    }
+        
+</pre>
+
+</p><p>The <code>operator[]</code> first checks the validity of the <code>index</code> that's
+passed to the function. If out of bounds a simple exception is
+thrown. Otherwise the function is completely standard. Note that the current
+implementation of <code>bvector</code> does not allow for <code>bvector&lt;Type&gt; const</code>
+objects to use the <code>operator[]</code>. Here is the implementation of the 
+<code>operator[]</code> function:
+        <pre>
+
+    Type &amp;operator[](unsigned index) throw(char const *)
+    {
+        if (index &gt; (finish - start))
+            throw "bvector array index out of bounds";
+        return (start[index]);
+    }
+        
+</pre>
+
+</p><p>The <code>sort()</code> function uses the available <code>sort()</code> generic
+algorithm. The <code>::sort()</code> notation is required to prevent confusion: without
+the scope resolution operator the compiler complains about us having specified
+the wrong arguments for the function <code>sort()</code>. Here is the implementation of
+<code>sort()</code>:
+        <pre>
+
+    bvector&lt;Type&gt; &amp;sort()
+    {
+        ::sort(start, finish);
+        return (*this);
+    }
+        
+</pre>
+
+    The <em>push_back()</em> function either initializes the size of the
+<code>bvector</code> to one element, or doubles the number of elements in the vector
+when there's no more room to store new elements. When the number of elements
+must be doubled, an auxiliary <code>bvector</code> object is created, into which the
+elements of the current <code>bvector</code> object are copied, using the <code>copy()</code>
+generic algorithm. Next, the memory pointed to by the the current <code>bvector</code>
+object is deleted, and its pointers are reassigned to point to the memory
+occupied by the auxiliary <code>bvector</code> object. The <code>start</code> pointer of the
+auxiliary <code>bvector</code> object is then set to 0, to prevent the destruction of
+its memory, to which the current <code>bvector</code> points as well. Finally the new
+value is stored in the vector. Here is the implementation:
+        <pre>
+
+    void push_back(Type const &amp;value)
+    {
+        if (!finish)
+        {
+            init(1);
+            finish = start;
+        }
+        else if (finish == end_of_storage)
+        {
+            bvector&lt;Type&gt;
+                enlarged((end_of_storage - start) &lt;&lt; 1);
+            copy(start, finish, enlarged.start);
+            delete [] start;
+            finish = enlarged.start + (finish - start);
+            start = enlarged.start;
+            end_of_storage = enlarged.end_of_storage;
+            enlarged.start = 0;
+        }
+        *finish++ = value;
+    }
+        
+</pre>
+
+    Two sets of iterators are available: the <code>begin()</code> and <code>end()</code>
+functions return <code>iterators</code>, the <code>rbegin()</code> and <code>rend()</code> functions
+return <code>reverse_iterators</code>. <code>Iterators</code> and <code>reverse_iterators</code> are
+defined as <code>typedefs</code> within the template class. These typedefs and the
+functions returning the (reverse) iterators are given below:
+        <pre>
+
+    typedef Type *iterator;
+    typedef reverse_iter&lt;Type&gt; reverse_iterator;
+
+    iterator begin()
+    {
+        return (start);
+    }
+    iterator end()
+    {
+        return (finish);
+    }
+    reverse_iterator rbegin()
+    {
+        return (reverse_iterator(finish));
+    }
+    reverse_iterator rend()
+    {
+        return (reverse_iterator(start));
+    }
+        
+</pre>
+    
+    The <code>iterator</code> is simply a type definition for a pointer to a
+<code>Type</code>. The <code>reverse_iterator</code> is more complex, as its type definition
+depends on a <code>reverse_iter&lt;iterator&gt;</code> type, defining the actual reverse
+iterator. The <code>reverse_iter&lt;iterator&gt;</code> itself is a template class, that is
+discussed in the next section.
+</p><p>
+</p><p><a name="l313"></a>
+<h3>17.3.1: The reverse_iter template class</h3>
+        <a name="templateclasses/reverseiter"></a>
+    The template class <code>reverse_iter</code> uses a template class parameter
+<code>Type</code> representing the data type for which a reverse iterator must be
+constructed. Since the type of the data to which the reverse iterator points
+is known, a reference and a pointer to the data type can easily be
+constructed. 
+</p><p>Given the data type <code>Type</code> to which a reverse iterator points, the reverse
+iterator must support the following operations:
+    <ul>
+        <li > It must be possible to construct a reverse iterator from an
+iterator. 
+        <li > A dereference operator <code>Type &amp;operator*()</code>, returning the data
+item to which the reverse iterator points.
+        <li > A pointer operator <code>Type *operator-&gt;()</code> returning the address
+of the data element, to be used when the data element is an object having
+members. 
+        <li > A prefix and postfix increment operator returning a reverse
+iterator pointing to the <em>previous</em> data element.
+    </ul>
+    As the reverse iterator returns a pointer to the previous element, it is
+possible to let the <code>rbegin()</code> iterator return a pointer to the last
+element, and to let <code>rend()</code> return a pointer to the address before the
+first data element. But it is also possible to let <code>rbegin()</code> return
+<code>end()</code>, and to let <code>rend()</code> return <code>begin()</code>. That way the pointers are
+used the same way, both for iterators and reverse iterators. This latter
+approach, which is used by the standard template library's implementation of
+the reverse iterators, requires the dereference operator to return the data
+element <em>before</em> the one to which the reverse iterator actually points.
+The implementation of the <code>operator*()</code> is, therefore:
+        <pre>
+
+    Type &amp;operator*() const 
+    {
+        Type  
+            *tmp = current;
+        return (*--tmp);
+    }
+        
+</pre>
+
+    The increment operators return reverse iterators. The prefix increment
+operator reduces the <code>current</code> pointer, and returns a reference to the 
+current reverse iterator by returning <code>*this</code>:
+        <pre>
+
+    reverse_iter&lt;Type&gt;&amp; operator++() 
+    {
+        --current;
+        return (*this);
+    }
+        
+</pre>
+
+    The postfix increment operator returns a reverse iterator object which is
+a copy of the current reverse iterator, whose pointer <code>current</code> is reduced
+by applying the postfix decrement operator on the <code>current</code> pointer:
+        <pre>
+
+    reverse_iter&lt;Type&gt; operator++(int) 
+    {
+        reverse_iter&lt;Type&gt;
+            tmp(current--);
+        return (tmp);
+    }
+        
+</pre>
+
+    Of course, the <code>operator+(int step)</code> and the <code>operator--()</code> could be
+defined as well. These definitions are left as an exercise for the reader.
+
+</p><p><a name="l314"></a>
+<h3>17.3.2: The final implementation</h3>
+        <a name="templateclasses/implementation"></a>
+    Below is the implementation of the template class <code>bvector</code> and its
+auxiliary template class <code>reverse_iter</code>:
+    <pre>
+    #include &lt;algorithm&gt;
+
+    template &lt;class Type&gt;
+    class reverse_iter 
+    {
+        public:
+            explicit reverse_iter(Type *x) 
+            : 
+                current(x) 
+            {}
+            Type &amp;operator*() const 
+            {
+                Type  
+                    *tmp = current;
+                return (*--tmp);
+            }
+            Type *operator-&gt;() const 
+            { 
+                return &amp;(operator*()); 
+            }
+            reverse_iter&lt;Type&gt;&amp; operator++() 
+            {
+                --current;
+                return (*this);
+            }
+            reverse_iter&lt;Type&gt; operator++(int) 
+            {
+                reverse_iter&lt;Type&gt;
+                    tmp(current--);
+                return (tmp);
+            }
+            bool operator!=(reverse_iter&lt;Type&gt; const &amp;other) 
+            {
+                return (current != other.current);
+            }
+        private:
+            Type 
+                *current;
+    }; 
+
+    template &lt;class Type&gt;
+    class bvector
+    {
+        typedef Type *iterator;
+        typedef reverse_iter&lt;Type&gt; reverse_iterator;
+    
+        public:
+            bvector()
+            {
+                init(0);
+            };
+            bvector(unsigned n)
+            {
+                init(n);
+            }
+            bvector(bvector&lt;Type&gt; const &amp;other)
+            {
+                construct(other);
+            }
+            ~bvector()
+            {
+                delete [] start;
+            }            
+            bvector&lt;Type&gt; const &amp;operator=(bvector&lt;Type&gt; const &amp;other)
+            {
+                if (this != &amp;other)
+                {
+                    delete [] start;
+                    construct(other);
+                }
+                return (*this);
+            }
+            Type &amp;operator[](unsigned index) throw(char const *)
+            {
+                if (index &gt;= (finish - start))
+                    throw "bvector array index out of bounds";
+                return (start[index]);
+            }
+            bvector&lt;Type&gt; &amp;sort()
+            {
+                ::sort(start, finish);
+                return (*this);
+            }
+            void push_back(Type const &amp;value)
+            {
+                if (!finish)
+                {
+                    init(1);
+                    finish = start;
+                }
+                else if (finish == end_of_storage)
+                {
+                    bvector&lt;Type&gt;
+                        enlarged((end_of_storage - start) &lt;&lt; 1);
+                    copy(start, finish, enlarged.start);
+                    delete [] start;
+                    finish = enlarged.start + (finish - start);
+                    start = enlarged.start;
+                    end_of_storage = enlarged.end_of_storage;
+                    enlarged.start = 0;
+                }
+                *finish++ = value;
+            }
+            iterator begin()
+            {
+                return (start);
+            }
+            iterator end()
+            {
+                return (finish);
+            }
+            reverse_iterator rbegin()
+            {
+                return (reverse_iterator(finish));
+            }
+            reverse_iterator rend()
+            {
+                return (reverse_iterator(start));
+            }
+            unsigned size()
+            {
+                return (finish - start);
+            }
+        private:
+            void init(unsigned n)
+            {
+                if (n)
+                {
+                    start = new Type[n];
+                    finish = start + n;
+                    end_of_storage = start + n;
+                }
+                else
+                {
+                    start = 0;
+                    finish = 0;
+                    end_of_storage = 0;
+                }
+            }                    
+            void construct(bvector&lt;Type&gt; const &amp;other)
+            {
+                init(other.finish - other.start);
+                copy(other.start, other.finish, start);
+            }
+                    
+            Type 
+                *start,
+                *finish,
+                *end_of_storage;
+    };
+            
+
+</pre>
+
+</p><p>A small <code>main()</code> function using
+the <code>bvector</code> data type is given next:
+    <pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include "bvector.h"
+
+int main()
+{
+    bvector&lt;int&gt;
+        bv(5),
+        b2;
+
+    b2 = bv;
+
+    bv[0] = 3;
+    bv[1] = 33;
+    bv[2] = 13;
+    bv[3] = 6;
+    bv[4] = 373;
+
+    copy(bv.begin(), bv.end(), ostream_iterator&lt;int&gt;(cout, " "));
+    cout &lt;&lt; endl;
+
+    bvector&lt;int&gt;::reverse_iterator
+            rit  = bv.rbegin();
+
+    while (rit != bv.rend())
+        cout &lt;&lt; *rit++ &lt;&lt; ", ";
+    cout &lt;&lt; endl;
+
+    bv.push_back(12);
+    bv.push_back(5);
+
+    copy(bv.begin(), bv.end(), ostream_iterator&lt;int&gt;(cout, " "));
+    cout &lt;&lt; endl;
+
+    bv.sort();
+    copy(bv.begin(), bv.end(), ostream_iterator&lt;int&gt;(cout, " "));
+    cout &lt;&lt; "bv has " &lt;&lt; bv.size() &lt;&lt; " elements\n";
+
+    bvector&lt;string&gt;
+        bstr;
+
+    bstr.push_back("bravo");
+    bstr.push_back("delta");
+    bstr.push_back("foxtrot");
+    bstr.push_back("echo");
+    bstr.push_back("charley");
+    bstr.push_back("alpha");
+
+    bstr.sort();
+    copy(bstr.begin(), bstr.end(), ostream_iterator&lt;string&gt;(cout, " "));
+    cout &lt;&lt; endl;
+}
+
+
+
+
+
+</pre>
+
+
+</p><p>
+</p><p>
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus18.html">Next chapter</a>
+    <li> <a href="cplusplus16.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

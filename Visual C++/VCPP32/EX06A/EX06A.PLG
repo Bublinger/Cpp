@@ -1,0 +1,42 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: ex06a - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSPA0D3.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Fp"Debug/ex06a.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"C:\vcpp32\ex06a\Ex06aDialog.cpp"
+"C:\vcpp32\ex06a\ex06aView.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSPA0D3.TMP" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSPA0D4.TMP" mit Inhalten
+[
+/nologo /subsystem:windows /incremental:yes /pdb:"Debug/ex06a.pdb" /debug /machine:I386 /out:"Debug/ex06a.exe" /pdbtype:sept 
+.\Debug\ex06a.obj
+.\Debug\Ex06aDialog.obj
+.\Debug\ex06aDoc.obj
+.\Debug\ex06aView.obj
+.\Debug\MainFrm.obj
+.\Debug\StdAfx.obj
+.\Debug\ex06a.res
+]
+Erstellen der Befehlzeile "link.exe @C:\WINDOWS\TEMP\RSPA0D4.TMP"
+<h3>Ausgabefenster</h3>
+Kompilierung läuft...
+Ex06aDialog.cpp
+Generieren von Code...
+Ueberspringen... (keine relevanten Aenderungen gefunden)
+ex06aView.cpp
+Linker-Vorgang läuft...
+
+
+
+<h3>Ergebnisse</h3>
+ex06a.exe - 0 Fehler, 0 Warnung(en)
+</pre>
+</body>
+</html>

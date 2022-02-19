@@ -1,0 +1,89 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: ex11d - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP7212.BAT" mit Inhalten
+[
+@echo off
+copy "hlp\ex11d.cnt" .\Debug
+]
+Erstellen der Befehlzeile "C:\WINDOWS\TEMP\RSP7212.BAT"
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP7213.BAT" mit Inhalten
+[
+@echo off
+echo. >"hlp\ex11d.hm"
+echo // Commands (ID_* and IDM_*) >>"hlp\ex11d.hm"
+makehm ID_,HID_,0x10000 IDM_,HIDM_,0x10000 resource.h >>"hlp\ex11d.hm"
+echo. >>"hlp\ex11d.hm"
+echo // Prompts (IDP_*) >>"hlp\ex11d.hm"
+makehm IDP_,HIDP_,0x30000 resource.h >>"hlp\ex11d.hm"
+echo. >>"hlp\ex11d.hm"
+echo // Resources (IDR_*) >>"hlp\ex11d.hm"
+makehm IDR_,HIDR_,0x20000 resource.h >>"hlp\ex11d.hm"
+echo. >>"hlp\ex11d.hm"
+echo // Dialogs (IDD_*) >>"hlp\ex11d.hm"
+makehm IDD_,HIDD_,0x20000 resource.h >>"hlp\ex11d.hm"
+echo. >>"hlp\ex11d.hm"
+echo // Frame Controls (IDW_*) >>"hlp\ex11d.hm"
+makehm IDW_,HIDW_,0x50000 resource.h >>"hlp\ex11d.hm"
+]
+Erstellen der Befehlzeile "C:\WINDOWS\TEMP\RSP7213.BAT"
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP7214.BAT" mit Inhalten
+[
+@echo off
+start /wait hcw /C /E /M "hlp\ex11d.hpj"
+if errorlevel 1 goto :Error
+if not exist "hlp\ex11d.hlp" goto :Error
+copy "hlp\ex11d.hlp" .\Debug
+goto :done
+:Error
+echo hlp\ex11d.hpj(1) : error:
+type "hlp\ex11d.log"
+:done
+]
+Erstellen der Befehlzeile "C:\WINDOWS\TEMP\RSP7214.BAT"
+Creating command line "rc.exe /l 0x407 /fo"Debug/ex11d.res" /d "_DEBUG" /d "_AFXDLL" "C:\vcpp32\ex11d\ex11d.rc"" 
+Kopieren der Inhaltsdatei...
+        1 Datei(en) kopiert
+Erstellen von Include-Datei für Hilfe...
+Hilfedatei wird erzeugt...
+        1 Datei(en) kopiert
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP7251.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Debug/ex11d.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ   /c 
+"C:\vcpp32\ex11d\ex11d.cpp"
+"C:\vcpp32\ex11d\MainFrm.cpp"
+"C:\vcpp32\ex11d\ex11dDoc.cpp"
+"C:\vcpp32\ex11d\ex11dView.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP7251.TMP" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP7252.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Debug/ex11d.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ   /c 
+"C:\vcpp32\ex11d\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP7252.TMP" 
+Erstellen der Befehlzeile "link.exe /nologo /subsystem:windows /incremental:yes /pdb:"Debug/ex11d.pdb" /debug /machine:I386 /out:"Debug/ex11d.exe" /pdbtype:sept  .\Debug\ex11d.obj .\Debug\StdAfx.obj .\Debug\MainFrm.obj .\Debug\ex11dDoc.obj .\Debug\ex11dView.obj .\Debug\ex11d.res "
+<h3>Ausgabefenster</h3>
+Ressourcen werden kompiliert...
+Kompilierung läuft...
+StdAfx.cpp
+Kompilierung läuft...
+ex11d.cpp
+MainFrm.cpp
+ex11dDoc.cpp
+ex11dView.cpp
+Generieren von Code...
+Linker-Vorgang läuft...
+
+
+
+<h3>Ergebnisse</h3>
+ex11d.exe - 0 Fehler, 0 Warnung(en)
+</pre>
+</body>
+</html>

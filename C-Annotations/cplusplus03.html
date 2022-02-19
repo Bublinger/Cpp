@@ -1,0 +1,1410 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus04.html">Next chapter</a>
+    <li> <a href="cplusplus02.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="FirstImpression"></a><a name="l29"></a>
+<h1>Chapter 3: A first impression of C++</h1> 
+<a name="first"></a>
+    
+
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="first/first"></a>
+    In this chapter the usage of <strong>C++</strong> is further explored. The possibility to
+declare functions in <code>struct</code>s is further illustrated using examples. The
+concept of a <code>class</code> is introduced.
+
+</p><p><a name="l30"></a>
+<h2>3.1: More extensions of C in C++</h2>
+    <a name="first/more"></a>
+    Before we continue with the `real' object-oriented approach to programming, we
+first introduce some extensions to the <strong>C</strong> programming language,
+encountered in <strong>C++</strong>: not mere differences between <strong>C</strong> and <strong>C++</strong>, but
+syntactical constructs and keywords that are not found in <strong>C</strong>.
+</p><p>
+</p><p><a name="l31"></a>
+<h3>3.1.1: The scope resolution operator ::</h3>
+        <a name="first/scope"></a>
+    
+The syntax of <strong>C++</strong> introduces a number of new operators, of which the
+scope resolution operator <code>::</code> is described first. This operator can be
+used in situations where a global variable exists with the same name as a
+local variable:
+</p><p><pre>
+
+    #include &lt;stdio.h&gt;
+
+    int
+        counter = 50;                   // global variable
+
+    int main()
+    {
+        for (register int counter = 1;  // this refers to the 
+             counter &lt; 10;              // local variable
+             counter++)
+        {
+            printf("%d\n",
+                    ::counter           // global variable
+                    /                   // divided by
+                    counter);           // local variable
+        }
+        return (0);
+    }
+
+</pre>
+
+</p><p>In this code fragment the scope operator is used to address a global variable
+instead of the local variable with the same name. The usage of the scope
+operator is more extensive than just this, but the other purposes will be
+described later.
+
+</p><p>
+    <a name="CoutCinCerr"></a><a name="l32"></a>
+<h3>3.1.2: cout, cin and cerr</h3>
+        <a name="first/cout"></a>
+    In analogy to <strong>C</strong>, <strong>C++</strong> defines standard input- and output streams
+which are opened when a program is executed. The streams are:
+</p><p><ul>
+</p><p><li > <code>cout</code>, analogous to <code>stdout</code>,
+</p><p><li > <code>cin</code>, analogous to <code>stdin</code>,
+</p><p><li > <code>cerr</code>, analogous to <code>stderr</code>.
+</p><p></ul>
+</p><p>Syntactically these streams are not used with functions: instead, data are
+read from the streams or written to them using the operators <code>&lt;&lt;</code>, called
+the <em>insertion operator</em> and <code>&gt;&gt;</code>, called the <em>extraction operator</em>. 
+This is illustrated in the example below:
+</p><p><pre>
+
+    #include &lt;iostream&gt;
+
+    void main()
+    {
+        int
+            ival;
+        char
+            sval[30];
+
+        cout &lt;&lt; "Enter a number:" &lt;&lt; endl;
+        cin &gt;&gt; ival;
+        cout &lt;&lt; "And now a string:" &lt;&lt; endl;
+        cin &gt;&gt; sval;
+
+        cout &lt;&lt; "The number is: " &lt;&lt; ival &lt;&lt; endl 
+             &lt;&lt; "And the string is: " &lt;&lt; sval &lt;&lt; endl;
+    }            
+
+</pre>
+
+</p><p>This program reads a number and a string from the <code>cin</code> stream (usually the
+keyboard) and prints these data to <code>cout</code>. Concerning the streams and their
+usage we remark the following:
+</p><p><ul>
+</p><p><li > The streams are declared in the header file <code>iostream</code>.
+</p><p><li > The streams <code>cout</code>, <code>cin</code> and <code>cerr</code> are in fact `objects'
+    of a given class (more on classes later), processing the input and
+    output of a program. Note that the term `object', as used here, means the
+    set of data and functions which defines the item in question.
+</p><p><li > The stream <code>cin</code> reads data and copies the information to
+    variables (e.g., <code>ival</code> in the above example) using the extraction
+    operator <code>&gt;&gt;</code>. We will describe later how operators in <strong>C++</strong>
+    can perform quite different actions than what they are defined to do by the
+    language grammar, such as is the case here. We've seen function 
+    overloading. In <strong>C++</strong> <em>operators</em> can also have multiple 
+    definitions, which is called <em>operator overloading</em>.
+</p><p><li > The operators which manipulate <code>cin</code>, <code>cout</code> and <code>cerr</code>
+    (i.e., <code>&gt;&gt;</code> and <code>&lt;&lt;</code>) also manipulate variables of
+    different types. In the above example <code>cout &lt;&lt; ival</code> results in the
+    printing of an integer value, whereas <code>cout &lt;&lt; "Enter a number"</code>
+    results in the printing of a string. The actions of the operators
+    therefore depend on the type of supplied variables.
+</p><p><li > Special symbolic constants are used for special situations. The
+    termination of a line written by <code>cout</code> is realized by inserting the 
+    <code>endl</code> symbol, rather than using the string <code>"\n"</code>. 
+</p><p></ul>
+</p><p>The streams <code>cin</code>, <code>cout</code> and <code>cerr</code> are in fact not part of the <strong>C++</strong>
+grammar, as defined in the compiler which parses source files. The streams are
+part of the definitions in the header file <code>iostream</code>. This is comparable
+to the fact that functions as <code>printf()</code> are not part of the <strong>C</strong> grammar,
+but were originally written by people who considered such functions handy and
+collected them in a run-time library.
+</p><p>Whether a program uses the old-style functions like <code>printf()</code> and
+<code>scanf()</code> or whether it employs the new-style streams is a matter of taste.
+Both styles can even be mixed. A number of advantages and disadvantages is
+given below:
+</p><p><ul>
+</p><p><li > Compared to the standard <code>C</code> functions <code>printf()</code> and
+    <code>scanf()</code>, the usage of the insertion and extraction operators
+    is more <code>type-safe</code>.
+    The format strings which are used with <code>printf()</code> and
+    <code>scanf()</code> can define wrong format specifiers for their arguments,
+    for which the compiler sometimes can't warn. In contrast, argument
+    checking with <code>cin</code>, <code>cout</code> and <code>cerr</code> is performed
+    by the compiler. Consequently it isn't possible to err by providing an
+    <code>int</code> argument in places where, according to the format string, a string 
+    argument should appear.
+</p><p><li > The functions <code>printf()</code> and <code>scanf()</code>, and other
+    functions which use format strings, in fact implement a mini-language
+    which is interpreted at run-time. In contrast, the <code>C++</code> compiler
+    knows exactly <code>which</code> in- or output action to perform given which
+    argument.
+</p><p><li > The usage of the left-shift and right-shift operators in the
+    context of the streams does illustrate the possibilities of <code>C++</code>.
+    Again, it requires a little getting used to, coming from <strong>C</strong>,
+    but after that these overloaded operators feel rather comfortably.
+</p><p></ul> 
+</p><p>The <em>iostream library</em> has a lot more to offer than just <code>cin, cout</code> and
+<code>cerr</code>. In chapter <a href="cplusplus12.html#IOStreams">12</a> <em>iostreams</em> will be covered in greater
+detail.
+
+</p><p>
+    <a name="ConstRule"></a><a name="l33"></a>
+<h3>3.1.3: The keyword const</h3>
+        <a name="first/const"></a>
+    The keyword <code>const</code> very often occurs in <strong>C++</strong> programs, even though it
+is also part of the <strong>C</strong> grammar, where it's much less used.
+</p><p>This keyword is a modifier which states that the value of a variable or of an
+argument may not be modified. In the below example an attempt is made to
+change the value of a variable <code>ival</code>, which is not legal:
+</p><p><pre>
+
+    int main()
+    {
+        int const               // a constant int..
+            ival = 3;           // initialized to 3
+
+        ival = 4;               // assignment leads
+                                // to an error message
+
+        return (0);
+    }
+
+</pre>
+
+</p><p>This example shows how <code>ival</code> may be initialized to a given value in its
+definition; attempts to change the value later (in an assignment) are not
+permitted.
+</p><p>Variables which are declared <code>const</code> can, in contrast to <strong>C</strong>, be used as
+the specification of the size of an array, as in the following example:
+</p><p><pre>
+
+    int const
+        size = 20;
+    char
+        buf[size];          // 20 chars big
+
+</pre>
+
+</p><p>A further usage of the keyword <code>const</code> is seen in the declaration of
+pointers, e.g., in pointer-arguments. In the declaration
+</p><p><pre>
+
+    char const *buf;
+
+</pre>
+
+</p><p><code>buf</code> is a pointer variable, which points to <code>char</code>s. Whatever is
+pointed to by <code>buf</code> may not be changed: the <code>char</code>s are declared as
+<code>const</code>. The pointer <code>buf</code> itself however may be changed. A statement as
+<code>*buf = 'a';</code> is therefore not allowed, while <code>buf++</code> is.
+</p><p>In the declaration
+</p><p><pre>
+
+    char *const buf;
+
+</pre>
+
+</p><p><code>buf</code> itself is a <code>const</code> pointer which may not be changed. Whatever
+<code>char</code>s are pointed to by <code>buf</code> may be changed at will.
+</p><p>Finally, the declaration
+</p><p><pre>
+
+    char const *const buf;
+
+</pre>
+
+</p><p>is also possible; here, neither the pointer nor what it points to may be
+changed.
+</p><p>The rule of thumb for the placement of the keyword <code>const</code> is the
+following: whatever occurs just prior to the keyword may not be changed.
+The definition or declaration in which <code>const</code> is used should be read
+from the variable or function identifier back to the type indentifier:
+<blockquote>
+    ``Buf is a const pointer to const characters''
+</blockquote>
+This rule of thumb is especially handy in cases where confusion may occur.
+In examples of <strong>C++</strong> code, one often encounters the reverse: <code>const</code>
+<em>preceding</em> what should not be altered. That this may result in sloppy
+code is indicated by our second example above:
+</p><p><pre>
+
+    char const *buf;
+
+</pre>
+
+</p><p>What must remain constant here? According to the sloppy interpretation, the
+pointer cannot be altered (since <code>const</code> precedes the pointer-*). In fact,
+the charvalues are the constant entities here, as will be clear when it is 
+tried to compile the following program:
+</p><p><pre>
+
+    int main()
+    {
+        char const *buf = "hello";
+    
+        buf++;                  // accepted by the compiler
+        *buf = 'u';             // rejected by the compiler
+
+        return (0);
+    }
+
+</pre>
+
+</p><p>Compilation fails on the statement <code>*buf = 'u';</code>, <em>not</em> on the statement
+<code>buf++</code>.
+
+</p><p><a name="l34"></a>
+<h3>3.1.4: References</h3>
+        <a name="first/references"></a>
+    
+Besides the normal declaration of variables, <strong>C++</strong> allows `references' to
+be declared as synonyms for variables. A reference to a variable is like an
+alias; the variable name and the reference name can both be used in statements
+which affect the variable:
+</p><p><pre>
+
+    int
+        int_value;
+    int
+        &amp;ref = int_value;
+
+</pre>
+
+</p><p>In the above example a variable <code>int_value</code> is defined. Subsequently a
+reference <code>ref</code> is defined, which due to its initialization addresses the
+same memory location which <code>int_value</code> occupies. In the definition of
+<code>ref</code>, the reference operator <code>&amp;</code> indicates that <code>ref</code> is not
+itself an integer but a reference to one. The two statements
+</p><p><pre>
+
+    int_value++;            // alternative 1
+    ref++;                  // alternative 2
+
+</pre>
+
+</p><p>have the same effect, as expected. At some memory location an <code>int</code> value
+is increased by one --- whether that location is called <code>int_value</code> or
+<code>ref</code> does not matter.
+</p><p>References serve an important function in <strong>C++</strong> as a means to pass arguments
+which can be modified (`variable arguments' in Pascal-terms). E.g., in
+standard <strong>C</strong>, a function which increases the value of its argument by five
+but which returns nothing (<code>void</code>), needs a pointer argument:
+</p><p><pre>
+
+    void increase(int *valp)        // expects a pointer
+    {                               // to an int
+        *valp += 5;
+    }
+
+    int main()
+    {
+        int
+            x;
+
+        increase(&amp;x)                // the address of x is
+        return (0);                 // passed as argument
+    }
+
+</pre>
+
+</p><p>This construction can <em>also</em> be used in <strong>C++</strong> but the same effect
+can be achieved using a reference:
+</p><p><pre>
+
+    void increase(int &amp;valr)            // expects a reference
+    {                                   // to an int
+        valr += 5;
+    }
+
+    int main()
+    {
+        int
+            x;
+
+        increase(x);                    // a reference to x is 
+        return (0);                     // passed as argument
+    }
+
+</pre>
+
+</p><p>The way in which <strong>C++</strong> compilers implement references is actually by 
+using pointers: in other words, references in <strong>C++</strong> are just ordinary
+pointers, as far as the compiler is concerned.  However, the programmer does
+not need to know or to bother about levels of indirection. (Compare
+this to the Pascal way: an argument which is declared as <code>var</code> is in fact
+also a pointer, but the programmer needn't know.)
+</p><p>It can be argued whether code such as the above is clear: the statement
+<code>increase</code> <code>(x)</code> in the <code>main()</code> function suggests that not <code>x</code>
+itself but a <em>copy</em> is passed. Yet the value of <code>x</code> changes because of
+the way <code>increase()</code> is defined.
+</p><p>Our suggestions for the usage of references as arguments to functions are
+therefore the following:
+</p><p><ul>
+</p><p><li > In those situations where a called function does not alter its
+    arguments, a copy of the variable can be passed:
+</p><p><pre>
+
+        void some_func(int val)
+        {
+            printf("%d\n", val);
+        }
+
+        int main()
+        {
+            int
+                x;
+
+            some_func(x);           // a copy is passed, so
+            return (0);             // x won't be changed
+        }
+    
+</pre>
+
+</p><p><li > When a function changes the value of its argument, the address 
+    or a reference can be passed, whichever you prefer:
+</p><p><pre>
+
+        void by_pointer(int *valp)
+        {
+            *valp += 5;
+        }
+
+        void by_reference(int &amp;valr)
+        {
+            valr += 5;
+        }
+
+        int main ()
+        {
+            int
+                x;
+
+            by_pointer(&amp;x);             // a pointer is passed
+            by_reference(x);            // x is altered by reference
+            return (0);                 // x might be changed
+        }
+    
+</pre>
+
+</p><p><li > References have an important role in those cases where the argument
+    will not be changed by the function, but where it is desirable to pass a
+    reference to the variable instead of a copy of
+    the whole variable. Such a situation occurs when a large variable, e.g., a
+    <code>struct</code>, is passed as argument, or is returned from the function.
+    In these cases the copying operations tend to become 
+    significant factors when the entire structure must be copied, and it is
+    preferred to use references. If the argument isn't changed by the 
+    function, or if the caller shouldn't change the returned information,
+    the use of the <code>const</code> keyword is appropriate and should be used.
+</p><p>Consider the following example:
+</p><p><pre>
+    
+    struct Person                       // some large structure
+    {
+        char
+            name [80],
+            address [90];
+        double
+            salary;
+    };
+            
+    Person    
+       person[50];                      // database of persons    
+
+    void printperson (Person const &amp;p)  // printperson expects a
+    {                                   // reference to a structure
+        printf ("Name: %s\n"            // but won't change it
+                "Address: %s\n",
+        p.name, p.address);
+    }
+                
+    Person const &amp;getperson(int index)  // get a person by indexvalue    
+    {    
+        ...
+        return (person[index]);         // a reference is returned,    
+    }                                   // not a copy of person[index]    
+
+    int main ()
+    {
+        Person
+            boss;
+
+        printperson (boss);             // no pointer is passed,
+                                        // so variable won't be    
+                                        // altered by function
+        printperson(getperson(5));      // references, not copies
+                                        // are passed here
+        return (0);
+    }
+
+</pre>
+
+</p><p><li >  It should furthermore be noted here that there is another reason
+    for using references when passing objects as function arguments: when
+    passing a reference to an object, the activation of a copy constructor is
+    avoided. We have to postpone this argument to chapter 
+    <a href="cplusplus06.html#MemoryManagement">6</a>
+</p><p></ul>
+</p><p>References also can lead to extremely `ugly' code. A function can also return
+a reference to a variable, as in the following example:
+</p><p><pre>
+
+    int &amp;func()
+    {
+        static int
+            value;
+
+        return (value);
+    }
+
+</pre>
+
+</p><p>This allows the following constructions:
+</p><p><pre>
+
+    func() = 20;
+    func() += func ();
+
+</pre>
+
+</p><p>It is probably superfluous to note that such constructions should not normally
+be used. Nonetheless, there are situations where it is useful to return a
+reference. Even though this is discussed later, we have seen an example
+of this phenomenon at our previous discussion of the <em>iostreams</em>. In a 
+statement like <code>cout &lt;&lt; "Hello" &lt;&lt; endl;</code>, the insertion operator returns
+a reference to <code>cout</code>. So, in this statement first the <code>"Hello"</code> is
+inserted into <code>cout</code>, producing a reference to <code>cout</code>. Via this reference
+the <code>endl</code> is then inserted in the <code>cout</code> object, again producing a
+reference to <code>cout</code>. This latter reference is not further used.
+</p><p>A number of differences between pointers and references is pointed out in the
+list below:
+</p><p><ul>
+</p><p><li > A reference cannot exist by itself, i.e., without something to
+    refer to. A declaration of a reference like
+</p><p><center><code>int &amp;ref;</code> </center>
+</p><p>is not allowed; what would <code>ref</code> refer to? 
+</p><p><li > References can, however, be declared as <code>external</code>.
+    These references were initialized elsewhere.
+</p><p><li > Reference may exist as parameters of functions: they are initialized
+    when the function is called.
+</p><p><li > References may be used in the return types of
+    functions. In those cases the function determines to what the return 
+    value will refer.
+</p><p><li > Reference may be used as data members of classes. We will return
+    to this usage later.
+</p><p><li > In contrast, pointers are variables by themselves. They point at
+    something concrete or just ``at nothing''.
+</p><p><li > 
+
+    References are aliases for other variables and cannot be re-aliased to
+    another variable. Once a reference is defined, it refers to its particular
+    variable.
+</p><p><li > In contrast, pointers can be reassigned to point to different 
+    variables.
+</p><p><li > When an address-of operator <code>&amp;</code> is used with a reference,
+    the expression yields the address of the variable to which the reference
+    applies. In contrast, ordinary pointers are variables themselves, so the
+    address of a pointer variable has nothing to do with the address of the
+    variable pointed to.
+</p><p></ul>
+</p><p>
+</p><p><a name="FunctionsInStructs"></a><a name="l35"></a>
+<h2>3.2: Functions as part of structs</h2>
+    <a name="first/structs"></a>
+    The first chapter described that functions can be part of <code>struct</code>s (see
+section <a href="cplusplus02.html#FunctionInStruct">2.5.16</a>).  Such functions are called <em>member
+functions</em> or <em>methods</em>. 
+This section discusses the actual definition of such functions.
+</p><p>The code fragment below illustrates a <code>struct</code> in which data fields for a
+name and address are present. A function <code>print()</code> is included in the
+<code>struct</code> definition:
+</p><p><pre>
+
+    struct person
+    {
+        char
+            name [80],
+            address [80];
+        void
+            print (void);
+    };
+
+</pre>
+
+</p><p>The member function <code>print()</code> is defined using the structure name
+(<code>person</code>) and the scope resolution operator (<code>::</code>):
+</p><p><pre>
+
+    void person::print()
+    {
+        printf("Name:      %s\n"
+               "Address:   %s\n", name, address);
+    }
+
+</pre>
+
+</p><p>In the definition of this member function, the function name is preceded by
+the <code>struct</code> name followed by <code>::</code>. The code of the function shows how
+the fields of the <code>struct</code> can be addressed without using the type name: in
+this example the function <code>print()</code> prints a variable <code>name</code>. Since
+<code>print()</code> is a part of the <code>struct</code> <code>person</code>, the variable <code>name</code>
+implicitly refers to the same type.
+</p><p>The usage of this <code>struct</code> could be, e.g.:
+</p><p><pre>
+
+    person
+        p;
+
+    strcpy(p.name, "Karel");
+    strcpy(p.address, "Rietveldlaan 37");
+    p.print();
+
+</pre>
+
+</p><p>The advantage of member functions lies in the fact that the called function
+can automatically address the data fields of the structure for which it was
+invoked. As such, in the statement <code>p.print()</code> the structure <code>p</code> is the
+`substrate': the variables <code>name</code> and <code>address</code> which are used in the
+code of <code>print()</code> refer to the same <code>struct p</code>.
+
+</p><p><a name="l36"></a>
+<h2>3.3: Several new data types</h2>
+    <a name="first/datatypes"></a>
+    In <strong>C</strong> the following basic data types are available: <code>void, char, short,
+int, long, float</code> and <code>double</code>. <strong>C++</strong> extends these five basic types with
+several extra types: the types <code>bool, wchar_t</code> and <code>long double</code>. The type
+<code>long double</code> is merely a double-long <code>double</code> datatype. Apart from these
+basic types a standard type <code>string</code> is available. The datatypes <code>bool</code>,
+and <code>wchar_t</code> are covered in the following sections, the datatype <code>string</code>
+is covered in chapter <a href="cplusplus04.html#String">4</a>.
+</p><p>
+</p><p>
+    <a name="BOOL"></a><a name="l37"></a>
+<h3>3.3.1: The `bool' data type</h3>
+        <a name="first/bool"></a>
+    In <strong>C</strong> the following basic data types are available: <code>void, char, int,
+float</code> and <code>double</code>. <strong>C++</strong> extends these five basic types with several
+extra types. In this section the type <code>bool</code> is introduced.
+</p><p>The type <code>bool</code> represents boolean (logical) values, for which the
+(now reserved) values <code>true</code> and <code>false</code> may be used. Apart from these
+reserved values, integral values may also be assigned to variables of type
+<code>bool</code>, which are implicitly converted to <code>true</code> and <code>false</code> according
+to the following conversion rules (assume <code>intValue</code> is an <code>int</code>-variable,
+and <code>boolValue</code> is a <code>bool</code>-variable):
+<pre>
+
+        // from int to bool:
+    boolValue = intValue ? true : false;
+
+        // from bool to int:
+
+    intValue = boolValue ? 1 : 0;
+
+</pre>
+
+Furthermore, when <code>bool</code> values are inserted into, e.g., <code>cout</code>, then
+<code>1</code> is written for <code>true</code> values, and <code>0</code> is written for <code>false</code>
+values. Consider the following example:
+<pre>
+
+    cout &lt;&lt; "A true value: "  &lt;&lt; true &lt;&lt; endl
+         &lt;&lt; "A false value: " &lt;&lt; false &lt;&lt; endl;
+
+</pre>
+
+</p><p>The <code>bool</code> data type is found in other programming languages as
+well. <strong>Pascal</strong> has its type <code>Boolean</code>, and <strong>Java</strong> has a <code>boolean</code>
+type. Different from these languages, <strong>C++</strong>'s type <code>bool</code> acts like a kind
+of <code>int</code> type: it's primarily a documentation-improving type, having just two
+values <code>true</code> and <code>false</code>. Actually, these values can be interpreted as
+<code>enum</code> values for <code>1</code> and <code>0</code>. Doing so would neglect the philosophy
+behind the <code>bool</code> data type, but nevertheless: assigning <code>true</code> to an
+<code>int</code> variable neither produces warnings nor errors.
+</p><p>Using the <code>bool</code>-type is generally more intuitively clear than using
+<code>int</code>. Consider the following prototypes:
+<pre>
+
+        bool exists(char const *fileName);  // (1)
+        int  exists(char const *fileName);  // (2)
+
+</pre>
+
+For the first prototype <code>(1)</code>, most people will expect the function to
+return <code>true</code> if the given filename is the name of an existing
+file. However, using the second prototype some ambiguity arises: intuitively
+the returnvalue 1 is appealing, as it leads to constructions like
+<pre>
+
+        if (exists("myfile"))
+            cout &lt;&lt; "myfile exists";
+
+</pre>
+
+On the other hand, many functions (like <code>access(), stat(),</code> etc.) return
+<code>0</code> to indicate a successful operation, reserving other values to indicate
+various types of errors. 
+</p><p>As a rule of thumb we suggest the following: If a function should inform its
+caller about the success or failure of its task, let the function return a
+<code>bool</code> value. If the function should return success or various types of
+errors, let the function return <em>enum</em> values, documenting the situation
+when the function returns. Only when the function returns a meaningful
+integral value (like the sum of two <code>int</code> values), let the function return
+an <code>int</code> value.
+
+</p><p>
+    <a name="WCHAR"></a><a name="l38"></a>
+<h3>3.3.2: The `wchar_t' data type</h3>
+        <a name="first/wchar"></a>
+    The <code>wchar_t</code> type is an extension of the <code>char</code> basic type, to accomodate
+<em>wide</em> character values, such as the <em>Unicode</em> character set.
+<code>Sizeof(wchar_t)</code> is 2, allowing for 65,536 different character values.
+</p><p>Note that a programming language like <strong>Java</strong> has a data type <code>char</code> that
+is comparable to <strong>C++</strong>'s <code>wchar_t</code> type, while <strong>Java</strong>'s <code>byte</code> data
+type is comparable to <strong>C++</strong>'s <code>char</code> type. Very convenient....
+</p><p>
+</p><p><a name="l39"></a>
+<h2>3.4: Data hiding: public, private and class</h2>
+    <a name="first/public"></a>
+    
+As mentioned previously (see section <a href="cplusplus02.html#Pretensions">2.3</a>), <strong>C++</strong>
+contains special syntactical possibilities to implement data hiding. Data
+hiding is the ability of one program part to hide its data from other parts;
+thus avoiding improper addressing or name collisions of data.
+</p><p><strong>C++</strong> has two special keywords which are concerned with data hiding:
+<code>private</code> and <code>public</code>. These keywords can be inserted in the definition
+of a <code>struct</code>. The keyword <code>public</code> defines all subsequent fields of a
+structure as accessible by all code; the keyword <code>private</code> defines all
+subsequent fields as only accessible by the code which is part of the
+<code>struct</code> (i.e., only accessible for the member functions) (Besides
+<code>public</code> and <code>private</code>, <strong>C++</strong> defines the keyword <code>protected</code>.
+This keyword is not often used and it is left for the reader to
+explore.). In a <code>struct</code> all fields are <code>public</code>, unless
+explicitly stated otherwise.
+</p><p>With this knowledge we can expand the <code>struct</code> <code>person</code>:
+</p><p><pre>
+
+    struct person
+    {
+        public:
+            void
+                setname (char const *n),
+                setaddress (char const *a),
+                print (void);
+            char const
+                *getname (void),
+                *getaddress (void);
+        private:
+            char
+                name [80],
+                address [80];
+    };
+
+</pre>
+
+</p><p>The data fields <code>name</code> and <code>address</code> are only accessible for the member
+functions which are defined in the <code>struct</code>: these are the functions
+<code>setname()</code>, <code>setaddress()</code> etc.. This property of the data type is
+given by the fact that the fields <code>name</code> and <code>address</code> are preceded by
+the keyword <code>private</code>. As an illustration consider the following code
+fragment:
+</p><p><pre>
+
+    person
+        x;
+
+    x.setname ("Frank");        // ok, setname() is public
+    strcpy (x.name, "Knarf");   // error, name is private
+
+</pre>
+
+</p><p>The concept of data hiding is realized here in the following manner. The
+actual data of a <code>struct</code> <code>person</code> are named only in the structure
+definition. The data are accessed by the outside world by special functions,
+which are also part of the definition. These member functions control all
+traffic between the data fields and other parts of the program and are
+therefore also called `interface' functions.
+The data hiding which is thus realized is illustrated further in 
+figure <a href="cplusplus03.html#datahiding">2</a>.
+</p><p><a name="datahiding"></a></p><p><center><img src="first/datahiding.gif" align="bottom" alt="figure 2 is shown here."><br> 
+figure 2: Private data and public interface functions of the class Person. 
+</center></p><p>
+    
+</p><p>Also note that the functions <code>setname()</code> and <code>setaddress()</code> are declared
+as having a <code>char const *</code> argument. This means that the
+functions will not alter the strings which are supplied as their arguments.
+In the same vein, the functions <code>getname()</code> and <code>getaddress()</code> return a
+<code>char const *</code>: the caller may not modify the strings which are
+pointed to by the return values.
+</p><p>Two examples of member functions of the <code>struct</code> <code>person</code> are shown
+below:
+</p><p><pre>
+
+    void person::setname(char const *n)
+    {
+        strncpy(name, n, 79);
+        name[79] = '\0';
+    }
+
+    char const *person::getname()
+    {
+        return (name);
+    }
+
+</pre>
+
+</p><p>In general, the power of the member functions and of the concept of data
+hiding lies in the fact that the interface functions can perform special
+tasks, e.g.,  checks for the validity of data. In the above example
+<code>setname()</code> copies only up to 79 characters from its argument to the data
+member <code>name</code>, thereby avoiding array boundary overflow.
+</p><p>Another example of the concept of data hiding is the following. As an
+alternative to member functions which keep their data in memory (as do the
+above code examples), a runtime library could be developed with interface
+functions which store their data on file. The conversion of a program which
+stores <code>person</code> structures in memory to one that stores the data on disk
+would mean the relinking of the program with a different library.
+</p><p>Though data hiding can be realized with <code>structs</code>, more often (almost
+always) classes are used instead. A <code>class</code> is in principle equivalent to a
+<code>struct</code> except that unless specified otherwise, all members (data or
+functions) are <code>private</code>. As far as <code>private</code> and <code>public</code> are
+concerned, a <code>class</code> is therefore the opposite of a <code>struct</code>. The
+definition of a <code>class</code> <code>person</code> would therefore look exactly as shown
+above, except for the fact that instead of the keyword <code>struct</code>, <code>class</code>
+would be used. Our typographic suggestion for class names is a capital as
+first character, followed by the remainder of the name in lower case (e.g.,
+<code>Person</code>).
+</p><p>
+</p><p><a name="l40"></a>
+<h2>3.5: Structs in C vs. structs in C++</h2>
+    <a name="first/cvscpp"></a>
+    At the end of this chapter we would like to illustrate the analogy between
+<strong>C</strong> and <strong>C++</strong> as far as <code>struct</code>s are concerned. In <strong>C</strong> it is 
+common to define several functions to process a <code>struct</code>, which then
+require a pointer to the <code>struct</code> as one of their arguments. A fragment
+of an imaginary <strong>C</strong> header file is given below:
+</p><p><pre>
+
+    // definition of a struct PERSON_ 
+    typedef struct
+    {
+        char
+            name[80],
+            address[80];
+    } PERSON_;
+
+    // some functions to manipulate PERSON_ structs 
+
+    // initialize fields with a name and address 
+    extern void initialize(PERSON_ *p, char const *nm,
+                           char const *adr);
+
+    // print information 
+    extern void print(PERSON_ const *p);
+
+    // etc.. 
+
+</pre>
+
+</p><p>In <strong>C++</strong>, the declarations of the involved functions are placed inside the
+definition of the <code>struct</code> or <code>class</code>. The argument which denotes which
+<code>struct</code> is involved is no longer needed.
+</p><p><pre>
+
+    class Person
+    {
+        public:
+            void initialize(char const *nm, char const *adr);
+            void print(void);
+            // etc..
+        private:
+            char 
+                name[80], 
+                address[80];
+    };
+
+</pre>
+
+</p><p>The <code>struct</code> argument is implicit in <strong>C++</strong>. A function call in <strong>C</strong>
+like
+</p><p><pre>
+
+    PERSON_
+        x;
+
+    initialize(&amp;x, "some name", "some address");
+
+</pre>
+
+</p><p>becomes in <strong>C++</strong>:
+</p><p><pre>
+
+    Person
+        x;
+
+    x.initialize("some name", "some address");
+
+</pre>
+
+</p><p>
+</p><p><a name="Namespaces"></a><a name="l41"></a>
+<h2>3.6: Namespaces</h2>
+    <a name="namespace/intro"></a>
+    Imagine a math teacher who wants to develop an interactive math program. For
+this program functions like <code>cos(), sin(), tan()</code> etc. are to be used
+accepting arguments in degrees rather than arguments in
+radials. Unfortunately, the functionname <code>cos()</code> is already in use, and that
+function accepts radials as its arguments, rather than degrees. 
+</p><p>Problems like these are normally solved by looking for another name, e.g., the
+functionname <code>cosDegrees()</code> is defined. <strong>C++</strong> offers an alternative
+solution by allowing <em>namespaces</em> to be defined: areas or regions in the
+code in which identifiers are defined which cannot conflict with existing
+names defined elsewhere.
+
+</p><p><a name="l42"></a>
+<h3>3.6.1: Defining namespaces</h3>
+        <a name="namespace/defining"></a>
+    Namespaces are defined according to the following syntax:
+        <pre>
+
+    namespace identifier
+    {
+        // declared or defined entities
+        // (declarative region)
+    }
+        
+</pre>
+
+    The identifier used in the definition of a namespace is a standard <strong>C++</strong>
+identifier. 
+</p><p>Within the <em>declarative region</em>, introduced in the above code example,
+functions, variables, structs, classes and even (nested) namespaces can be
+defined or declared. Namespaces cannot be defined within a block. So it is not
+possible to define a namespace within, e.g., a function. However, it is
+possible to define a namespace using multiple <em>namespace</em>
+declarations. Namespaces are said to be <em>open</em>. This means that a namespace
+<code>CppAnnotations</code> could be defined in a file <code>file1.cc</code> and also in a file
+<code>file2.cc</code>. The entities defined in the <code>CppAnnotations</code> namespace of
+files <code>file1.cc</code> and <code>file2.cc</code> are then united in one <code>CppAnnotations</code>
+namespace region. For example:
+        <pre>
+
+    // in file1.cc
+    namespace CppAnnotations
+    {
+        double cos(double argInDegrees)
+        {
+            ...
+        }
+    }
+
+    // in file2.cc
+    namespace CppAnnotations
+    {
+        double sin(double argInDegrees)
+        {
+            ...
+        }
+    }
+        
+</pre>
+
+    Both <code>sin()</code> and <code>cos()</code> are now defined in the same
+<code>CppAnnotations</code> namespace. 
+</p><p>Namespace entities can also be defined outside of their namespaces. This
+topic is discussed in section <a href="cplusplus03.html#OUTSIDE">3.6.4.1</a>.
+
+</p><p>
+<a name="l43"></a>
+
+             
+<strong>3.6.1.1: Declaring entities in namespaces</strong></p><p>
+            <a name="namespace/declaring"></a>
+        Instead of <em>defiing</em> entities in a namespace, entities may also be
+<em>declared</em> in a namespace. This allows us to put all the declarations of a
+namespace in a header file which can thereupon be included in sources in which
+the entities of a namespace are used. Such a header file could contain, e.g.,
+        <pre>
+
+    namespace CppAnnotations
+    {
+        double cos(double degrees);
+        double sin(double degrees);
+    }
+        
+</pre>
+
+</p><p>
+</p><p>
+<a name="l44"></a>
+
+             
+<strong>3.6.1.2: A closed namespace</strong></p><p>
+            <a name="namespace/closed"></a>
+    Namespaces can be defined without a name. Such a namespace is anonymous
+and it restricts the usability of the defined entities to the source file in
+which the anonymous namespace is defined. 
+</p><p>The entities that are defined in the anonymous namespace are accessible the
+same way as <code>static</code> functions and variables in <strong>C</strong>. The <code>static</code>
+keyword can still be used in <strong>C++</strong>, but its use is more dominant in
+<code>class</code> definitions (see chapter <a href="cplusplus05.html#Classes">5</a>). In situations where static
+variables or functions are necessary, the use of the anonymous namespace is
+preferred. 
+
+</p><p><a name="l45"></a>
+<h3>3.6.2: Referring to entities</h3>
+        <a name="namespace/referring"></a>
+    Given a namespace and entities that are defined or declared in it, the scope
+resolution operator can be used to refer to the entities that are defined in
+the namespace. For example, to use the function <code>cos()</code> defined in the
+<code>CppAnnotations</code> namespace the following code could be used:
+        <pre>
+
+    // assume the CppAnnotations namespace is declared in the next header
+    // file:
+    #include &lt;CppAnnotations&gt;
+    
+    int main()
+    {
+        cout &lt;&lt; "The cosine of 60 degrees is: " &lt;&lt;
+                CppAnnotations::cos(60) &lt;&lt; endl;
+        return (0);
+    }
+        
+</pre>
+
+    This is a rather cumbersome way to refer to the <code>cos()</code> function in the
+<code>CppAnnotations</code> namespace, especially so if the function is frequently
+used. 
+</p><p>Therefore, an <em>abbreviated</em> form (just <code>cos()</code> can be used by
+declaring that <code>cos()</code> will refer to <code>CppAnnotations::cos()</code>. For this,
+the <code>using</code>-declaration can be used. Following
+        <pre>
+
+    using CppAnnotations::cos;      // note: no function prototype, just the
+                                    // name of the entity is required.    
+        
+</pre>
+
+    the function <code>cos()</code> will refer to the <code>cos()</code> function in the
+<code>CppAnnotations</code> namespace. This implies that the standard <code>cos()</code>
+function, accepting radials, cannot be used automatically anymore. The plain
+scope resolution operator can be used to reach the generic <code>cos()</code> function:
+        <pre>
+
+    int main()
+    {
+        using CppAnnotations::cos;
+        ...
+        cout &lt;&lt; cos(60)         // this uses CppAnnotations::cos()
+            &lt;&lt; ::cos(1.5)       // this uses the standard cos() function
+            &lt;&lt; endl;
+        return (0);
+    }
+        
+</pre>
+
+    Note that a <code>using</code>-declaration can be used inside a block. The
+<code>using</code> declaration prevents the definition of entities having the same
+name as the one used in the <code>using</code> declaration: it is not possible to
+use a using declaration for a variable <code>value</code> in the <code>CppAnnotations</code>
+namespace, and to define (or declare) an identically named object in the
+block in which the <code>using</code> declaration was placed:
+        <pre>
+
+    int main()
+    {
+        using CppAnnotations::value;
+        ...
+        cout &lt;&lt; value &lt;&lt; endl;  // this uses CppAnnotations::value
+
+        int
+            value;              // error: value already defined.
+
+        return (0);
+    }
+        
+</pre>
+    
+</p><p>
+</p><p>
+<a name="l46"></a>
+
+             
+<strong>3.6.2.1: The using directive</strong></p><p>
+            <a name="namespace/directive"></a>
+    A generalized alternative to the <code>using</code>-declaration is the
+<code>using</code>-<em>directive</em>: 
+        <pre>
+
+    using namespace CppAnnotations;
+        
+</pre>
+
+    Following this directive, <em>all</em> entities defined in the
+<code>CppAnnotations</code> namespace are uses as if they where declared by <code>using</code>
+declarations. 
+</p><p>While the <code>using</code>-directive is a quick way to import all the names of
+the <code>CppAnnotations</code> namespace (assuming the entities are declared or
+defined separately from the directive), it is at the same time a somewhat
+dirty way to do so, as it is less clear which entity will be used in a
+particular block of code.
+</p><p>If, e.g., <code>cos()</code> is defined in the <code>CppAnnotations</code> namespace, the
+function <code>CppAnnotations::cos()</code> will be used when <code>cos()</code> is called in
+the code. However, if <code>cos()</code> is <em>not</em> defined in the <code>CppAnnotations</code>
+namespace, the standard <code>cos()</code> function will be used. The <code>using</code>
+directive does not document as clearly which entity will be used as the
+<code>using</code> declaration does. For this reason, the <code>using</code> directive is
+somewhat deprecated.
+
+</p><p><a name="l47"></a>
+<h3>3.6.3: The standard namespace</h3>
+        <a name="namespace/std"></a>
+    Apart from the anonymous namespace, many entities of the runtime available
+software (e.g., <code>cout, cin, cerr</code> and the templates defined in the
+<em>Standard Template Library</em>, see chapter <a href="cplusplus11.html#STL">11</a>) are now defined in the
+<code>std</code> namespace.
+</p><p>Regarding the discussion in the previous section, one should use a <code>using</code>
+declaration for these entities. For example, in order to use the <code>cout</code>
+stream, the code should start with something like
+        <pre>
+
+    #include &lt;iostream&gt;
+    
+    using std::cout;
+        
+</pre>
+
+    Often, however, the identifiers that are defined in the <code>std</code> namespace
+can all be accepted without much thought. Because of that, one often
+encounters a <code>using</code> directive, rather than a <code>using</code> declaration with the
+<code>std</code> namespace. So, instead of the mentioned <code>using declaration</code> a
+construction like
+        <pre>
+
+    #include &lt;iostream&gt;
+    
+    using namespace std;
+        
+</pre>
+
+    is often encountered. Whether this should be encouraged is subject of some
+dispute. Long <code>using</code> declarations are of course inconvenient too. So as a
+rule of thumb one might decide to stick to <code>using</code> declarations, up to the
+point where the list becomes impractically long, at which point a <code>using</code>
+directive could be considered.
+</p><p>
+</p><p><a name="l48"></a>
+<h3>3.6.4: Nesting namespaces and namespace aliasing</h3>
+        <a name="namespace/nesting"></a>
+    Namespaces can be nested. The following code shows the definition of a nested
+namespace: 
+        <pre>
+
+    namespace CppAnnotations
+    {
+        namespace Virtual
+        {
+            void
+                *pointer;
+        }
+    }
+        
+</pre>
+
+    Now the variable <code>pointer</code> defined in the <code>Virtual</code> namespace, nested
+under the <code>CppAnnotations</code> namespace. In order to refer to this variable,
+the following options are available:
+    <ul>
+        <li > The <em>fully qualified name</em> can be used. A fully qualified name
+of an entity is a list of all the namespaces that are visited until the
+definition of the entity is reached, glued together by the scope resolution
+operator:
+        <pre>
+
+    int main()
+    {
+        CppAnnotations::Virtual::pointer = 0;
+        return (0);
+    }
+        
+</pre>
+
+        <li > A <code>using</code> declaration for <code>CppAnnotations::Virtual</code> can be
+used. Now <code>Virtual</code> can be used without any prefix, but 
+<code>pointer</code> must be used with the <code>Virtual::</code> prefix:
+        <pre>
+
+    ...
+    using CppAnnotations::Virtual;
+
+    int main()
+    {
+        Virtual::pointer = 0;
+        return (0);
+    }
+        
+</pre>
+
+        <li > A <code>using</code> declaration for <code>CppAnnotations::Virtual::pointer</code>
+can be used. Now <code>pointer</code> can be used without any prefix:
+        <pre>
+
+    ...
+    using CppAnnotations::Virtual::pointer;
+
+    int main()
+    {
+        pointer = 0;
+        return (0);
+    }
+        
+</pre>
+
+        <li > A <code>using</code> directive or directives can be used:
+        <pre>
+
+    ...
+    using namespace CppAnnotations::Virtual;
+
+    int main()
+    {
+        pointer = 0;
+        return (0);
+    }
+        
+</pre>
+
+    Alternatively, two separate <code>using</code> directives could have been used:
+        <pre>
+
+    ...
+    using namespace CppAnnotations;
+    using namespace Virtual;
+
+    int main()
+    {
+        pointer = 0;
+        return (0);
+    }
+        
+</pre>
+
+</p><p><li > A combination of <code>using</code> declarations and <code>using</code>
+directives can be used. E.g., a <code>using</code> directive can be used for
+the <code>CppAnnotations</code> namespace, and a <code>using</code> declaration can be used for
+the <code>Virtual::pointer</code> variable:
+        <pre>
+
+    ...
+    using namespace CppAnnotations;
+    using Virtual::pointer;
+
+    int main()
+    {
+        pointer = 0;
+        return (0);
+    }
+        
+</pre>
+
+    </ul>
+    At every <code>using</code> directive all entities of that namespace can be used
+without any further prefix. If a namespace is nested, then that namespace can
+also be used without any further prefix. However, the entities defined in the
+nested namespace still need the nested namespace's name. Only by using a
+<code>using</code> declaration or directive the qualified name of the 
+nested namespace can be omitted.
+</p><p>When fully qualified names are somehow preferred, while the long form (like
+<code>CppAnnotations::Virtual::pointer</code>) is at the same time considered too long,
+a namespace <em>alias</em> can be used:
+        <pre>
+
+    namespace CV = CppAnnotations::Virtual;
+        
+</pre>
+
+    This defines <code>CV</code> as an <em>alias</em> for the full name. So, to refer to the
+<code>pointer</code> variable the construction
+        <pre>
+
+    CV::pointer = 0;
+        
+</pre>
+
+    Of course, a namespace alias itself can also be used in a <code>using</code>
+declaration or directive.
+</p><p>
+</p><p><a name="OUTSIDE"></a>
+<a name="l49"></a>
+
+             
+<strong>3.6.4.1: Defining entities outside of their namespaces</strong></p><p>
+            <a name="namespace/outside"></a>
+    It is not strictly necessary to define members of namespaces within a
+<code>namespace</code> region. By prefixing the member by its namespace or namespaces a
+member can be defined outside of a namespace region. This may be done at the
+global level, or at intermediate levels in the case of nested namespaces. So
+while it
+is not possible to define a member of namespace <code>A</code> within the region of
+namespace <code>C</code>, it is possible to define a member of namespace <code>A::B</code>
+within the region of namespace <code>A</code>. 
+</p><p>Note, however, that when a member of a namespace is defined outside of a
+namespace region, it must <em>still be declared within</em> the region.
+</p><p>Assume the type <code>int INT8[8]</code> is defined in the
+<code>CppAnnotations::Virtual</code> namespace.
+</p><p>Now suppose we want to define (at the global level) a member function
+<code>funny</code> of namespace <code>CppAnnotations::Virtual</code>, returning a pointer to
+<code>CppAnnotations::Virtual::INT8</code>. The definition of such a function could be
+as follows (first everything is defined inside the <code>CppAnnotations::Virtual</code>
+namespace):
+        <pre>
+
+    namespace CppAnnotations
+    {
+        namespace Virtual
+        {
+            void
+                *pointer;
+
+            typedef int INT8[8];
+
+            INT8 *funny()
+            {
+                INT8
+                    *ip = new INT8[1];
+                
+                for (int idx = 0; idx &lt; sizeof(INT8) / sizeof(int); ++idx)
+                    (*ip)[idx] = (1 + idx) * (1 + idx);
+
+                return (ip);
+            }
+        }
+    }
+        
+</pre>
+
+    The function <code>funny()</code> defines an array of one <code>INT8</code> vector, and
+returns its address after initializing the vector by the squares of the first
+eight natural numbers.
+</p><p>Now the function <code>funny()</code> can be defined outside of the
+<code>CppAnnotations::Virtual</code> as follows:
+        <pre>
+
+    namespace CppAnnotations
+    {
+        namespace Virtual
+        {
+            void
+                *pointer;
+
+            typedef int INT8[8];
+
+            INT8 *funny();
+        }
+    }
+
+    CppAnnotations::Virtual::INT8 *CppAnnotations::Virtual::funny()
+    {
+        INT8
+            *ip = new INT8[1];
+        
+        for (int idx = 0; idx &lt; sizeof(INT8) / sizeof(int); ++idx)
+        {
+            cout &lt;&lt; idx &lt;&lt; endl;
+            (*ip)[idx] = idx * idx;
+        }
+
+        return (ip);
+    }
+        
+</pre>
+
+    At the final code fragment note the following:
+    <ul>
+    <li ><code>funny()</code> is declared inside of the <code>CppAnnotations::Virtual</code>
+namespace. 
+    <li ><code></code> The definition outside of the namespace region requires us to use
+the fully qualified name of the function <em>and</em> of its returntype.
+    <li ><code></code> <em>Inside</em> the block of the function <code>funny</code> we are within the
+<code>CppAnnotations::Virtual</code> namespace, so inside the function fully
+qualified names (e.g., for <code>INT8</code> are not required any more.
+    </ul>
+</p><p>Finally, note that the function could also have been defined in the
+<code>CppAnnotations</code> region. It that case the <code>Virtual</code> namespace would have
+been required for the function name and its returntype, while the internals of
+the function would remain the same:
+        <pre>
+
+    namespace CppAnnotations
+    {
+        namespace Virtual
+        {
+            void
+                *pointer;
+
+            typedef int INT8[8];
+
+            INT8 *funny();
+        }
+
+        Virtual::INT8 *Virtual::funny()
+        {
+            INT8
+                *ip = new INT8[1];
+            
+            for (int idx = 0; idx &lt; sizeof(INT8) / sizeof(int); ++idx)
+            {
+                cout &lt;&lt; idx &lt;&lt; endl;
+                (*ip)[idx] = idx * idx;
+            }
+    
+            return (ip);
+        }
+    }
+        
+</pre>
+
+</p><p>
+
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus04.html">Next chapter</a>
+    <li> <a href="cplusplus02.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

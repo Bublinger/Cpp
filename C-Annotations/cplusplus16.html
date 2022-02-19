@@ -1,0 +1,1177 @@
+<html>
+<head>
+<title>C++ Annotations
+        Version 4.4.2 </title>
+</head>
+<body fgcolor="black" bgcolor="white"  >
+<hr>
+<ul>
+    <li> <a href="cplusplus17.html">Next chapter</a>
+    <li> <a href="cplusplus15.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+
+<a name="Polymorphism"></a><a name="l266"></a>
+<h1>Chapter 16: Polymorphism, late binding and virtual functions</h1>
+<a name="virtual"></a>
+    
+<blockquote>
+    <em>
+        We're always interested in getting feedback. E-mail us if you like
+        this guide, if you think that important material is omitted, if you
+        encounter errors in the code examples or in the documentation, if you
+        find any typos, or generally just if you feel like e-mailing. Send
+        your email to
+        <a href="mailto:f.b.brokken@rc.rug.nl">Frank Brokken</a>.
+</p><p><strong>Please</strong> state the document version you're referring to, as found in
+        the title (in this document: 4.4.2). 
+    </em>
+</blockquote>
+</p><p>
+</p><p><a name="virtual/intro"></a>
+    As we have seen in the previous chapter, <strong>C++</strong> provides the tools to derive
+classes from one base type, to use base class pointers to 
+address derived objects, and subsequently to process derived objects in a
+generic class.
+</p><p>Concerning the allowed operations on all objects in such a generic class we
+have seen that the base class must define the actions to be performed on all
+derived objects. In the example of the <code>Vehicle</code> this was the functionality
+to store and retrieve the weight of a vehicle.
+</p><p>When using a base class pointer to address an object of a derived class, the
+pointer type (i.e., the base class type) normally determines which function
+will actually be called. This means that the code example from section
+<a href="cplusplus15.html#VStorage">15.7</a> using the storage class <code>VStorage</code>, will incorrectly
+compute the combined weight when a <code>Truck</code> object (see section <a href="cplusplus15.html#Truck">15.4</a>)
+is in the storage: only one weight field of the engine part of the truck is
+taken into consideration. The reason for this is obvious: a <code>Vehicle *vp</code>
+calls the function <code>Vehicle::getweight()</code> and not <code>Truck::getweight()</code>,
+even when that pointer actually points to a <code>Truck</code>.
+</p><p>However, a remedy is available. In <strong>C++</strong> it is possible for a
+<code>Vehicle *vp</code> to call a function <code>Truck::getweight()</code> when the pointer
+actually points to a <code>Truck</code>. 
+</p><p>The terminology for this feature is <em>polymorphism</em>: 
+it is as though the pointer <code>vp</code> assumes the type of the object it points
+to, rather than keeping it own (base class) type.
+So, <code>vp</code> might behave
+like a <code>Truck *</code> when pointing to a <code>Truck</code>, or like an <code>Auto *</code> when
+pointing to an <code>Auto</code> etc.. (In one of the StarTrek movies, Cap.
+Kirk was in trouble, as usual. He met an extremely beautiful lady who however
+thereupon changed into a hideous troll. Kirk was quite surprised, but the lady
+told him:  ``Didn't you know I am a polymorph?'')
+</p><p>A second term for this characteristic is <em>late binding</em>. 
+This name refers to the
+fact that the decision <em>which</em> function to call (a base class function or
+a function of a derived class) cannot be made <em>compile-time</em>, 
+but is postponed
+until the program is actually executed: the right function is selected 
+<em>run-time</em>.
+</p><p>
+</p><p><a name="virfunc"></a><a name="l267"></a>
+<h2>16.1: Virtual functions</h2>
+    <a name="virtual/function"></a>
+    The default behavior of the activation of a member function via a pointer is
+that the <em>type</em> of the pointer determines the function. E.g., a
+<code>Vehicle*</code> will activate <code>Vehicle</code>'s member functions, even when
+pointing to an object of a derived class. This is referred to as <em>early</em> or
+<em>static</em> binding, since the type of function is known compile-time. The
+<em>late</em> or <em>dynamic</em> binding is achieved in <strong>C++</strong> with 
+<em>virtual functions</em>.
+</p><p>A function becomes virtual when its declaration starts with the keyword
+<code>virtual</code>. Once a function is declared <code>virtual</code> in a base class, its
+definition remains <code>virtual</code> in all derived classes; even when the keyword
+<code>virtual</code> is not repeated in the definition of the derived classes.
+</p><p>As far as the vehicle classification system is concerned (see section 
+<a href="cplusplus15.html#VehicleSystem">15.1</a> ff.) the two member functions <code>getweight()</code> and
+<code>setweight()</code> might be declared as <code>virtual</code>. The class definitions
+below illustrate the classes <code>Vehicle</code> (which is the overall base class of
+the classification system) and <code>Truck</code>, which has <code>Vehicle</code> as an
+indirect base class. The functions <code>getweight()</code> of the two classes are
+also shown:
+</p><p><pre>
+
+    class Vehicle
+    {
+        public:
+            Vehicle();      // constructors
+            Vehicle(int wt);
+
+                            // interface.. now virtuals!
+            virtual int getweight() const;
+            virtual void setweight(int wt);
+            
+        private:
+            int             // data
+                weight;
+    }
+
+    // Vehicle's own getweight() function:
+    int Vehicle::getweight() const
+    {
+        return (weight);
+    }
+
+    class Land: public Vehicle
+    {
+        ...
+    }
+
+    class Auto: public Land
+    {
+        ...
+    }
+
+    class Truck: public Auto
+    {
+        public:
+            Truck();        // constructors
+            Truck(int engine_wt, int sp, char const *nm,
+                  int trailer_wt);
+
+                            // interface: to set two weight fields
+            void setweight(int engine_wt, int trailer_wt);
+                            // and to return combined weight
+            int getweight() const;
+
+        private:
+            int             // data
+                trailer_weight;
+    };
+
+    // Truck's own getweight() function
+    int Truck::getweight() const
+    {
+        return (Auto::getweight() + trailer_wt);
+    }
+
+</pre>
+
+</p><p>Note that the keyword <code>virtual</code> appears only in the definition of the base
+class <code>Vehicle</code>; it need not be repeated in the derived classes (though a
+repetition would be no error).
+</p><p>The effect of the late binding is illustrated in the next fragment:
+</p><p><pre>
+
+    Vehicle
+        v(1200);            // vehicle with weight 1200
+    Truck
+        t(6000, 115,        // truck with cabin weight 6000, speed 115,
+          "Scania",         // make Scania, trailer weight 15000
+          15000);
+
+    Vehicle
+        *vp;                // generic vehicle pointer
+
+    int main()
+    {
+        // see below (1)
+        vp = &amp;v;
+        printf("%d\n", vp-&gt;getweight());
+
+        // see below (2)
+        vp = &amp;t;
+        printf("%d\n", vp-&gt;getweight());
+
+        // see below (3)
+        printf("%d\n", vp-&gt;getspeed());
+
+        return (0);
+    }
+
+</pre>
+
+</p><p>Since the function <code>getweight()</code> is defined as <code>virtual</code>, late binding is
+used here: in the statements above, just below the <code>(1)</code> mark, <code>Vehicle</code>'s
+function <code>getweight()</code> is called. In contrast, the statements below <code>(2)</code>
+use <code>Truck</code>'s function <code>getweight()</code>.
+</p><p>Statement <code>(3)</code> however will produces a syntax error. A function
+<code>getspeed()</code> is no member of <code>Vehicle</code>, and hence also not callable via
+a <code>Vehicle*</code>.
+</p><p>The rule is that when using a pointer to a class, 
+<em>only the functions which are members of that class can be called</em>.
+These functions can be <code>virtual</code>,
+but this only affects the type of binding (early vs. late).
+
+</p><p><a name="l268"></a>
+<h3>16.1.1: Polymorphism in program development</h3>
+        <a name="virtual/polymorphism"></a>
+    When functions are defined as <code>virtual</code> in a base class (and hence in all
+derived classes), and when these functions are called using a pointer to the
+base class, the pointer as it were can assume more forms: it is polymorph. In
+this section we illustrate the effect of polymorphism on the manner in which
+programs in <strong>C++</strong> can be developed.
+</p><p>A vehicle classification system in <strong>C</strong> might be implemented with
+<code>Vehicle</code> being a union of <code>struct</code>s, and having an enumeration field to
+determine which actual type of vehicle is represented. A function
+<code>getweight()</code> would typically first determine what type of vehicle is
+represented, and then inspect the relevant fields:
+</p><p><pre>
+
+    enum Vtype                  // type of the vehicle 
+    {
+        is_vehicle,
+        is_land,
+        is_auto,
+        is_truck,
+    }
+    struct Vehicle              // generic vehicle type 
+    {
+        int weight;
+    }
+    struct Land                 // land vehicle: adds speed 
+    {
+        Vehicle v;
+        int speed;
+    }
+    struct Auto                 // auto: Land vehicle + name 
+    {
+        Land l;
+        char *name;
+    }
+    struct Truck                // truck: Auto + trailer 
+    {
+        Auto a;
+        int trailer_wt;
+    }
+    union AnyVehicle            // all sorts of vehicles in 1 union 
+    { 
+        Vehicle v;
+        Land l;
+        Auto a;
+        Truck t;
+    }
+    struct Object               // the data for all vehicles 
+    { 
+        Vtype type;
+        AnyVehicle thing;
+    }
+
+    int getweight(Object *o)   // how to get weight of a vehicle 
+    { 
+        switch (o-&gt;type)
+        {
+            case is_vehicle:
+                return (o-&gt;thing.v.weight);
+            case is_land:
+                return (o-&gt;thing.l.v.weight);
+            case is_auto:
+                return (o-&gt;thing.a.l.v.weight);
+            case is_truck:
+                return (o-&gt;thing.t.a.l.v.weight +
+                        o-&gt;thing.t.trailer_wt);
+        }
+    }
+ 
+</pre>
+
+    A disadvantage of this approach is that the implementation cannot be
+easily changed. E.g., if we wanted to define a type <code>Airplane</code>, which would,
+e.g., add the functionality to store the number of passengers, then we'd have
+to re-edit and re-compile the above code.
+</p><p>In contrast, <strong>C++</strong> offers the possiblity of polymorphism. The advantage
+is that `old' code remains usable. The implementation of an extra class
+<code>Airplane</code> would in <strong>C++</strong> mean one extra class, possibly with its own
+(virtual) functions <code>getweight()</code> and <code>setweight()</code>. A function like:
+ <pre>
+
+    void printweight(Vehicle const *any)
+    {
+        printf("Weight: %d\n", any-&gt;getweight());
+    }
+ 
+</pre>
+
+ would still work; the function wouldn't even need to be recompiled, since
+late binding is in effect.
+</p><p>
+</p><p>
+    <a name="howpolymorfism"></a><a name="l269"></a>
+<h3>16.1.2: How polymorphism is implemented</h3>
+        <a name="virtual/implementation"></a>
+    This section briefly describes how polymorphism is implemented in <strong>C++</strong>.
+Understanding the implementation is not necessary for the usage of this
+feature of <strong>C++</strong>, though it does explain why there is a cost of
+polymorphism in terms of memory usage.
+</p><p>The fundamental idea of polymorphism is that the <strong>C++</strong> compiler does not
+know which function to call at compile-time; the appropriate function 
+will be selected run-time. That means that the address of 
+the function must be stored
+somewhere, to be looked up prior to the actual call. This `somewhere' place
+must be accessible from the object in question. E.g., when a <code>Vehicle *vp</code>
+points to a <code>Truck</code> object, then <code>vp-&gt;getweight()</code> calls a member
+function of <code>Truck</code>; the address of this function is determined from the
+actual object which <code>vp</code> points to.
+</p><p>A common implementation is the following. An object containing
+virtual functions holds as its first data member a hidden field, pointing to
+an array of pointers holding the addresses of the virtual functions. It
+must be noted that this implementation is compiler-dependent, and is by no
+means dictated by the <strong>C++</strong> ANSI definition.
+</p><p>The table of addresses of virtual functions is shared by all objects of
+the class. It even may be the case that two classes share the same table. The
+overhead in terms of memory consumption is therefore:
+</p><p><ul>
+</p><p><li > One extra pointer field per object, which points to:
+</p><p><li > One table of pointers per (derived) class to address the virtual
+    functions.
+</p><p></ul>
+</p><p>Consequently, a statement like <code>vp-&gt;getweight()</code> first inspects the hidden 
+data
+member of the object pointed to by <code>vp</code>. In the case of the vehicle
+classification system, this data member points to a table of two addresses:
+one pointer for the function <code>getweight()</code> and one pointer for the function
+<code>setweight()</code>. The actual function which is called is determined from this
+table.
+</p><p>The internal organization of the objects having virtual functions is further
+illustrated in figure <a href="cplusplus16.html#ImplementationFigure">13</a>.
+</p><p><a name="ImplementationFigure"></a></p><p><center><img src="virtual/implementation.gif" align="bottom" alt="figure 13 is shown here."><br> 
+figure 13: Internal organization objects when virtual functions are defined. 
+</center></p><p>
+    
+</p><p>As can be seen from figure <a href="cplusplus16.html#ImplementationFigure">13</a>, all objects which
+use virtual functions must have one (hidden) data member to address a table of
+function pointers. The objects of the classes <code>Vehicle</code> and <code>Auto</code> both
+address the same table. The class <code>Truck</code>, however, introduces its own
+version of <code>getweight()</code>: therefore, this class needs its own table of
+function pointers.
+
+</p><p><a name="l270"></a>
+<h2>16.2: Pure virtual functions</h2>
+    <a name="virtual/pure"></a>
+    Until now the base class <code>Vehicle</code> contained its own, concrete,
+implementations of the virtual functions <code>getweight()</code> and
+<code>setweight()</code>. In <strong>C++</strong> it is however also possible only to <em>mention</em>
+virtual functions in a base class, and not define them. The functions are
+concretely implemented in a derived class. This approach defines a
+<em>protocol</em>, which has to be followed in the derived classes.
+</p><p>The special feature of only <em>declaring</em> functions in a base class, and not
+<em>defining</em> them, is that derived classes must take care of the actual
+definition: the <strong>C++</strong> compiler will not allow the definition of an object
+of a class which doesn't concretely define the function in question. The base
+class thus enforces a protocol by declaring a function by its name, return
+value and arguments; but the derived classes must take care of the actual
+implementation. The base class itself is therefore only a <em>model</em>, to be
+used for the derivation of other classes. Such base classes are also called
+<em> abstract</em> classes.
+</p><p>The functions which are only declared but not defined in the base class are
+called <em>pure virtual functions</em>. A function is made pure virtual by
+preceding its declaration with the keyword <code>virtual</code> and by postfixing it
+with <code>= 0</code>. An example of a pure virtual function occurs in the following
+listing, where the definition of a class <code>Sortable</code> requires that all
+subsequent classes have a function <code>compare()</code>:
+</p><p><pre>
+
+    class Sortable
+    {
+        public:
+            virtual int compare(Sortable const &amp;other) const = 0;
+    };
+
+</pre>
+
+</p><p>The function <code>compare()</code> must return an <code>int</code> and receives a reference
+to a second <code>Sortable</code> object. Possibly its action would be to compare the
+current object with the <code>other</code> one. The function is not allowed to alter 
+the other
+object, as <code>other</code> is declared <code>const</code>. Furthermore, the function is not
+allowed to alter the current object, as the function itself is declared
+<code>const</code>.
+</p><p>The above base class can be used as a model for derived classes. As an example
+consider the following class <code>Person</code> (a prototype of which was introduced
+in chapter <a href="cplusplus06.html#Person">6.1</a>), capable of comparing two <code>Person</code>
+objects by the alphabetical order of their names and addresses:
+</p><p><pre>
+
+    class Person: public Sortable
+    {
+        public:
+            // constructors, destructor, and stuff
+            Person();
+            Person(char const *nm, char const *add, char const *ph);
+            Person(Person const &amp;other);
+            Person const &amp;operator=(Person const &amp;other);
+            ~Person();
+            
+            // interface
+            char const *getname() const;
+            char const *getaddress() const;
+            char const *getphone() const;
+            void setname(char const *nm);
+            void setaddress(char const *add);
+            void setphone(char const *ph);
+
+            // requirements enforced by Sortable
+            int compare(Sortable const &amp;other) const;
+
+        private:
+            // data members
+            char *name, *address, *phone;
+    };
+
+    int Person::compare(Sortable const &amp;o)
+    {
+        Person 
+            const &amp;other = (Person const &amp;)o;
+        register int
+            cmp;
+
+        return
+        (
+            // first try: if names unequal, we're done
+            (cmp = strcmp(name, other.name)) ?
+                cmp
+            :
+                // second try: compare by addresses
+                strcmp(address, other.address)
+        );
+    }
+
+</pre>
+    
+</p><p>Note in the implementation of <code>Person::compare()</code> that the argument of the
+function is not a reference to a <code>Person</code> but a reference to a
+<code>Sortable</code>. Remember that <strong>C++</strong> allows function overloading: a function
+<code>compare(Person const &amp;other)</code> would be an entirely different function
+from the one required by the protocol of <code>Sortable</code>. In the implementation
+of the function we therefore cast the <code>Sortable&amp;</code> argument to a
+<code>Person&amp;</code> argument.
+</p><p>
+</p><p><a name="l271"></a>
+<h2>16.3: Comparing only Persons</h2>
+        <a name="virtual/comparing"></a>
+    Sometimes it may be useful to know in the concrete implementation of a pure
+virtual function what the <code>other</code> object is. E.g., the function
+<code>Person::compare()</code> should make the comparison <code>only</code> if the
+<code>other</code> object is a <code>Person</code> too: imagine what the expression
+</p><p><center><code>strcmp(name, other.name)</code> </center>
+</p><p>would do when the <code>other</code> object were in fact not a <code>Person</code> and
+hence did not have a <code>char *name</code> datamember.
+</p><p>We therefore present here an improved version of the protocol of the class
+<code>Sortable</code>. This class is expanded to require that each derived class
+implements a function <code>int getsignature()</code>:
+</p><p><pre>
+
+    class Sortable
+    {
+        ...
+        virtual int getsignature() const = 0;
+        ...
+    };
+
+</pre>
+    
+</p><p>The concrete function <code>Person::compare()</code> can now compare names and
+addresses only if the signatures of the current and other object match:
+</p><p><pre>
+
+    int Person::compare(Sortable const &amp;o)
+    {
+        register int
+            cmp;
+            
+        // first, check signatures
+        if ((cmp = getsignature() - o.getsignature()))
+            return (cmp);
+
+        Person 
+            const &amp;other = (Person const &amp;)o;
+
+        return
+        (
+            // next try: if names unequal, we're done
+            (cmp = strcmp(name, other.name)) ?
+                cmp
+            :
+                // last try: compare by addresses
+                strcmp(address, other.address)
+        );
+    }
+
+</pre>
+    
+</p><p>The crux of the matter is of course the function <code>getsignature()</code>. This
+function should return a unique <code>int</code> value for its particular class.
+An elegant implementation is the following:
+</p><p><pre>
+
+    class Person: public Sortable
+    {
+        ...
+        // getsignature() now required too
+        int getsignature() const;
+    }
+
+    int Person::getsignature() const
+    {
+        static int              // Person's own tag, I'm quite sure
+            tag;                // that no other class can access it
+
+        return ((int) &amp;tag);    // Hence, &amp;tag is unique for Person
+    }
+
+</pre>
+
+</p><p>For the reader who's puzzled by our `elegant solution': the <code>static int tag</code>
+defined in the <code>Person::getsignature()</code> function is just one variable, no 
+matter how many <code>Person</code> objects exist. Furthermore, it's created 
+compile-time as a global variable, since it's static. Hence, there's only one 
+variable <code>tag</code> for the <code>Person</code> class. Its <em>address</em>, therefore, is 
+uniquely connected to the <code>Person</code> class. This <code>address</code> is cast to an 
+<code>int</code> which thus becomes the (unique) signature of <code>Person</code> objects.
+
+</p><p><a name="l272"></a>
+<h2>16.4: Virtual destructors</h2>
+    <a name="virtual/destructor"></a>
+    When the operator <code>delete</code> releases memory which is occupied by a
+dynamically allocated object, a corresponding destructor is called to ensure
+that internally used memory of the object can also be released. Now consider
+the following code fragment, in which the two classes from the previous
+sections are used:
+</p><p><pre>
+
+    Sortable
+        *sp;
+    Person
+        *pp = new Person("Frank", "frank@icce.rug.nl", "363 3688");
+
+    sp = pp;            // sp now points to a Person
+    ...
+    delete sp;          // object destroyed
+
+</pre>
+
+</p><p>In this example an object of a derived class (<code>Person</code>) is destroyed using a
+base class pointer (<code>Sortable *</code>). For a `standard' class definition this
+will mean that the destructor of <code>Sortable</code> is called, instead of the
+destructor of <code>Person</code>.
+</p><p><strong>C++</strong> however allows a destructor to be virtual. By preceding the
+declaration of a destructor with the keyword <code>virtual</code> we can ensure that
+the right destructor is activated even when called via a base class
+pointer. The definition of the class <code>Sortable</code> would therefore become:
+</p><p><pre>
+
+    class Sortable
+    {
+        public:
+            virtual ~Sortable();
+            virtual int compare(Sortable const &amp;other) const = 0;
+            ...
+    };
+
+</pre>
+    
+</p><p>Should the virtual destructor of the base class be a <em>pure</em> virtual
+function or not? In general, the answer to this question would be no: for a
+class such as <code>Sortable</code> the definition should not <em>force</em> derived
+classes to define a destructor. In contrast, <code>compare()</code> is a pure virtual
+function: in this case the base class defines a protocol which must be adhered
+to.
+</p><p>By defining the destructor of the base class as <code>virtual</code>, but not as
+purely so, the base class offers the possibility of redefinition of the
+destructor in any derived classes. The base class doesn't enforce the choice.
+</p><p>The conclusion is therefore that the base class must define a destructor
+function, which is used in the case that derived classes do <em>not</em> define
+their own destructors. Such a destructor could be an empty function:
+</p><p><pre>
+
+    Sortable::~Sortable()
+    {
+    }
+
+</pre>
+
+
+</p><p><a name="l273"></a>
+<h2>16.5: Virtual functions in multiple inheritance</h2>
+    <a name="virtual/multiple"></a>
+    As was previously mentioned in chapter <a href="cplusplus15.html#Inheritance">15</a> it is possible
+to derive a class from several base classes at once. Such a derived class
+inherits the properties of all its base classes. Of course, the base classes
+themselves may be derived from classes yet higher in the hierarchy.
+</p><p>A slight difficulty in multiple inheritance may arise when more than one
+`path' leads from the derived class to the base class. This is illustrated in
+the code fragment below: a class <code>Derived</code> is doubly derived from a class
+<code>Base</code>:
+</p><p><pre>
+
+    class Base
+    {
+        public:
+            void setfield(int val)
+                { field = val; }
+            int getfield() const
+                { return (field); }
+        private:
+            int field;
+    };
+
+    class Derived: public Base, public Base
+    {
+    };
+
+</pre>
+    
+</p><p>Due to the double derivation, the functionality of <code>Base</code> now occurs twice
+in <code>Derived</code>. This leads to ambiguity: when the function <code>setfield()</code> is
+called for a <code>Derived</code> object, <em>which</em> function should that be, since
+there are two? In such a duplicate derivation, many C++ compilers will fail to 
+generate code and (correctly) identify the error.
+</p><p>The above code clearly duplicates its base class in the derivation. Such a
+duplication can be easily avoided here. But duplication of a base class can
+also occur via nested inheritance, where an object is derived from, say, an
+<code>Auto</code> and from an <code>Air</code> (see the vehicle classification system, chapter
+<a href="cplusplus15.html#VehicleSystem">15.1</a>). Such a class would be needed to represent, e.g., a
+flying car (such as the one in James Bond vs. the Man with the Golden
+Gun...). An <code>AirAuto</code> would ultimately contain two <code>Vehicles</code>,
+and hence two <code>weight</code> fields, two <code>setweight()</code> functions and two
+<code>getweight()</code> functions. 
+
+</p><p><a name="l274"></a>
+<h3>16.5.1: Ambiguity in multiple inheritance</h3>
+        <a name="virtual/ambiguity"></a>
+    Let's investigate closer why an <code>AirAuto</code> introduces ambiguity, when
+derived from <code>Auto</code> and <code>Air</code>.
+</p><p><ul>
+    <li > An <code>AirAuto</code> is an <code>Auto</code>, hence a <code>Land</code>, and hence a
+        <code>Vehicle</code>.
+    <li > However, an <code>AirAuto</code> is also an <code>Air</code>, and hence a
+        <code>Vehicle</code>.
+</ul>
+</p><p>The duplication of <code>Vehicle</code> data is further illustrated in 
+figure <a href="cplusplus16.html#ambiguity">14</a>.
+</p><p><a name="ambiguity"></a></p><p><center><img src="virtual/ambiguity.gif" align="bottom" alt="figure 14 is shown here."><br> 
+figure 14: Duplication of a base class in multiple derivation. 
+</center></p><p>
+    
+</p><p>The internal organization of an <code>AirAuto</code> is shown in 
+figure <a href="cplusplus16.html#InternalOrganization">15</a>
+</p><p><a name="InternalOrganization"></a></p><p><center><img src="virtual/internal.gif" align="bottom" alt="figure 15 is shown here."><br> 
+figure 15: Internal organization of an <code>AirAuto</code> object. 
+</center></p><p>
+    
+</p><p>The <strong>C++</strong> compiler will detect the ambiguity in an <code>AirAuto</code> object, and
+will therefore fail to produce code for a statement like:
+</p><p><pre>
+
+    AirAuto
+        cool;
+
+    printf("%d\n", cool.getweight());
+
+</pre>
+
+</p><p>The question of which member function <code>getweight()</code> should be called, cannot
+be resolved by the compiler. The programmer has two possibilities to resolve
+the ambiguity explicitly:
+</p><p><ul>
+    <li > First, the function call where the ambiguity occurs can be
+        modified. This is done with the scope resolution operator:
+<pre>
+
+        // let's hope that the weight is kept in the Auto
+        // part of the object..
+        printf("%d\n", cool.Auto::getweight());
+
+</pre>
+
+</p><p>Note the place of the scope operator and the class name: before the name
+        of the member function itself.
+    <li > Second, a dedicated function <code>getweight()</code> could be created for
+        the class <code>AirAuto</code>:
+<pre>
+    
+        int AirAuto::getweight() const
+        {
+            return(Auto::getweight());
+        }
+
+</pre>
+    
+</ul>
+</p><p>The second possibility from the two above is preferable, since it relieves the
+programmer who uses the class <code>AirAuto</code> of special precautions.
+</p><p>However, besides these explicit solutions, there is a more elegant one. This
+will be discussed in the next section.
+
+</p><p><a name="l275"></a>
+<h3>16.5.2: Virtual base classes</h3>
+        <a name="virtual/base"></a>
+    As is illustrated in figure <a href="cplusplus16.html#InternalOrganization">15</a>, more than
+one object of the type <code>Vehicle</code> is present in one <code>AirAuto</code>. The
+result is not only an ambiguity in the functions which access the <code>weight</code>
+data, but also the presence of two <code>weight</code> fields. This is somewhat
+redundant, since we can assume that an <code>AirAuto</code> has just one weight.
+</p><p>We can achieve that only one <em>Vehicle</em> will be contained in an <code>AirAuto</code>.
+This is done by ensuring that the base class which is multiply present in a
+derived class, is defined as a <em>virtual base class</em>. The behavior of
+virtual base classes is the following: when a base class <code>B</code> is a virtual
+base class of a derived class <code>D</code>, then <code>B</code> may be present in <code>D</code> but
+this is not necessarily so. The compiler will leave out the inclusion of the
+members of <code>B</code> when these are already present in <code>D</code>.
+</p><p>For the class <code>AirAuto</code> this means that the derivation of <code>Land</code> and
+<code>Air</code> is changed:
+</p><p><pre>
+
+    class Land: virtual public Vehicle
+    {
+        ...
+    };
+
+    class Air: virtual public Vehicle
+    {
+        ...
+    };
+
+</pre>
+
+</p><p>The virtual derivation ensures that via the <code>Land</code> route, a <code>Vehicle</code> is
+only added to a class when not yet present. The same holds true for the
+<code>Air</code> route. This means that we can no longer say by which route a
+<code>Vehicle</code> becomes a part of an <code>AirAuto</code>; we only can say that there is
+one <code>Vehicle</code> object embedded.
+</p><p>The internal organization of an <code>AirAuto</code> after virtual derivation is
+shown in figure <a href="cplusplus16.html#VirtualBaseClass">16</a>.
+</p><p><a name="VirtualBaseClass"></a></p><p><center><img src="virtual/virtbase.gif" align="bottom" alt="figure 16 is shown here."><br> 
+figure 16: Internal organization of an <code>AirAuto</code> object when the base
+            classes are virtual. 
+</center></p><p>
+    
+</p><p>With respect to virtual derivation we note:
+</p><p><ul>
+    <li > Virtual derivation is, in contrast to virtual functions, a pure
+        compile-time issue: whether a derivation is virtual or not defines 
+        how the compiler builds a class definition from other classes.
+    <li > In the above example it would suffice to define either <code>Land</code> or
+        <code>Air</code> with virtual derivation. That also would have the effect that 
+        one
+        definition of a <code>Vehicle</code> in an <code>AirAuto</code> would be dropped. 
+        Defining
+        both <code>Land</code> and <code>Air</code> as virtually derived is however by no means
+        erroneous.
+    <li > The fact that the <code>Vehicle</code> in an <code>AirAuto</code> is no longer
+        `embedded' in <code>Auto</code> or <code>Air</code> has a consequence for the chain of
+        construction. The constructor of an <code>AirAuto</code> will directly call the
+        constructor of a <code>Vehicle</code>; this constructor will not be called from
+        the constructors of <code>Auto</code> or <code>Air</code>.
+</ul>
+</p><p>Summarizing, virtual derivation has the consequence that ambiguity in the
+calling of member functions of a base class is avoided. Furthermore,
+duplication of data members is avoided.
+</p><p>
+</p><p><a name="l276"></a>
+<h3>16.5.3: When virtual derivation is not appropriate</h3>
+        <a name="virtual/notvirtual"></a>
+    In contrast to the previous definition of a class such as <code>AirAuto</code>,
+situations may arise where the double presence of the members of a base class
+is appropriate. To illustrate this, consider the definition of a <code>Truck</code>
+from section <a href="cplusplus15.html#Truck">15.4</a>:
+</p><p><pre>
+
+    class Truck: public Auto
+    {
+        public:
+            // constructors
+            Truck();
+            Truck(int engine_wt, int sp, char const *nm,
+                   int trailer_wt);
+
+            // interface: to set two weight fields
+            void setweight(int engine_wt, int trailer_wt);
+            // and to return combined weight
+            int getweight() const;
+
+        private:
+            // data
+            int trailer_weight;
+    };
+
+    // example of constructor
+    Truck::Truck(int engine_wt, int sp, char const *nm,
+                  int trailer_wt)
+    : 
+        Auto(engine_wt, sp, nm)
+    {
+        trailer_weight = trailer_wt;
+    }
+
+    // example of interface function
+    int Truck::getweight() const
+    {
+        return
+        (                           // sum of:    
+            Auto::getweight() +     //   engine part plus    
+            trailer_wt              //   the trailer    
+        );    
+    }
+
+</pre>
+    
+</p><p>This definition shows how a <code>Truck</code> object is constructed to hold two
+weight fields: one via its derivation from <code>Auto</code> and one via its own
+<code>int trailer_weight</code> data member. Such a definition is of course valid, but
+could be rewritten. We could let a <code>Truck</code> be derived from an <code>Auto</code>
+<em>and</em> from a <code>Vehicle</code>, thereby explicitly requesting the double
+presence of a <code>Vehicle</code>; one for the weight of the engine and cabin, and
+one for the weight of the trailer.
+</p><p>A small item of interest here is that a derivation like
+</p><p><pre>
+
+    class Truck: public Auto, public Vehicle
+
+</pre>
+
+</p><p>is not accepted by the <strong>C++</strong> compiler: a <code>Vehicle</code> is already part of an
+<code>Auto</code>, and is therefore not needed. An intermediate class resolves the
+problem: we derive a class <code>TrailerVeh</code> from <code>Vehicle</code>, and <code>Truck</code>
+from <code>Auto</code> and from <code>TrailerVeh</code>.  All ambiguities concerning the
+member functions are then be resolved in the class <code>Truck</code>:
+</p><p><pre>
+
+    class TrailerVeh: public Vehicle
+    {
+        public:
+            TrailerVeh(int wt);
+    };
+
+    TrailerVeh::TrailerVeh(int wt)
+    : 
+        Vehicle(wt)
+    {
+    }
+    
+    class Truck: public Auto, public TrailerVeh
+    {
+        public:
+            // constructors
+            Truck();
+            Truck(int engine_wt, int sp, char const *nm,
+                   int trailer_wt);
+
+            // interface: to set two weight fields
+            void setweight(int engine_wt, int trailer_wt);
+            // and to return combined weight
+            int getweight() const;
+    };
+
+    // example of constructor
+    Truck::Truck(int engine_wt, int sp, char const *nm,
+                  int trailer_wt)
+    : 
+        Auto(engine_wt, sp, nm), 
+        TrailerVeh(trailer_wt)
+    {
+    }
+
+    // example of interface function
+    int Truck::getweight() const
+    {
+        return
+            (                               // sum of:
+                Auto::getweight() +        //   engine part plus
+                TrailerVeh::getweight()    //   the trailer
+            );
+    }
+
+</pre>
+
+
+</p><p><a name="RTTI"></a><a name="l277"></a>
+<h2>16.6: Run-Time Type identification</h2>
+    <a name="virtual/rtti"></a>
+    <strong>C++</strong> offers two ways to retrieve the type of objects and expressions while
+the program is run. The possibilities of <strong>C++</strong>'s <em>run-time type
+identification</em> are somewhat limited compared to languages like
+<strong>JAVA</strong>. Normally, <strong>C++</strong> uses static type checking and type
+identification. Static type checking and determination is safer and more
+efficient than run-time type identification, and should therefore be used
+wherever possible. Nonetheles, <strong>C++</strong> offers run-time type identification by
+providing the <em>dynamic cast</em> and <code>typeid</code> operators.
+    <ul>
+        <li > The <code>dynamic_cast</code> operator can be used to convert a pointer or
+reference to a base class to a pointer or reference to a derived class.
+        <li > The <code>typeid</code> operator returns the actual type of an expression.
+    </ul>
+    For all practical purposes, these operators work on class type objects,
+where the classes contain one or more virtual functions. 
+</p><p>
+</p><p>
+    <a name="DYNAMICCAST"></a><a name="l278"></a>
+<h3>16.6.1: The dynamic_cast operator</h3>
+        <a name="virtual/dynamiccast"></a>
+    The <code>dynamic_cast</code> operator is used to convert a (base) class pointer or
+reference to a (base) class object to, respectively, a derived class pointer
+or derived class reference.
+</p><p>The dynamic cast is performed run-time. A prerequisiste for the proper
+functioning of the dynamic cast operator is the existence of at least one
+virtual function in the base class. 
+</p><p>In the following example a pointer to the class <code>Derived</code> is obtained from
+the <code>Base</code> class pointer <code>bp</code>:
+</p><p><pre>
+
+    class Base
+    {
+        public:
+            virtual ~Base();
+    };
+    class Derived: public Base
+    {
+        public:
+            char const *toString()
+            {
+                return ("Derived object");
+            }
+    };
+    int main()
+    {
+        Base
+            *bp;
+        Derived
+            *dp,
+            d;
+
+        bp = &amp;d;
+
+        if ((dp = dynamic_cast&lt;Derived *&gt;(bp)))
+            cout &lt;&lt; dp-&gt;toString() &lt;&lt; endl;
+        else
+            cout &lt;&lt; "dynamic cast conversion failed\n";
+
+        return (0);
+    }
+        
+</pre>
+
+    Note the test: in the <code>if</code> condition the success of the dynamic cast is
+checked. This must be done <em>run-time</em>, as the compiler can't do this
+itself. If a base class pointer is provided the dynamic cast operator returns
+0 on failure, and a pointer to the requested derived class on
+success. Consequently, if there are multiple derived classes, a series of
+checks could be performed to find the actual derived class to which the
+pointer points:
+        <pre>
+
+    class Base
+    {
+        public:
+            virtual ~Base();
+    };
+    class Derived: public Base
+    {
+        public:
+            char const *toString()
+            {
+                return ("Derived object");
+            }
+    };
+    class SecondDerived: public Base
+    {
+        public:
+            char const *hello()
+            {
+                return ("hello from a SecondDerived object");
+            }
+    };
+    int main()
+    {
+        Base
+            *bp;
+        Derived
+            *dp,
+            d;
+        SecondDerived
+            *sdp;
+
+        bp = &amp;d;
+
+        if ((dp = dynamic_cast&lt;Derived *&gt;(bp)))
+            cout &lt;&lt; dp-&gt;toString() &lt;&lt; endl;
+        else if ((sdp = dynamic_cast&lt;SecondDerived *&gt;(bp)))
+            cout &lt;&lt; dp-&gt;hello() &lt;&lt; endl;
+    }
+        
+</pre>
+
+</p><p>Alternatively, a reference to a base class object may be available. In
+this case the <code>dynamic_cast&lt;&gt;()</code> operator will throw an exception if it
+fails. For example, assuming the availability of the abovementioned classes
+<code>Base, Derived</code>, and <code>SecondDerived</code>:
+        <pre>
+
+    void process(Base &amp;b)
+    {
+        try
+        {
+            cout &lt;&lt; dynamic_cast&lt;Derived &amp;&gt;(b).toString() &lt;&lt; endl;
+            return;
+        }
+        catch (std::bad_cast)
+        {}
+
+        try
+        {
+            cout &lt;&lt; dynamic_cast&lt;SecondDerived &amp;&gt;(b).hello() &lt;&lt; endl;
+            return;
+        }
+        catch (std::bad_cast)
+        {}
+    }
+            
+    int main()
+    {
+        Derived
+            d;
+
+        process(d);
+        return (0);
+    }
+        
+</pre>
+
+    In this example the value <code>std::bad_cast</code> is introduced. The
+<code>std::bad_cast</code> is thrown as an exception if the dynamic cast of a reference
+to a base class object fails.
+</p><p>The dynamic cast operator may be a handy tool when an existing base class
+cannot or should not be modified (e.g., when the sources are not available),
+and a derived class may be modified instead. Code receiving a base class
+pointer or reference may then perform a dynamic cast to the derived class to
+be able to use the derived class' functionality. 
+</p><p>Casts from a base class reference or pointer to a derived class reference or
+pointer are called <em>downcasts</em>.
+</p><p>
+</p><p><a name="l279"></a>
+<h3>16.6.2: The typeid operator</h3>
+        <a name="virtual/typeid"></a>
+    As with the <code>dynamic_cast</code> operator, the <code>typeid</code> is usually applied to
+base class objects, that are actually derived class objects. Similarly, the
+base class should contain one or more virtual functions. 
+</p><p>In order to use the <code>typeid</code> operator, the header file <code>typeinfo</code> must be
+included: 
+    <center><code>#include &lt;typeinfo&gt;</code> </center>
+    Actually, the <code>typeid</code> operator returns an object of type <code>type_info</code>,
+which may, e.g., be compared to other <code>type_info</code> objects. 
+</p><p>The class <code>type_info</code> may be implemented differently by different
+implementations, but at the very least it has the following interface:
+        <pre>
+
+    class type_info
+    {
+        public:
+            virtual ~type_info();
+            int operator==(const type_info &amp;other) const;
+            int operator!=(const type_info &amp;other) const;
+            char const *name() const;
+        private:
+            type_info(type_info const &amp;other);
+            type_info &amp;operator=(type_info const &amp;other);
+    };
+        
+</pre>
+
+    Note that this class has a private copy constructor and overloaded
+assignment operator. This prevents the normal construction or assignment of a
+<code>type_info</code> object. <code>Type_info</code> objects are constructed and returned by
+the <code>typeid</code> operator. Implementations, however, may choose to extend or
+elaborate upon the <code>type_info</code> class and provide, e.g., lists of functions
+that can be called in a certain class. 
+</p><p>If the <code>type_id</code> operator is given a base class reference (where the
+base class contains at least one virtual function), it will indicate that the
+type of its operand is the derived class. For example:
+        <pre>
+
+    class Base;     // contains &gt;= 1 virtual functions
+    class Derived: public Base;
+
+    Derived
+        d;
+    Base
+        &amp;br = d;
+
+    cout &lt;&lt; typeid(br).name() &lt;&lt; endl;
+        
+</pre>
+
+    In this example the <code>typeid</code> operator is given a base class reference.
+It will print the text <code>Derived</code>, being the class name of the class <code>br</code>
+actually refers to. If <code>Base</code> does not contain virtual functions, the text
+<code>Base</code> would have been printed.
+</p><p>The <code>typeid</code> operator can be used to determine the name of any type of
+expression, not just of class type objects. For example:
+        <pre>
+
+    cout &lt;&lt; typeid(12).name() &lt;&lt; endl;     // prints:  int
+    cout &lt;&lt; typeid(12.23).name() &lt;&lt; endl;  // prints:  double
+        
+</pre>
+
+    Note, however, that the above example is suggestive at most of the type
+that is printed. It <em>may</em> be <code>int</code> and <code>double</code>, but this is not
+necessarily the case. If portability is required, make sure no tests against
+static, built-in strings are required. Check out what your compiler produces
+in case of doubt.
+</p><p>In situations where the <code>typeid</code> operator is applied to determine the
+type of a derived class, it is important to realize that a base class
+<em>reference</em> is used as the argument of the <code>typeid</code> operator. Consider the
+following example:
+        <pre>
+
+    class Base;     // contains at least one virtual function
+    class Derived: public Base;
+
+    Base
+        *bp = new Derived;      // base class pointer to derived object
+
+    if (typeid(bp) == typeid(Derived *))    // 1: false
+        ...
+    if (typeid(bp) == typeid(Base *))       // 2: true
+        ...
+    if (typeid(bp) == typeid(Derived))      // 3: false
+        ...
+    if (typeid(bp) == typeid(Base))         // 4: false
+        ...
+        
+</pre>
+
+    Here, <code>(1)</code> returns <code>false</code> as a <code>Base *</code> is not a <code>Derived
+*</code>. <code>(2)</code> returns <code>true</code>, as the two pointer types are the same, <code>(3)</code>
+and <code>(4)</code> return <code>false</code> as pointers to objects are not the objects
+themselves. 
+</p><p>On the other hand, if <code>*bp</code> is used in the above expressions, then
+<code>(1)</code> and <code>(2)</code> return <code>false</code> as an object (or reference to an object)
+is not a pointer to an object, whereas with
+        <pre>
+
+    if (typeid(*bp) == typeid(Derived))      // 3: true
+        ...
+    if (typeid(*bp) == typeid(Base))         // 4: false
+        ...
+        
+</pre>
+
+    we see that <code>(3)</code> now returns <code>true</code>: <code>*bp</code> actually refers to a
+<code>Derived</code> class object, and <code>typeid(*bp)</code> will return <code>typeid(Derived)</code>.
+</p><p>A similar result is obtained if a base class reference is used:
+</p><p><pre>
+
+    Base
+        &amp;br = *bp;
+    
+    if (typeid(br) == typeid(Derived))      // 3: true
+        ...
+    if (typeid(br) == typeid(Base))         // 4: false
+        ...
+        
+</pre>
+
+
+</p><p>
+</p><p>
+
+
+<hr>
+<ul>
+    <li> <a href="cplusplus17.html">Next chapter</a>
+    <li> <a href="cplusplus15.html">Previous chapter</a>
+    <li> <a href="cplusplus.html">Table of contents</a>
+</ul>
+<hr>
+</body>
+</html>

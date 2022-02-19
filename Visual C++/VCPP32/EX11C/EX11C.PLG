@@ -1,0 +1,55 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: ex11c - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP3201.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Debug/ex11c.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\vc5_vcpp32\ex10c\cdib.cpp"
+"C:\vcpp32\ex11c\ex11c.cpp"
+"C:\vcpp32\ex11c\ex11cDoc.cpp"
+"C:\vcpp32\ex11c\ex11cView.cpp"
+"C:\vcpp32\ex11c\MainFrm.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP3201.TMP" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP3202.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Debug/ex11c.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\vcpp32\ex11c\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP3202.TMP" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP3203.TMP" mit Inhalten
+[
+/nologo /subsystem:windows /incremental:yes /pdb:"Debug/ex11c.pdb" /debug /machine:I386 /out:"Debug/ex11c.exe" /pdbtype:sept 
+.\Debug\cdib.obj
+.\Debug\ex11c.obj
+.\Debug\ex11cDoc.obj
+.\Debug\ex11cView.obj
+.\Debug\MainFrm.obj
+.\Debug\StdAfx.obj
+.\Debug\ex11c.res
+]
+Erstellen der Befehlzeile "link.exe @C:\WINDOWS\TEMP\RSP3203.TMP"
+<h3>Ausgabefenster</h3>
+Kompilierung läuft...
+StdAfx.cpp
+Kompilierung läuft...
+cdib.cpp
+ex11c.cpp
+ex11cDoc.cpp
+ex11cView.cpp
+MainFrm.cpp
+Generieren von Code...
+Linker-Vorgang läuft...
+
+
+
+<h3>Ergebnisse</h3>
+ex11c.exe - 0 Fehler, 0 Warnung(en)
+</pre>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: ex08b - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Creating command line "rc.exe /l 0x407 /fo"Debug/ex08b.res" /d "_DEBUG" /d "_AFXDLL" "C:\vcpp32\ex08b\ex08b.rc"" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSPF115.TMP" mit Inhalten
+[
+/nologo /subsystem:windows /incremental:yes /pdb:"Debug/ex08b.pdb" /debug /machine:I386 /out:"Debug/ex08b.exe" /pdbtype:sept 
+.\Debug\ex08b.obj
+.\Debug\ex08bDoc.obj
+.\Debug\ex08bView.obj
+.\Debug\MainFrm.obj
+.\Debug\StdAfx.obj
+.\Debug\webbrowser.obj
+.\Debug\ex08b.res
+]
+Erstellen der Befehlzeile "link.exe @C:\WINDOWS\TEMP\RSPF115.TMP"
+<h3>Ausgabefenster</h3>
+Ressourcen werden kompiliert...
+Linker-Vorgang läuft...
+
+
+
+<h3>Ergebnisse</h3>
+ex08b.exe - 0 Fehler, 0 Warnung(en)
+</pre>
+</body>
+</html>

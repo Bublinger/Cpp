@@ -1,0 +1,44 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: ex11a - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Creating command line "rc.exe /l 0x407 /fo"Debug/ex11a.res" /d "_DEBUG" /d "_AFXDLL" "C:\vcpp32\ex11a\ex11a.rc"" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP7364.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Debug/ex11a.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\vcpp32\ex11a\ex11a.cpp"
+"C:\vcpp32\ex11a\ex11aDoc.cpp"
+"C:\vcpp32\ex11a\ex11aView.cpp"
+"C:\vcpp32\ex11a\MainFrm.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP7364.TMP" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSP7365.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Debug/ex11a.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\vcpp32\ex11a\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP7365.TMP" 
+Erstellen der Befehlzeile "link.exe /nologo /subsystem:windows /incremental:yes /pdb:"Debug/ex11a.pdb" /debug /machine:I386 /out:"Debug/ex11a.exe" /pdbtype:sept  .\Debug\ex11a.obj .\Debug\ex11aDoc.obj .\Debug\ex11aView.obj .\Debug\MainFrm.obj .\Debug\StdAfx.obj .\Debug\ex11a.res "
+<h3>Ausgabefenster</h3>
+Ressourcen werden kompiliert...
+Kompilierung läuft...
+StdAfx.cpp
+Kompilierung läuft...
+ex11a.cpp
+ex11aDoc.cpp
+ex11aView.cpp
+MainFrm.cpp
+Generieren von Code...
+Linker-Vorgang läuft...
+
+
+
+<h3>Ergebnisse</h3>
+ex11a.exe - 0 Fehler, 0 Warnung(en)
+</pre>
+</body>
+</html>

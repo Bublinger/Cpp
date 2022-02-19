@@ -1,0 +1,47 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: ex03a - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Creating command line "rc.exe /l 0x407 /fo"Debug/ex03a.res" /d "_DEBUG" /d "_AFXDLL" "C:\Tmp\ex03a\ex03a.rc"" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSPB221.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR"Debug/" /Fp"Debug/ex03a.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ   /c 
+"C:\Tmp\ex03a\ex03a.cpp"
+"C:\Tmp\ex03a\MainFrm.cpp"
+"C:\Tmp\ex03a\ex03aDoc.cpp"
+"C:\Tmp\ex03a\ex03aView.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSPB221.TMP" 
+Erstellen der temporären Datei  "C:\WINDOWS\TEMP\RSPB222.TMP" mit Inhalten
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR"Debug/" /Fp"Debug/ex03a.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ   /c 
+"C:\Tmp\ex03a\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSPB222.TMP" 
+Erstellen der Befehlzeile "link.exe /nologo /subsystem:windows /incremental:yes /pdb:"Debug/ex03a.pdb" /debug /machine:I386 /out:"Debug/ex03a.exe" /pdbtype:sept  .\Debug\ex03a.obj .\Debug\StdAfx.obj .\Debug\MainFrm.obj .\Debug\ex03aDoc.obj .\Debug\ex03aView.obj .\Debug\ex03a.res "
+<h3>Ausgabefenster</h3>
+Ressourcen werden kompiliert...
+Kompilierung läuft...
+StdAfx.cpp
+Kompilierung läuft...
+ex03a.cpp
+MainFrm.cpp
+ex03aDoc.cpp
+ex03aView.cpp
+Generieren von Code...
+Linker-Vorgang läuft...
+Erstellen der Befehlzeile "bscmake.exe /nologo /o"Debug/ex03a.bsc"  .\Debug\StdAfx.sbr .\Debug\ex03a.sbr .\Debug\MainFrm.sbr .\Debug\ex03aDoc.sbr .\Debug\ex03aView.sbr"
+Browse-Informationsdatei wird erstellt...
+<h3>Ausgabefenster</h3>
+
+
+
+<h3>Ergebnisse</h3>
+ex03a.exe - 0 Fehler, 0 Warnung(en)
+</pre>
+</body>
+</html>
